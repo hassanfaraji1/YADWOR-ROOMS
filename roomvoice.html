@@ -1107,7 +1107,16 @@
     var __ownerHiddenTO = null;
     var studentRef = null, studentPC = null;
     var teacherPeerConns = {};
-    const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+    const servers = {
+        iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
+            { urls: "turn:openrelay.metered.ca:80",    username: "openrelayproject", credential: "openrelayproject" },
+            { urls: "turn:openrelay.metered.ca:443",   username: "openrelayproject", credential: "openrelayproject" },
+            { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+        ]
+    };
 
     /* ════ بيانات الهدايا ════ */
     var tabsKeys = ["tab1","tab2","tab3","tab4","tab5"];
@@ -1242,6 +1251,17 @@
                 audioEl.play().catch(function(){});
             }
         };
+        pc.onconnectionstatechange = function() {
+            if (pc && (pc.connectionState === "failed" || pc.connectionState === "disconnected")) {
+                setTimeout(function() {
+                    if (teacherPeerConns[studentKey]) {
+                        try { pc.close(); } catch(ex) {}
+                        delete teacherPeerConns[studentKey];
+                        createPeerForOrganizer(studentKey, studentUid);
+                    }
+                }, 3000);
+            }
+        };
 
         function addTracksAndOffer() {
             if (localStream) {
@@ -1284,7 +1304,10 @@
         var myKey = studentRef.key;
 
         if (localStream) {
-            localStream.getTracks().forEach(function(track) { try { studentPC.addTrack(track, localStream); } catch(e) {} });
+            localStream.getTracks().forEach(function(track) {
+                if (track.kind === "audio") track.enabled = micOn;
+                try { studentPC.addTrack(track, localStream); } catch(e) {}
+            });
         }
         studentPC.onicecandidate = function(e) {
             if (e.candidate) db.ref("rooms/" + roomId + "/candidates/" + myKey + "/fromStudent").push(JSON.stringify(e.candidate));
@@ -1587,11 +1610,14 @@
                 }).catch(function(){});
 
             // استمع لـ offer من صاحب الغرفة
+            var _lastOfferStr = null;
             db.ref("rooms/" + roomId + "/offers/" + sid).on("value", function(snap) {
                 if (snap.exists()) {
+                    var offerStr = snap.val();
                     try {
-                        if (!studentPC || !studentPC.currentRemoteDescription || studentPC.signalingState === "closed") {
-                            createOrganizerPeerAndAnswer(snap.val());
+                        if (!studentPC || studentPC.signalingState === "closed" || offerStr !== _lastOfferStr) {
+                            _lastOfferStr = offerStr;
+                            createOrganizerPeerAndAnswer(offerStr);
                         }
                     } catch(e) {}
                 }
