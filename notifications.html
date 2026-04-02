@@ -137,7 +137,7 @@ body{background:var(--bg);color:var(--txt);padding-top:60px;padding-bottom:70px;
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav-item active" onclick="location.href='home.html'">
+  <button class="nav-item active" onclick="location.href='index.html'">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>الرئيسية</span>
   </button>
@@ -250,7 +250,7 @@ function renderNotifs() {
     const link = n.type==='message' ? `chat.html?chatId=${[myUid,n.fromUserId].sort().join('_')}&name=${encodeURIComponent(fromName)}&av=${encodeURIComponent(fromAv)}&uid=${encodeURIComponent(n.fromUserId||'')}`
                : (n.type==='follow'||n.type==='friend') ? `profile.html?uid=${encodeURIComponent(n.fromUserId||'')}`
                : n.reelId ? `reels.html?reelId=${encodeURIComponent(n.reelId)}`
-               : n.postId ? `home.html` : '#';
+               : n.postId ? `index.html` : '#';
 
     // ── إشعار مكافأة التصنيف ──
     if (n.type === 'leaderboard_reward' || n.type === 'leaderboard_update' || n.type === 'lb_reward') {
