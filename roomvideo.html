@@ -84,7 +84,7 @@
 
         #switchCamBtn { position: absolute; bottom: 10px; left: 195px; z-index: 30; background: rgba(0,0,0,.5); color: white; padding: 3px 10px; border-radius: 6px; font-size: 11px; border: none; cursor: pointer; display: none; align-items: center; gap: 4px; font-family: 'Tajawal',sans-serif; }
 
-        /* ===== نافذة الهدايا — متطابقة مع home.html ===== */
+        /* ===== نافذة الهدايا — متطابقة مع index.html ===== */
         .gift-modal { position:fixed; bottom:-100%; left:0; width:100%; background:var(--gift-bg); border-radius:20px 20px 0 0; z-index:2100; display:flex; flex-direction:column; transition:bottom .3s cubic-bezier(.25,.8,.25,1); color:white; max-height:72vh; }
         .gift-modal.open { bottom:0; }
         .gdesc { text-align:center; font-size:11px; color:#8e8e93; padding:10px 15px 0; min-height:24px; }
@@ -1855,7 +1855,7 @@
         }, 5000);
     }
 
-    // ─── الهدايا — متطابقة مع home.html ───
+    // ─── الهدايا — متطابقة مع index.html ───
     function buildGiftGrid() {
         const c = document.getElementById('ggc'); c.innerHTML = '';
         tabKeys.forEach((key, idx) => {
