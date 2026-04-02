@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إنشاء منشور - YADWOR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#1877f2; --bg:#f0f2f5; --card:#fff;
+            --txt:#050505; --sub:#65676b; --border:#e4e6eb; --red:#e41e3f;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; -webkit-tap-highlight-color:transparent; }
+        body { background:#fff; min-height:100vh; }
+
+        /* ── Loader ── */
+        #loader { position:fixed; inset:0; background:#fff; z-index:9999; padding:70px 16px 0; }
+        .sk { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:sh 1.4s infinite; border-radius:8px; }
+        @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* ── Top bar ── */
+        .top-bar {
+            position:fixed; top:0; left:0; right:0; height:56px;
+            background:#fff; border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 14px; z-index:200; box-shadow:0 1px 3px rgba(0,0,0,.06);
+        }
+        .back-btn {
+            background:none; border:none; cursor:pointer;
+            width:38px; height:38px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .back-btn svg { width:22px; height:22px; fill:none; stroke:var(--txt); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+        .top-bar h2 { font-size:16px; font-weight:800; }
+        .pub-btn {
+            background:var(--primary); color:#fff; border:none;
+            padding:8px 22px; border-radius:22px;
+            font-size:14px; font-weight:700; cursor:pointer;
+            font-family:'Tajawal',sans-serif;
+            display:flex; align-items:center; gap:6px; transition:opacity .2s;
+        }
+        .pub-btn:disabled { opacity:.5; cursor:not-allowed; }
+        .pub-btn svg { width:16px; height:16px; fill:white; flex-shrink:0; }
+        .spin { width:16px; height:16px; border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; flex-shrink:0; }
+        @keyframes sp { to{transform:rotate(360deg)} }
+
+        /* ── Page ── */
+        .page { padding:66px 0 40px; max-width:600px; margin:0 auto; background:#fff; display:none; }
+
+        /* ── User row ── */
+        .user-row { display:flex; align-items:center; gap:12px; padding:14px 15px 10px; }
+        .av-wrap { position:relative; width:46px; height:46px; flex-shrink:0; }
+        .av-wrap .av-img { width:100%; height:100%; border-radius:50%; object-fit:cover; border:2px solid #e1e8ed; display:block; }
+        .av-wrap .av-fr { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:145%; height:145%; object-fit:contain; pointer-events:none; z-index:5; }
+        .user-name { font-weight:700; font-size:16px; }
+        .prv-hint { font-size:11px; color:var(--sub); margin-top:2px; }
+
+        /* ── Textarea ── */
+        .post-textarea {
+            width:100%; border:none; resize:none; font-size:17px;
+            color:var(--txt); outline:none; min-height:120px;
+            background:transparent; padding:4px 15px 14px;
+            font-family:'Tajawal',sans-serif; line-height:1.7;
+        }
+        .post-textarea::placeholder { color:#c0c3c8; }
+
+        /* ── فاصل ── */
+        .sep { height:1px; background:var(--border); margin:0 14px; }
+        .divider { height:8px; background:#f5f5f5; }
+
+        /* ════════════════════════════════
+           نظام الخانات الذكي — 4 مربعات
+        ════════════════════════════════ */
+        .imgs-zone { padding:12px 14px 8px; }
+
+        .imgs-meta-row {
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:10px;
+        }
+        .imgs-meta-badge {
+            display:flex; align-items:center; gap:6px;
+            background:linear-gradient(135deg,#e8f0fe,#d2e3fc);
+            padding:5px 12px; border-radius:20px;
+        }
+        .imgs-meta-badge span { font-size:12px; font-weight:800; color:var(--primary); }
+        .imgs-meta-hint {
+            font-size:11px; color:#aaa;
+            display:flex; align-items:center; gap:4px;
+        }
+
+        /* الشبكة: دائماً عمودان */
+        .slots-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+        }
+
+        /* كل خانة */
+        .slot-box {
+            position:relative;
+            aspect-ratio:1/1;
+            border-radius:16px;
+            overflow:hidden;
+            border:2px dashed #d0d9e8;
+            background:linear-gradient(145deg,#f5f8ff,#eef2fb);
+            cursor:pointer;
+            transition:border-color .2s, background .2s, transform .15s, box-shadow .2s;
+        }
+        .slot-box.filled {
+            border:none;
+            cursor:default;
+            background:#000;
+            box-shadow:0 4px 18px rgba(0,0,0,0.18);
+        }
+        .slot-box.add-box:active {
+            background:#e4eeff;
+            border-color:var(--primary);
+            transform:scale(0.97);
+        }
+
+        /* صورة داخل الخانة */
+        .slot-img {
+            width:100%; height:100%; object-fit:cover;
+            display:block; border-radius:16px;
+            transition:transform .25s ease;
+        }
+        .slot-box.filled:active .slot-img { transform:scale(1.04); }
+
+        /* تأثير تحميل الصورة */
+        .slot-img-loading {
+            position:absolute; inset:0;
+            background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+            background-size:200% 100%;
+            animation:shimLoad 1.2s infinite;
+            border-radius:16px;
+            z-index:1;
+        }
+        @keyframes shimLoad { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* داخل خانة الإضافة */
+        .add-inner {
+            position:absolute; inset:0;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:8px; pointer-events:none;
+        }
+        .add-circle {
+            width:52px; height:52px; border-radius:50%;
+            background:linear-gradient(135deg,#1877f2,#5ba3ff);
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 4px 16px rgba(24,119,242,0.3);
+            transition:transform .2s;
+        }
+        .add-circle svg { width:26px; height:26px; fill:none; stroke:#fff; stroke-width:2.5; stroke-linecap:round; }
+        .slot-box.add-box:active .add-circle { transform:scale(0.9); }
+        .add-lbl { font-size:12px; font-weight:800; color:var(--primary); }
+        .add-sub  { font-size:10px; color:#94a3b8; margin-top:-4px; }
+
+        /* شارة رقم الصورة */
+        .slot-num {
+            position:absolute; bottom:8px; right:9px;
+            background:rgba(0,0,0,0.55);
+            backdrop-filter:blur(4px);
+            color:#fff;
+            font-size:10px; font-weight:800;
+            padding:3px 8px; border-radius:10px;
+            pointer-events:none; z-index:3;
+            letter-spacing:.3px;
+        }
+
+        /* زر الحذف — تصميم جديد */
+        .slot-rm-btn {
+            position:absolute; top:8px; left:8px;
+            width:30px; height:30px; border-radius:50%;
+            background:rgba(228,30,63,0.88);
+            backdrop-filter:blur(4px);
+            border:2px solid rgba(255,255,255,0.6);
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; z-index:4;
+            transition:background .18s, transform .15s, box-shadow .15s;
+            box-shadow:0 2px 8px rgba(228,30,63,0.4);
+        }
+        .slot-rm-btn:active { background:var(--red); transform:scale(.88); }
+        .slot-rm-btn svg { width:12px; height:12px; fill:none; stroke:#fff; stroke-width:3; stroke-linecap:round; }
+
+        /* أيقونة معاينة عند hover/touch */
+        .slot-preview-hint {
+            position:absolute; inset:0;
+            background:rgba(0,0,0,0);
+            display:flex; align-items:center; justify-content:center;
+            z-index:2; transition:background .2s;
+            pointer-events:none;
+        }
+        .slot-preview-hint svg {
+            width:32px; height:32px; fill:none; stroke:#fff;
+            stroke-width:2; opacity:0; transition:opacity .2s;
+            filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+        }
+        .slot-box.filled:active .slot-preview-hint { background:rgba(0,0,0,0.25); }
+        .slot-box.filled:active .slot-preview-hint svg { opacity:1; }
+
+        /* شريط الأزرار (المعرض / الكاميرا) — يظهر فقط عند 0 صور */
+        .add-photo-bar {
+            display:flex; gap:10px; padding:10px 14px 6px; flex-wrap:wrap;
+        }
+        .photo-lbl {
+            display:flex; align-items:center; gap:8px;
+            padding:11px 18px; border-radius:26px;
+            border:2px solid var(--border); background:#fff;
+            font-size:13px; font-weight:700; color:var(--primary);
+            cursor:pointer; font-family:'Tajawal',sans-serif;
+            transition:background .15s, border-color .15s, transform .12s;
+            box-shadow:0 1px 4px rgba(0,0,0,0.06);
+        }
+        .photo-lbl:active { background:#e4eeff; border-color:var(--primary); transform:scale(0.97); }
+        .photo-lbl svg { width:18px; height:18px; flex-shrink:0; }
+        #fileGallery, #fileCamera { display:none; }
+
+        /* ── Form ── */
+        .form-section { padding:12px 15px; }
+        .form-label { font-size:13px; color:var(--sub); font-weight:600; margin-bottom:7px; display:flex; align-items:center; gap:6px; }
+        .form-input {
+            width:100%; padding:11px 13px; border:1.5px solid var(--border);
+            border-radius:12px; background:#f7f7f7; font-size:14px;
+            color:var(--txt); outline:none; font-family:'Tajawal',sans-serif;
+        }
+        .form-input:focus { border-color:var(--primary); background:#fff; }
+
+        /* ── Privacy chips ── */
+        .prv-chips { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+        .prv-chip {
+            padding:8px 16px; border-radius:20px;
+            border:2px solid var(--border);
+            font-size:13px; font-weight:700; color:var(--sub); cursor:pointer;
+            transition:all .15s;
+        }
+        .prv-chip.on { border-color:var(--primary); background:#e8f2ff; color:var(--primary); }
+
+        /* ── رفع الملفات ── */
+        .up-ov { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:5000; display:none; align-items:center; justify-content:center; }
+        .up-ov.show { display:flex; }
+        .up-card { background:#fff; border-radius:20px; padding:28px 32px; width:270px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .up-icon { font-size:36px; margin-bottom:10px; }
+        .up-title { font-size:15px; font-weight:800; margin-bottom:14px; }
+        .up-track { height:8px; background:#eee; border-radius:10px; overflow:hidden; }
+        .up-fill { height:100%; background:var(--primary); border-radius:10px; width:0; transition:width .35s ease; }
+        .up-sub { font-size:12px; color:var(--sub); margin-top:9px; }
+
+        /* ── Success screen ── */
+        .success-ov { position:fixed; inset:0; background:#fff; z-index:6000; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+        .success-ov.show { display:flex; animation:fadeIn .35s ease; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .suc-circle { width:84px; height:84px; border-radius:50%; background:#e8f5e9; display:flex; align-items:center; justify-content:center; animation:pop .4s cubic-bezier(.25,.8,.25,1); }
+        @keyframes pop { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+        .suc-circle svg { width:44px; height:44px; fill:none; stroke:#42b72a; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+        .suc-txt { font-size:18px; font-weight:800; }
+        .suc-sub { font-size:14px; color:var(--sub); }
+
+        /* ── Preview modal (محسّن) ── */
+        .modal-ov {
+            position:fixed; inset:0;
+            background:rgba(0,0,0,.92);
+            z-index:3000; display:none;
+            justify-content:center; align-items:center;
+            padding:16px;
+            animation:none;
+        }
+        .modal-ov.open { display:flex; animation:modalIn .25s ease; }
+        @keyframes modalIn { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+        .modal-inner {
+            position:relative;
+            display:flex; flex-direction:column; align-items:center;
+            gap:12px; max-width:100%; max-height:90vh;
+        }
+        .modal-img {
+            max-width:100%; max-height:80vh;
+            border-radius:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,.5);
+            object-fit:contain;
+        }
+        .modal-hint {
+            font-size:12px; color:rgba(255,255,255,.45);
+            font-family:'Tajawal',sans-serif;
+        }
+        .img-close {
+            position:absolute; top:-14px; left:-14px;
+            background:rgba(255,255,255,.18);
+            backdrop-filter:blur(6px);
+            color:#fff; border:1.5px solid rgba(255,255,255,.25);
+            width:40px; height:40px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:background .2s, transform .15s;
+        }
+        .img-close:active { background:rgba(228,30,63,.8); transform:scale(.9); }
+
+        /* ── Toast ── */
+        .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(8px); background:#1c1c1e; color:#fff; padding:11px 22px; border-radius:22px; font-size:14px; z-index:4000; opacity:0; transition:.25s; pointer-events:none; white-space:nowrap; }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        /* ── خانة تفعيل الإعلان ── */
+        .ad-toggle-section { padding:12px 15px; }
+        .ad-toggle-row {
+            display:flex; align-items:center; justify-content:space-between;
+            background:#f8f9ff; border:1.5px solid #e8eaf6;
+            border-radius:14px; padding:13px 14px; cursor:pointer;
+            transition:border-color .2s, background .2s;
+        }
+        .ad-toggle-row:active { background:#eef0fb; }
+        .ad-toggle-left { display:flex; align-items:center; gap:10px; }
+        .ad-toggle-icon {
+            width:36px; height:36px; border-radius:10px;
+            background:linear-gradient(135deg,#1877f2,#42a5f5);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .ad-toggle-icon svg { width:18px; height:18px; fill:none; stroke:#fff; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+        .ad-toggle-text-wrap { display:flex; flex-direction:column; gap:2px; }
+        .ad-toggle-title { font-size:14px; font-weight:800; color:#1a1a2e; }
+        .ad-toggle-sub { font-size:11px; color:#888; }
+        /* مربع الاختيار المخصص */
+        .ad-checkbox-wrap { position:relative; width:22px; height:22px; flex-shrink:0; }
+        .ad-checkbox-wrap input[type="checkbox"] { position:absolute; opacity:0; width:0; height:0; }
+        .ad-checkbox-box {
+            width:22px; height:22px; border-radius:6px;
+            border:2px solid #c0c3c8; background:#fff;
+            display:flex; align-items:center; justify-content:center;
+            transition:all .2s; cursor:pointer;
+        }
+        .ad-checkbox-box svg { width:13px; height:13px; stroke:#fff; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; fill:none; opacity:0; transition:opacity .15s; }
+        .ad-checkbox-wrap input:checked + .ad-checkbox-box { background:var(--primary); border-color:var(--primary); }
+        .ad-checkbox-wrap input:checked + .ad-checkbox-box svg { opacity:1; }
+        /* نافذة شروط تحقيق الدخل */
+        .mono-conds-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,.55);
+            display:flex; align-items:flex-end; justify-content:center;
+            z-index:3000; opacity:0; visibility:hidden; transition:all .25s;
+        }
+        .mono-conds-overlay.show { opacity:1; visibility:visible; }
+        .mono-conds-box {
+            background:#fff; width:100%; max-width:600px;
+            border-radius:22px 22px 0 0; padding:0;
+            transform:translateY(100%); transition:transform .3s cubic-bezier(.2,.8,.2,1);
+            max-height:85vh; overflow-y:auto;
+        }
+        .mono-conds-overlay.show .mono-conds-box { transform:translateY(0); }
+        .mono-conds-hdr {
+            padding:18px 18px 14px; border-bottom:1px solid #f0f2f5;
+            display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#fff; z-index:2;
+        }
+        .mono-conds-hdr h3 { font-size:16px; font-weight:900; color:#1a1a2e; }
+        .mono-conds-close { background:#f0f2f5; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .mono-conds-close svg { width:16px; height:16px; stroke:#555; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+        .mono-conds-body { padding:16px 18px 28px; }
+        .mono-conds-desc { font-size:13px; color:#666; margin-bottom:16px; line-height:1.7; }
+        .mono-cond-item {
+            display:flex; align-items:center; gap:12px;
+            background:#f8f9ff; border:1.5px solid #eef0f8;
+            border-radius:13px; padding:12px 14px; margin-bottom:10px;
+        }
+        .mono-cond-item.done { border-color:#43a047; background:#f1f8f0; }
+        .mono-cond-item.done .mono-cond-check { background:#43a047; }
+        .mono-cond-check {
+            width:28px; height:28px; border-radius:50%; background:#e0e0e0;
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .mono-cond-check svg { width:14px; height:14px; stroke:#fff; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+        .mono-cond-info { flex:1; min-width:0; }
+        .mono-cond-label { font-size:13px; font-weight:700; color:#1a1a2e; }
+        .mono-cond-progress { font-size:11px; color:#888; margin-top:2px; }
+        .mono-cond-bar-wrap { height:4px; background:#e8eaf6; border-radius:4px; margin-top:6px; overflow:hidden; }
+        .mono-cond-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#1877f2,#42a5f5); transition:width .4s; }
+        .mono-cond-item.done .mono-cond-bar-fill { background:linear-gradient(90deg,#43a047,#66bb6a); }
+    </style>
+</head>
+<body>
+
+<!-- ─── Loader ─── -->
+<div id="loader">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <div class="sk" style="width:46px;height:46px;border-radius:50%;flex-shrink:0;"></div>
+        <div style="flex:1;">
+            <div class="sk" style="height:14px;width:55%;margin-bottom:8px;"></div>
+            <div class="sk" style="height:11px;width:35%;"></div>
+        </div>
+    </div>
+    <div class="sk" style="height:100px;margin-bottom:14px;border-radius:10px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div class="sk" style="height:120px;border-radius:14px;"></div>
+        <div class="sk" style="height:120px;border-radius:14px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <div class="sk" style="height:44px;width:140px;border-radius:24px;"></div>
+        <div class="sk" style="height:44px;width:140px;border-radius:24px;"></div>
+    </div>
+</div>
+
+<!-- ─── Top bar ─── -->
+<div class="top-bar">
+    <button class="back-btn" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <h2>إنشاء منشور</h2>
+    <button class="pub-btn" id="pubBtn" onclick="publishPost()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        نشر
+    </button>
+</div>
+
+<!-- ─── Page ─── -->
+<div class="page" id="pageContent">
+
+    <!-- صف المستخدم -->
+    <div class="user-row">
+        <div class="av-wrap" id="avWrap">
+            <img class="av-img" id="myAv" src="" onerror="this.src='https://ui-avatars.com/api/?name=U'">
+        </div>
+        <div>
+            <div class="user-name" id="myName">...</div>
+            <div class="prv-hint" id="prvHint">🌍 عام للجميع</div>
+        </div>
+    </div>
+
+    <!-- نص المنشور -->
+    <textarea class="post-textarea" id="postText"
+        placeholder="بم تفكر؟ شارك مع مجتمعك..." rows="5"
+        oninput="autoResize(this)"></textarea>
+
+    <div class="sep"></div>
+
+    <!-- ════ قسم الصور ════ -->
+
+    <!-- شريط الأزرار (يظهر فقط عند 0 صور) -->
+    <div class="add-photo-bar" id="addPhotoBar">
+        <label class="photo-lbl" for="fileGallery">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5" fill="var(--primary)" stroke="none"/>
+                <polyline points="21 15 16 10 5 21" stroke-linejoin="round"/>
+            </svg>
+            اختر من المعرض
+        </label>
+        <label class="photo-lbl" for="fileCamera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+            </svg>
+            التقاط صورة
+        </label>
+    </div>
+
+    <!-- منطقة الخانات (تظهر عند وجود صورة على الأقل) -->
+    <div class="imgs-zone" id="imgsZone" style="display:none;">
+        <div class="imgs-meta-row">
+            <div class="imgs-meta-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--primary)" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="var(--primary)" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span id="imgsMeta">0 / 4</span>
+            </div>
+            <div class="imgs-meta-hint">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#aaa" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                اضغط للمعاينة
+            </div>
+        </div>
+        <div class="slots-grid" id="slotsGrid"></div>
+    </div>
+
+    <!-- inputs مخفية -->
+    <input type="file" id="fileGallery" accept="image/*" multiple>
+    <input type="file" id="fileCamera"  accept="image/*" capture="environment">
+
+    <div class="divider" style="margin-top:12px;"></div>
+
+    <!-- هاشتاقات -->
+    <div class="form-section">
+        <div class="form-label">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--sub)" stroke-width="2">
+                <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/>
+                <line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>
+            </svg>
+            هاشتاقات
+        </div>
+        <input type="text" class="form-input" id="hashtags" placeholder="#الرياضة  #برمجة  #تصميم">
+    </div>
+
+    <div class="divider" style="height:4px;"></div>
+
+    <!-- الخصوصية -->
+    <div class="form-section">
+        <div class="form-label">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--sub)" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            من يمكنه رؤية المنشور؟
+        </div>
+        <div class="prv-chips">
+            <div class="prv-chip on"  data-val="public"  onclick="setPrv(this)">🌍 عام</div>
+            <div class="prv-chip"     data-val="friends" onclick="setPrv(this)">👥 أصدقاء</div>
+            <div class="prv-chip"     data-val="only_me" onclick="setPrv(this)">🔒 أنا فقط</div>
+        </div>
+    </div>
+
+    <div style="height:34px;"></div>
+
+    <!-- ── قسم تفعيل الإعلان ── -->
+    <div class="divider" style="height:4px;margin-bottom:0;"></div>
+    <div class="ad-toggle-section" id="adToggleSection">
+        <div class="ad-toggle-row" onclick="handleAdToggleClick()">
+            <div class="ad-toggle-left">
+                <div class="ad-toggle-icon">
+                    <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </div>
+                <div class="ad-toggle-text-wrap">
+                    <span class="ad-toggle-title">تفعيل الإعلان في المنشور</span>
+                    <span class="ad-toggle-sub" id="adToggleSub">سيظهر إعلان ممول أسفل منشورك</span>
+                </div>
+            </div>
+            <div class="ad-checkbox-wrap" onclick="event.stopPropagation(); handleAdToggleClick()">
+                <input type="checkbox" id="adEnabledCheck" disabled>
+                <div class="ad-checkbox-box">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ─── نافذة شروط تحقيق الدخل ─── -->
+<div class="mono-conds-overlay" id="monoCondsOverlay">
+    <div class="mono-conds-box">
+        <div class="mono-conds-hdr">
+            <h3>شروط تفعيل الإعلانات</h3>
+            <button class="mono-conds-close" onclick="closeMonoConds()">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="mono-conds-body">
+            <p class="mono-conds-desc">لتفعيل ميزة الإعلانات في منشوراتك وتحقيق الدخل، يجب إكمال الشروط التالية:</p>
+            <div id="monoCondsList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── رفع الملفات overlay ─── -->
+<div class="up-ov" id="upOv">
+    <div class="up-card">
+        <div class="up-icon">📤</div>
+        <div class="up-title">جاري رفع الصور...</div>
+        <div class="up-track"><div class="up-fill" id="upFill"></div></div>
+        <div class="up-sub" id="upSub"></div>
+    </div>
+</div>
+
+<!-- ─── شاشة النجاح ─── -->
+<div class="success-ov" id="successOv">
+    <div class="suc-circle">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="suc-txt">تم النشر بنجاح! 🎉</div>
+    <div class="suc-sub">يتم توجيهك للرئيسية...</div>
+</div>
+
+<!-- ─── معاينة صورة (محسّنة) ─── -->
+<div class="modal-ov" id="imgModal" onclick="if(event.target===this)closePreview()">
+    <div class="modal-inner">
+        <button class="img-close" onclick="closePreview()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <img class="modal-img" id="modalImg">
+        <div class="modal-hint">اسحب للأسفل للإغلاق</div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+    apiKey:"AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",
+    authDomain:"a-comment-5a3e5.firebaseapp.com",
+    databaseURL:"https://a-comment-5a3e5-default-rtdb.firebaseio.com",
+    projectId:"a-comment-5a3e5",
+    storageBucket:"a-comment-5a3e5.appspot.com",
+    messagingSenderId:"557343451166",
+    appId:"1:557343451166:web:d181f098cdeccf7691260f"
+});
+const db = firebase.database(), auth = firebase.auth();
+
+/* ══════════════════════════════════════════════
+   الثوابت والحالة
+══════════════════════════════════════════════ */
+const MAX_SLOTS = 4;
+let me = null;
+let selPrivacy = 'public';
+
+/*
+   المصفوفة الرئيسية للخانات: دائماً 4 عناصر
+   كل عنصر = File | null
+   مثال: [File, File, null, null]
+   الخانة 0 → الأولى، الخانة 1 → الثانية، ...
+*/
+let slots = [null, null, null, null];
+
+/* ── Auth ── */
+var _isMonetized = false;
+var _adEnabled   = false;
+
+auth.onAuthStateChanged(user => {
+    if (!user) { location.href = 'roomlogin.html'; return; }
+    db.ref('users/' + user.uid).once('value', snap => {
+        const u = snap.val() || {};
+        me = {
+            uid:    user.uid,
+            name:   u.yourname || u.name || user.displayName || 'مستخدم',
+            avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.yourname||'U')}`,
+            frame:  u.activeFrameUrl || u.Cadar_Avatar || ''
+        };
+        document.getElementById('myAv').src = me.avatar;
+        document.getElementById('myName').textContent = me.name;
+        if (me.frame) {
+            const fr = document.createElement('img');
+            fr.className = 'av-fr'; fr.src = me.frame;
+            fr.onerror = () => fr.remove();
+            document.getElementById('avWrap').appendChild(fr);
+        }
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('pageContent').style.display = 'block';
+
+        // ── التحقق من حالة تحقيق الدخل ──
+        checkUserMonetizationStatus(user.uid, u);
+    });
+});
+
+/* ── Privacy ── */
+const prvMap = { public:'🌍 عام للجميع', friends:'👥 الأصدقاء فقط', only_me:'🔒 أنا فقط' };
+function setPrv(el) {
+    document.querySelectorAll('.prv-chip').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+    selPrivacy = el.dataset.val;
+    document.getElementById('prvHint').textContent = prvMap[selPrivacy];
+}
+
+/* ── auto resize textarea ── */
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+}
+
+/* ══════════════════════════════════════════════
+   دوال مساعدة للخانات
+══════════════════════════════════════════════ */
+
+// عدد الخانات المملوءة
+function filledCount() { return slots.filter(f => f !== null).length; }
+
+// رقم آخر خانة مملوءة (0-indexed)، أو -1 إن لا توجد
+function lastFilledIdx() {
+    for (let i = MAX_SLOTS - 1; i >= 0; i--) if (slots[i] !== null) return i;
+    return -1;
+}
+
+// أول خانة فارغة (0-indexed)، أو -1 إن لا توجد
+function firstEmptyIdx() {
+    for (let i = 0; i < MAX_SLOTS; i++) if (slots[i] === null) return i;
+    return -1;
+}
+
+/*
+   كم خانة تظهر في الشبكة؟
+   القاعدة:
+   - 0 صور  → لا تظهر الشبكة أصلاً (يظهر شريط الأزرار بدلاً)
+   - 1 صورة → خانة 1 (مملوءة) + خانة 2 (إضافة) = 2 خانات
+   - 2 صور  → خانتان (مملوءتان) + خانة 3 (إضافة) = 3 خانات
+             لكن الشبكة عمودان فقط → نعرض 2 مملوءة + 1 فارغة = 3 خانات
+             (الخانة الثالثة تشغل عرض خانة كاملة في عمود واحد)
+   - 3 صور  → 3 مملوءة + خانة 4 (إضافة) = 4 خانات
+   - 4 صور  → 4 مملوءة فقط (لا خانة إضافة)
+
+   بكلام أبسط:
+   visibleCount = min(lastFilledIdx + 2, MAX_SLOTS)
+   إذا count === MAX_SLOTS → visibleCount = MAX_SLOTS (كل مملوءة)
+*/
+function visibleCount() {
+    const last = lastFilledIdx();
+    if (last === -1) return 0;
+    const cnt = filledCount();
+    if (cnt >= MAX_SLOTS) return MAX_SLOTS;
+    return Math.min(last + 2, MAX_SLOTS);
+}
+
+/* ══════════════════════════════════════════════
+   الدالة الرئيسية: إعادة رسم الشبكة
+══════════════════════════════════════════════ */
+function renderSlots() {
+    const grid    = document.getElementById('slotsGrid');
+    const zone    = document.getElementById('imgsZone');
+    const bar     = document.getElementById('addPhotoBar');
+    const meta    = document.getElementById('imgsMeta');
+    const cnt     = filledCount();
+    const visible = visibleCount();
+
+    // حرر الـ blob URLs القديمة لتجنب تسرب الذاكرة
+    grid.querySelectorAll('.slot-img[data-blob]').forEach(img => {
+        try { URL.revokeObjectURL(img.dataset.blob); } catch(e) {}
+    });
+    grid.innerHTML = '';
+
+    if (cnt === 0) {
+        zone.style.display = 'none';
+        bar.style.display  = 'flex';
+        return;
+    }
+
+    zone.style.display = 'block';
+    bar.style.display  = 'none';
+    meta.textContent = `${cnt} / ${MAX_SLOTS} صور`;
+
+    for (let i = 0; i < visible; i++) {
+        const file = slots[i];
+        const box  = document.createElement('div');
+
+        if (file !== null) {
+            /* ── خانة مملوءة ── */
+            box.className = 'slot-box filled';
+
+            // shimmer للتحميل
+            const shimmer = document.createElement('div');
+            shimmer.className = 'slot-img-loading';
+            box.appendChild(shimmer);
+
+            const img = document.createElement('img');
+            img.className = 'slot-img';
+            img.style.opacity = '0';
+            img.style.transition = 'opacity .3s ease';
+
+            // إنشاء blob URL بشكل صحيح
+            const blobUrl = URL.createObjectURL(file);
+            img.dataset.blob = blobUrl;
+            img.src = blobUrl;
+            img.onload = () => {
+                shimmer.remove();
+                img.style.opacity = '1';
+            };
+            img.onerror = () => {
+                shimmer.remove();
+                img.style.opacity = '1';
+            };
+            // فتح المعاينة عند الضغط على الصورة
+            img.addEventListener('click', () => openPreview(file));
+
+            // طبقة معاينة شفافة فوق الصورة
+            const hint = document.createElement('div');
+            hint.className = 'slot-preview-hint';
+            hint.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>`;
+            hint.addEventListener('click', () => openPreview(file));
+
+            // شارة رقم الصورة
+            const num = document.createElement('div');
+            num.className = 'slot-num';
+            num.textContent = `${i + 1}`;
+
+            // زر الحذف الأحمر
+            const rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'slot-rm-btn';
+            rm.title = 'حذف الصورة';
+            rm.innerHTML = `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+            rm.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // أنيميشن حذف خفيف
+                box.style.transition = 'opacity .2s, transform .2s';
+                box.style.opacity = '0';
+                box.style.transform = 'scale(0.85)';
+                setTimeout(() => removeSlot(i), 180);
+            });
+
+            box.appendChild(img);
+            box.appendChild(hint);
+            box.appendChild(num);
+            box.appendChild(rm);
+
+        } else {
+            /* ── خانة إضافة ── */
+            box.className = 'slot-box add-box';
+            box.addEventListener('click', () => pickForSlot(i));
+            box.innerHTML = `
+                <div class="add-inner">
+                    <div class="add-circle">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <div class="add-lbl">أضف صورة</div>
+                    <div class="add-sub">${cnt + 1} / 4</div>
+                </div>`;
+        }
+
+        grid.appendChild(box);
+    }
+}
+
+/* ══════════════════════════════════════════════
+   إزالة صورة من خانة
+   القاعدة:
+   - احذف slots[idx] (اجعله null)
+   - اضغط كل الصور نحو اليسار (تعبئة الفراغات)
+   - مثال: [A, null, C, D] → [A, C, D, null]
+   - مثال: حذف الرابعة [A,B,C,null] → [A,B,null,null] → الشبكة تعرض 3 فقط
+   - مثال: حذف الثالثة والرابعة → تظهر خانة الثالثة للإضافة
+══════════════════════════════════════════════ */
+function removeSlot(idx) {
+    slots[idx] = null;
+    // إزاحة (compact): نجمع الصور غير الفارغة ونعيد توزيعها
+    const filled = slots.filter(f => f !== null);
+    for (let i = 0; i < MAX_SLOTS; i++) slots[i] = filled[i] || null;
+    renderSlots();
+}
+
+/* ══════════════════════════════════════════════
+   اختيار ملف لخانة معينة (بالنقر على خانة الإضافة)
+══════════════════════════════════════════════ */
+let pendingSlotIdx = -1;
+
+function pickForSlot(idx) {
+    pendingSlotIdx = idx;
+    const fi = document.getElementById('fileGallery');
+    fi.value = '';
+    fi.removeAttribute('multiple'); // اختيار صورة واحدة عند النقر على خانة بعينها
+    fi.click();
+}
+
+/* ── file inputs listeners ── */
+document.getElementById('fileGallery').addEventListener('change', function(e) {
+    const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+
+    if (pendingSlotIdx >= 0) {
+        // وضع "خانة واحدة محددة"
+        const idx = pendingSlotIdx;
+        pendingSlotIdx = -1;
+        if (slots[idx] === null) {
+            slots[idx] = files[0];
+        } else {
+            // الخانة اتملأت بين الطلب والاستجابة — ضع في أول فارغة
+            const emp = firstEmptyIdx();
+            if (emp !== -1) slots[emp] = files[0];
+            else showToast('الحد الأقصى 4 صور');
+        }
+        // إذا اختار أكثر من صورة، أضف الباقي
+        for (let i = 1; i < files.length; i++) {
+            const emp = firstEmptyIdx();
+            if (emp === -1) { if (i < files.length - 1) showToast('اكتفي بـ 4 صور'); break; }
+            slots[emp] = files[i];
+        }
+    } else {
+        // وضع "شريط الأزرار" — أضف كل الصور من أول فراغ
+        let added = 0;
+        for (const file of files) {
+            const emp = firstEmptyIdx();
+            if (emp === -1) { showToast(`الحد الأقصى ${MAX_SLOTS} صور`); break; }
+            slots[emp] = file; added++;
+        }
+    }
+
+    // أعد تفعيل multiple للمرة القادمة
+    this.setAttribute('multiple', '');
+    this.value = '';
+    renderSlots();
+});
+
+document.getElementById('fileCamera').addEventListener('change', function(e) {
+    const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    const emp = firstEmptyIdx();
+    if (emp === -1) { showToast('الحد الأقصى 4 صور'); }
+    else { slots[emp] = files[0]; renderSlots(); }
+    this.value = '';
+});
+
+/* ── معاينة صورة ── */
+let _previewUrl = null;
+function openPreview(file) {
+    if (_previewUrl) { try { URL.revokeObjectURL(_previewUrl); } catch(e) {} }
+    _previewUrl = URL.createObjectURL(file);
+    const mImg = document.getElementById('modalImg');
+    mImg.src = _previewUrl;
+    document.getElementById('imgModal').classList.add('open');
+}
+function closePreview() {
+    document.getElementById('imgModal').classList.remove('open');
+    if (_previewUrl) {
+        setTimeout(() => { try { URL.revokeObjectURL(_previewUrl); } catch(e) {} _previewUrl = null; }, 300);
+    }
+}
+
+/* ══════════════════════════════════════════════
+   ضغط الصورة قبل الرفع (يقلل الحجم ويسرّع الرفع)
+══════════════════════════════════════════════ */
+function compressImg(file, maxW = 1280, quality = 0.82) {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                let { width: w, height: h } = img;
+                if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', quality);
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+/* ══════════════════════════════════════════════
+   التحقق من أهلية تحقيق الدخل
+══════════════════════════════════════════════ */
+
+var _defaultMonoConds = [
+    { label:'عدد المتابعين',      field:'followersCount', target:1000, unit:'متابع'   },
+    { label:'مشاهدات الريلز',     field:'totalViews',     target:10000, unit:'مشاهدة' },
+    { label:'عدد المنشورات',      field:'postsCount',     target:30,    unit:'منشور'  },
+    { label:'عمر الحساب (أيام)',  field:'accountAge',     target:30,    unit:'يوم'    }
+];
+
+function checkUserMonetizationStatus(uid, userData) {
+    // ── دائماً نجلب بيانات المستخدم الحالية من Firebase مباشرةً ──
+    // لضمان أن موافقة الأدمن تنعكس فوراً حتى لو تغيرت بعد تحميل الصفحة
+    db.ref('users/' + uid).once('value', function(userSnap) {
+        var freshUser = userSnap.val() || userData || {};
+
+        // ── التحقق من موافقة الأدمن المباشرة ──
+        // إذا وافق الأدمن (monetization/status === 'active') → مؤهل فوراً
+        // بغض النظر عن قيم الشروط الحالية أو تغييرها
+        var adminApproved = (freshUser.monetization && freshUser.monetization.status === 'active');
+
+        var subEl   = document.getElementById('adToggleSub');
+        var checkEl = document.getElementById('adEnabledCheck');
+
+        // ── جلب الشروط الحالية من Firebase في كل مرة (لعرضها في النافذة) ──
+        db.ref('settings/monetizationConditions').once('value', function(condSnap) {
+            var conds = [];
+            condSnap.forEach(function(s) { var v = s.val(); if (v) conds.push(v); });
+            if (!conds.length) conds = _defaultMonoConds;
+
+            // حساب عمر الحساب بالأيام من البيانات الحديثة
+            var createdAt = freshUser.createdAt || freshUser.joinedAt || 0;
+            var accountAgeDays = createdAt ? Math.floor((Date.now() - createdAt) / 86400000) : 0;
+
+            // قيم المستخدم الحالية من البيانات الحديثة
+            var userValues = {
+                followersCount: freshUser.followersCount || (freshUser.followers ? Object.keys(freshUser.followers).length : 0),
+                totalViews:     freshUser.totalViews     || 0,
+                postsCount:     freshUser.postsCount     || 0,
+                accountAge:     accountAgeDays,
+                reelsCount:     freshUser.reelsCount     || 0,
+                giftsReceived:  freshUser.giftsReceived  || 0
+            };
+
+            // حفظ الشروط مع قيم المستخدم الحالية لعرضها في نافذة الشروط
+            window._monoCondsWithValues = conds.map(function(c) {
+                var cur  = userValues[c.field] || 0;
+                var done = adminApproved || (cur >= (c.target || 0));
+                return { label:c.label, field:c.field, target:c.target, unit:c.unit, current:cur, done:done };
+            });
+
+            if (adminApproved) {
+                // ── مؤهل بموافقة الأدمن — تفعيل الخانة مباشرةً ──
+                _isMonetized = true;
+                if (checkEl) checkEl.disabled = false;
+                if (subEl) subEl.textContent = 'سيظهر إعلان ممول أسفل منشورك';
+            } else {
+                // ── غير معتمد من الأدمن — نحسب الشروط الحالية ──
+                var allDone = conds.every(function(c) {
+                    return (userValues[c.field] || 0) >= (c.target || 0);
+                });
+                _isMonetized = allDone;
+
+                if (allDone) {
+                    if (checkEl) checkEl.disabled = false;
+                    if (subEl) subEl.textContent = 'سيظهر إعلان ممول أسفل منشورك';
+                } else {
+                    if (checkEl) { checkEl.disabled = true; checkEl.checked = false; }
+                    _adEnabled = false;
+                    if (subEl) subEl.textContent = 'أكمل شروط تحقيق الدخل للتفعيل';
+                }
+            }
+        });
+    });
+}
+
+/* ── نقرة على خانة الإعلان ── */
+function handleAdToggleClick() {
+    var checkEl = document.getElementById('adEnabledCheck');
+    if (!_isMonetized) {
+        // غير مؤهل — أظهر نافذة الشروط
+        openMonoConds();
+        return;
+    }
+    // مؤهل — قلب حالة الـ checkbox
+    checkEl.checked = !checkEl.checked;
+    _adEnabled = checkEl.checked;
+    var subEl = document.getElementById('adToggleSub');
+    if (subEl) subEl.textContent = _adEnabled ? 'سيظهر إعلان ممول أسفل منشورك' : 'سيظهر إعلان ممول أسفل منشورك';
+}
+
+/* ── فتح نافذة الشروط — تجلب الشروط الحالية من Firebase في كل مرة ── */
+function openMonoConds() {
+    var overlay = document.getElementById('monoCondsOverlay');
+    var listEl  = document.getElementById('monoCondsList');
+    if (!overlay || !listEl) return;
+
+    // إظهار النافذة فوراً مع حالة تحميل
+    listEl.innerHTML = '<div style="text-align:center;padding:24px;color:#888;font-size:13px;">جاري التحميل...</div>';
+    overlay.classList.add('show');
+
+    // ── جلب الشروط الحالية من Firebase في كل فتح للنافذة ──
+    db.ref('settings/monetizationConditions').once('value', function(condSnap) {
+        var conds = [];
+        condSnap.forEach(function(s) { var v = s.val(); if (v) conds.push(v); });
+        if (!conds.length) conds = _defaultMonoConds;
+
+        // استخدام القيم المحفوظة من آخر فحص إن وُجدت، وإلا 0
+        var savedConds = window._monoCondsWithValues || [];
+        var savedMap   = {};
+        savedConds.forEach(function(c) { savedMap[c.field] = c; });
+
+        listEl.innerHTML = '';
+        conds.forEach(function(c) {
+            var saved  = savedMap[c.field] || {};
+            var cur    = saved.current !== undefined ? saved.current : 0;
+            // إذا كان المستخدم معتمداً من الأدمن → كل الشروط تُعرض كمكتملة
+            var done   = _isMonetized ? true : (cur >= (c.target || 0));
+            var pct    = _isMonetized ? 100 : Math.min(100, Math.round((cur / (c.target || 1)) * 100));
+            var item   = document.createElement('div');
+            item.className = 'mono-cond-item' + (done ? ' done' : '');
+            item.innerHTML =
+                '<div class="mono-cond-check">'
+                    + '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+                + '</div>'
+                + '<div class="mono-cond-info">'
+                    + '<div class="mono-cond-label">' + (c.label || c.field) + '</div>'
+                    + '<div class="mono-cond-progress">' + cur + ' / ' + (c.target || 0) + ' ' + (c.unit || '') + '</div>'
+                    + '<div class="mono-cond-bar-wrap"><div class="mono-cond-bar-fill" style="width:' + pct + '%"></div></div>'
+                + '</div>';
+            listEl.appendChild(item);
+        });
+    });
+}
+
+/* ── إغلاق نافذة الشروط ── */
+function closeMonoConds() {
+    var overlay = document.getElementById('monoCondsOverlay');
+    if (overlay) overlay.classList.remove('show');
+}
+
+/* ══════════════════════════════════════════════
+   النشر — رفع الصور وحفظ المنشور في Firebase
+══════════════════════════════════════════════ */
+async function publishPost() {
+    const text     = (document.getElementById('postText').value || '').trim();
+    const hashtags = (document.getElementById('hashtags').value || '').trim();
+    const imgs     = slots.filter(f => f !== null);
+
+    if (!text && !imgs.length) { showToast('اكتب شيئاً أو أضف صورة'); return; }
+    if (!me) { showToast('الرجاء تسجيل الدخول'); return; }
+
+    const btn = document.getElementById('pubBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> جاري النشر...';
+
+    const imageUrls = [];
+
+    if (imgs.length) {
+        const upOv   = document.getElementById('upOv');
+        const upFill = document.getElementById('upFill');
+        const upSub  = document.getElementById('upSub');
+        upOv.classList.add('show');
+
+        for (let i = 0; i < imgs.length; i++) {
+            upSub.textContent = `رفع صورة ${i + 1} من ${imgs.length}...`;
+            upFill.style.width = Math.round((i / imgs.length) * 80) + '%';
+            try {
+                const compressed = await compressImg(imgs[i]);
+                const url = await uploadToCloudinary(compressed);
+                imageUrls.push(url);
+            } catch(err) {
+                upOv.classList.remove('show');
+                showToast(`❌ فشل رفع الصورة ${i + 1}، تحقق من الاتصال`);
+                btn.disabled = false;
+                btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"/></svg> نشر';
+                return;
+            }
+        }
+        upFill.style.width = '90%';
+        upSub.textContent  = 'حفظ المنشور...';
+    }
+
+    try {
+        const postData = {
+            authorUid:     me.uid,
+            authorName:    me.name,
+            authorAvatar:  me.avatar,
+            authorFrame:   me.frame,
+            text,
+            hashtags,
+            privacy:       selPrivacy,
+            imageUrl:      imageUrls[0] || '',   // للتوافق مع الصفحات القديمة
+            imageUrls:     imageUrls,             // كل الصور (حتى 4)
+            likesCount:    0,
+            commentsCount: 0,
+            giftsCount:    0,
+            adEnabled:     _adEnabled ? true : false,
+            ts:            firebase.database.ServerValue.TIMESTAMP
+        };
+        const newPostRef = await db.ref('posts').push(postData);
+        // ── حفظ وقت آخر منشور للمستخدم لإظهاره أولاً في الرئيسية ──
+        db.ref('users/' + me.uid + '/lastPostTs').set(Date.now());
+        db.ref('users/' + me.uid + '/postsCount').transaction(v => (v || 0) + 1);
+        // ── تحديث تقدم مهام النشر ──
+        db.ref('tasks').once('value').then(function(snap) {
+            var tasks = snap.val() || {};
+            Object.keys(tasks).forEach(function(tid) {
+                var t = tasks[tid];
+                if (t.type === 'posts' && t.active) {
+                    var cur = t.currentProgress || 0;
+                    if (cur < t.target) {
+                        db.ref('tasks/' + tid + '/currentProgress').transaction(function(v) { return (v || 0) + 1; });
+                    }
+                }
+            });
+        });
+
+        document.getElementById('upFill').style.width = '100%';
+        document.getElementById('upSub').textContent  = '✅ اكتمل!';
+        setTimeout(() => {
+            document.getElementById('upOv').classList.remove('show');
+            document.getElementById('successOv').classList.add('show');
+            setTimeout(() => location.href = 'home.html', 1800);
+        }, 500);
+
+    } catch(err) {
+        document.getElementById('upOv').classList.remove('show');
+        showToast('خطأ في الحفظ، حاول مجدداً');
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"/></svg> نشر';
+    }
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── Cloudinary Upload Helper ── */
+async function uploadToCloudinary(file, onProgress) {
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        var fd  = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', 'my_app_upload');
+        var resType = (file.type && (file.type.startsWith('video/') || file.type.startsWith('audio/'))) ? 'video' : 'image';
+        if (xhr.upload && onProgress) {
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) onProgress(Math.round(e.loaded / e.total * 100));
+            });
+        }
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                var d = JSON.parse(xhr.responseText);
+                d.secure_url ? resolve(d.secure_url) : reject(new Error(d.error ? d.error.message : 'Upload failed'));
+            } else { reject(new Error('HTTP ' + xhr.status)); }
+        });
+        xhr.addEventListener('error', function() { reject(new Error('Network error')); });
+        xhr.open('POST', 'https://api.cloudinary.com/v1_1/dlujoziwz/' + resType + '/upload');
+        xhr.send(fd);
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إحصائياتي - YADWOR</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1877f2; --bg:#f2f4f7; --card:#fff;
+  --txt:#0f1117; --sub:#65676b; --border:#e8eaed;
+  --red:#e41e3f; --green:#2ecc71; --gold:#f39c12;
+  --purple:#8b5cf6; --orange:#f97316; --teal:#0694a2;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--txt);padding-top:58px;padding-bottom:82px;overflow-x:hidden;}
+
+/* Loader */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
+.spin{width:36px;height:36px;border:3px solid #dde;border-top-color:var(--primary);border-radius:50%;animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Navbar */
+.top-navbar{position:fixed;top:0;left:0;right:0;height:58px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 14px;z-index:1000;box-shadow:0 1px 0 var(--border);}
+.nav-back{background:none;border:none;cursor:pointer;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--txt);transition:.15s;}
+.nav-back:active{background:var(--bg);}
+.nav-back svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-title{font-size:17px;font-weight:800;color:var(--txt);display:flex;align-items:center;gap:8px;}
+.nav-title-icon{width:32px;height:32px;background:linear-gradient(135deg,#1877f2,#42a5f5);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.nav-title-icon svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ══ HERO SECTION ══ */
+.hero-section{
+  background:#fff;margin:14px 14px 0;border-radius:20px;
+  padding:20px 18px 20px;box-shadow:0 2px 14px rgba(0,0,0,.07);
+  border:1px solid var(--border);
+}
+.hero-top{margin-bottom:20px;}
+.hero-label{font-size:12px;color:var(--sub);font-weight:600;margin-bottom:3px;}
+.hero-name{font-size:22px;font-weight:900;color:var(--txt);}
+
+/* شبكة الصناديق الملوّنة */
+.hero-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.hbox{border-radius:15px;padding:14px 10px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:88px;position:relative;overflow:hidden;}
+.hbox::after{content:'';position:absolute;top:-18px;right:-18px;width:60px;height:60px;border-radius:50%;opacity:.15;}
+
+/* ألوان */
+.hbox-blue  {background:linear-gradient(145deg,#dbeafe,#eff6ff);}  .hbox-blue::after{background:#1877f2;}
+.hbox-green {background:linear-gradient(145deg,#d1fae5,#ecfdf5);}  .hbox-green::after{background:#2ecc71;}
+.hbox-purple{background:linear-gradient(145deg,#ede9fe,#f5f3ff);}  .hbox-purple::after{background:#8b5cf6;}
+.hbox-red   {background:linear-gradient(145deg,#fee2e2,#fef2f2);}  .hbox-red::after{background:#e41e3f;}
+.hbox-orange{background:linear-gradient(145deg,#ffedd5,#fff7ed);}  .hbox-orange::after{background:#f97316;}
+.hbox-teal  {background:linear-gradient(145deg,#ccfbf1,#f0fdfa);}  .hbox-teal::after{background:#0694a2;}
+
+.hbox-ico{width:36px;height:36px;border-radius:11px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;}
+.hbox-blue   .hbox-ico{background:#1877f2;} .hbox-green .hbox-ico{background:#2ecc71;}
+.hbox-purple .hbox-ico{background:#8b5cf6;} .hbox-red   .hbox-ico{background:#e41e3f;}
+.hbox-orange .hbox-ico{background:#f97316;} .hbox-teal  .hbox-ico{background:#0694a2;}
+.hbox-ico svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+.hbox-val{font-size:22px;font-weight:900;line-height:1;margin-bottom:4px;position:relative;z-index:1;}
+.hbox-blue  .hbox-val{color:#1d4ed8;} .hbox-green .hbox-val{color:#15803d;}
+.hbox-purple.hbox-val{color:#6d28d9;} .hbox-purple .hbox-val{color:#6d28d9;}
+.hbox-red   .hbox-val{color:#be123c;} .hbox-orange .hbox-val{color:#c2410c;}
+.hbox-teal  .hbox-val{color:#0e7490;}
+.hbox-lbl{font-size:10px;font-weight:700;color:var(--sub);position:relative;z-index:1;}
+
+/* ══ Section Title ══ */
+.sec-title{font-size:15px;font-weight:800;color:var(--txt);margin:24px 14px 10px;display:flex;align-items:center;gap:9px;}
+.sec-ico{width:33px;height:33px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-ico svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.si-blue  {background:linear-gradient(135deg,#1877f2,#42a5f5);}
+.si-red   {background:linear-gradient(135deg,#e41e3f,#f87171);}
+.si-gold  {background:linear-gradient(135deg,#f39c12,#fbbf24);}
+.si-purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+.si-teal  {background:linear-gradient(135deg,#0694a2,#22d3ee);}
+.si-orange{background:linear-gradient(135deg,#f97316,#fb923c);}
+.si-green {background:linear-gradient(135deg,#2ecc71,#6ee7b7);}
+
+/* ══ Stat Card ══ */
+.stat-card{background:#fff;border-radius:16px;padding:18px 16px;margin:0 14px 12px;box-shadow:0 1px 6px rgba(0,0,0,.05);border:1px solid var(--border);}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-size:14px;font-weight:800;color:var(--txt);display:flex;align-items:center;gap:8px;}
+.card-ico{width:29px;height:29px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-ico svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.badge{font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;white-space:nowrap;}
+.badge-blue  {background:#dbeafe;color:#1d4ed8;} .badge-red   {background:#fee2e2;color:#be123c;}
+.badge-gold  {background:#fef3c7;color:#92400e;} .badge-purple{background:#ede9fe;color:#6d28d9;}
+.badge-teal  {background:#ccfbf1;color:#0e7490;} .badge-orange{background:#ffedd5;color:#c2410c;}
+.badge-green {background:#d1fae5;color:#15803d;} .badge-neu   {background:#f3f4f6;color:var(--sub);}
+
+/* رقم كبير */
+.big-row{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+.big-num{font-size:36px;font-weight:900;line-height:1;}
+.bn-blue  {color:#1877f2;} .bn-red   {color:#e41e3f;} .bn-gold  {color:#f39c12;}
+.bn-purple{color:#8b5cf6;} .bn-teal  {color:#0694a2;} .bn-orange{color:#f97316;}
+.bn-green {color:#2ecc71;}
+.big-sub{font-size:12px;color:var(--sub);font-weight:600;}
+
+/* شبكة الفترات */
+.periods{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.pbox{border-radius:11px;padding:10px 6px;text-align:center;background:var(--bg);border:1.5px solid transparent;transition:.15s;}
+.pbox.hi{border-color:var(--primary);background:linear-gradient(135deg,#eff6ff,#dbeafe);}
+.pbox-val{font-size:16px;font-weight:900;line-height:1.1;color:var(--txt);}
+.pv-blue  {color:#1877f2;} .pv-red   {color:#e41e3f;} .pv-gold  {color:#f39c12;}
+.pv-purple{color:#8b5cf6;} .pv-teal  {color:#0694a2;} .pv-orange{color:#c2410c;}
+.pv-green {color:#15803d;}
+.pbox-lbl{font-size:9.5px;color:var(--sub);font-weight:700;margin-top:3px;}
+
+/* Progress */
+.prog-wrap{margin-top:14px;}
+.prog-row{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:5px;font-weight:600;}
+.prog-track{height:7px;background:#f0f0f0;border-radius:7px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:7px;transition:width 1.3s cubic-bezier(.4,0,.2,1);}
+.pf-blue  {background:linear-gradient(90deg,#1877f2,#60a5fa);}
+.pf-red   {background:linear-gradient(90deg,#e41e3f,#f87171);}
+.pf-gold  {background:linear-gradient(90deg,#f39c12,#fbbf24);}
+.pf-purple{background:linear-gradient(90deg,#8b5cf6,#c4b5fd);}
+
+.card-divider{height:1px;background:var(--border);margin:18px 0;}
+
+/* ══ Revenue Card ══ */
+.rev-card{background:#fff;border-radius:16px;padding:18px 16px;margin:0 14px 12px;box-shadow:0 1px 6px rgba(0,0,0,.05);border:1px solid var(--border);}
+.rev-top{background:linear-gradient(135deg,#f39c12,#f97316);border-radius:13px;padding:17px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;}
+.rev-ico{width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rev-ico svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.rev-val{font-size:30px;font-weight:900;color:#fff;line-height:1;}
+.rev-lbl{font-size:11px;color:rgba(255,255,255,.82);font-weight:600;margin-top:2px;}
+.rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rev-box{background:var(--bg);border-radius:11px;padding:12px;text-align:center;}
+.rev-box-val{font-size:18px;font-weight:900;color:var(--txt);}
+.rev-box-lbl{font-size:10px;color:var(--sub);font-weight:700;margin-top:3px;}
+.rev-pending{background:linear-gradient(135deg,#fff7ed,#ffedd5);}
+.rev-pending .rev-box-val{color:#c2410c;}
+
+/* ══ Mono Card ══ */
+.mono-card{background:linear-gradient(145deg,#1a237e 0%,#1565c0 55%,#1877f2 100%);border-radius:16px;padding:20px 18px;margin:0 14px 12px;color:#fff;position:relative;overflow:hidden;}
+.mono-card::before{content:'';position:absolute;top:-55px;right:-55px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none;}
+.mono-card::after{content:'';position:absolute;bottom:-45px;left:-35px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;}
+.submitted-info-box{background:rgba(255,255,255,0.13);border-radius:13px;padding:14px 16px;margin:14px 0 2px;position:relative;z-index:1;}
+.submitted-info-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.1);}
+.submitted-info-row:last-child{border-bottom:none;padding-bottom:2px;}
+.submitted-info-ico{width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.submitted-info-ico svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.submitted-info-texts{display:flex;flex-direction:column;gap:1px;}
+.submitted-info-label{font-size:10px;color:rgba(255,255,255,0.6);font-weight:500;}
+.submitted-info-value{font-size:13px;color:#fff;font-weight:700;}
+.mono-hdr{display:flex;align-items:center;gap:10px;margin-bottom:5px;position:relative;z-index:1;}
+.mono-hdr-ico{width:39px;height:39px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mono-hdr-ico svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.mono-title{font-size:16px;font-weight:900;}
+.mono-sub{font-size:12px;color:rgba(255,255,255,.72);margin-bottom:18px;position:relative;z-index:1;line-height:1.6;}
+
+/* Condition */
+.cond-item{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;margin-bottom:10px;position:relative;z-index:1;backdrop-filter:blur(6px);}
+.cond-sico{width:35px;height:35px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cond-sico svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.cond-body{flex:1;min-width:0;}
+.cond-lbl{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;}
+.cond-track{height:5px;background:rgba(255,255,255,.2);border-radius:5px;overflow:hidden;}
+.cond-fill{height:100%;border-radius:5px;transition:width 1.3s cubic-bezier(.4,0,.2,1);}
+.cf-done   {background:linear-gradient(90deg,#43e97b,#38f9d7);}
+.cf-partial{background:linear-gradient(90deg,#f1c40f,#f97316);}
+.cf-low    {background:linear-gradient(90deg,#ff6b6b,#ee0979);}
+.cond-nums{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;}
+.cond-ck{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ck-done{background:rgba(67,233,123,.2);} .ck-part{background:rgba(241,196,15,.2);} .ck-low{background:rgba(238,9,121,.15);}
+.ck-done svg{stroke:#43e97b;} .ck-part svg{stroke:#f1c40f;} .ck-low svg{stroke:#ff6b6b;}
+.cond-ck svg{width:15px;height:15px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* Activate Button */
+.act-btn{width:100%;padding:14px;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Tajawal',sans-serif;margin-top:10px;transition:.2s;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;}
+.act-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.ab-ready    {background:linear-gradient(135deg,#43e97b,#38f9d7);color:#0a4a2a;}
+.ab-notready {background:rgba(255,255,255,.12);color:rgba(255,255,255,.45);cursor:not-allowed;}
+.ab-pending  {background:rgba(255,255,255,.15);color:rgba(255,255,255,.75);cursor:default;border:1.5px solid rgba(255,255,255,.25);}
+.ab-active   {background:linear-gradient(135deg,#43e97b,#38f9d7);color:#0a4a2a;cursor:default;}
+.ab-suspended{background:rgba(249,115,22,.2);color:#ffb347;cursor:default;border:1.5px solid rgba(249,115,22,.4);}
+
+.susp-bar{background:rgba(249,115,22,.15);border:1.5px solid rgba(249,115,22,.4);border-radius:11px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:#ffcc80;display:flex;align-items:center;gap:8px;position:relative;z-index:1;}
+.susp-bar svg{width:16px;height:16px;fill:none;stroke:#ffb347;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+/* ══ Activation Modal ══ */
+.act-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:5000;display:none;align-items:flex-end;justify-content:center;}
+.act-ov.open{display:flex;}
+.act-box{background:#fff;width:100%;max-width:600px;border-radius:22px 22px 0 0;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1);}
+.act-ov.open .act-box{transform:translateY(0);}
+.act-hdr{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2;}
+.act-hdr h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.act-hdr h3 svg{width:20px;height:20px;fill:none;stroke:var(--primary);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.act-close{background:none;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#999;font-size:22px;}
+.act-body{padding:18px 18px 32px;}
+.act-notice{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:#92400e;line-height:1.65;display:flex;gap:10px;}
+.act-notice svg{width:18px;height:18px;fill:none;stroke:#92400e;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:2px;}
+.act-sec{margin-bottom:20px;}
+.act-sec-ttl{font-size:12px;font-weight:800;color:var(--sub);letter-spacing:.4px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.act-field{margin-bottom:13px;}
+.act-field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--txt);}
+.act-field input,.act-field select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Tajawal',sans-serif;color:var(--txt);outline:none;transition:.2s;background:#fafafa;}
+.act-field input:focus{border-color:var(--primary);background:#fff;}
+.act-field .hint{font-size:11px;color:var(--sub);margin-top:5px;}
+.act-field .warn{font-size:11px;color:#c2410c;margin-top:5px;}
+.pay-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.pay-tab{flex:1;padding:11px;border:2px solid var(--border);border-radius:12px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;transition:.2s;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:6px;}
+.pay-tab svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.pay-tab.active{border-color:var(--primary);background:#eff6ff;color:var(--primary);}
+.act-submit{width:100%;padding:15px;background:linear-gradient(135deg,#1877f2,#1565c0);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Tajawal',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;}
+.act-submit svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.act-submit:hover{box-shadow:0 6px 20px rgba(24,119,242,.35);}
+.act-submit:disabled{background:#ccc;cursor:not-allowed;box-shadow:none;}
+
+/* Toast */
+#toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(15,17,23,.88);color:#fff;padding:11px 22px;border-radius:24px;font-size:13px;z-index:9999;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s;}
+#toast.show{opacity:1;}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:#fff;display:flex;justify-content:space-around;align-items:center;border-top:1px solid var(--border);z-index:1000;}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#90949c;font-size:10px;gap:2px;flex:1;height:100%;cursor:pointer;border:none;background:none;font-family:'Tajawal',sans-serif;}
+.nav-item svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item.active{color:var(--primary);}
+.nav-item.active svg{stroke:var(--primary);}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spin"></div></div>
+
+<!-- Navbar -->
+<header class="top-navbar">
+  <button class="nav-back" onclick="history.back()">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="nav-title">
+    <div class="nav-title-icon">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><polyline points="2 20 22 20"/></svg>
+    </div>
+    إحصائياتي
+  </div>
+  <div style="width:38px;"></div>
+</header>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero-section">
+  <div class="hero-top">
+    <div class="hero-label">مرحباً،</div>
+    <div class="hero-name" id="heroName">...</div>
+  </div>
+
+  <div class="hero-grid">
+    <!-- متابعون -->
+    <div class="hbox hbox-blue">
+      <div class="hbox-ico">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="hbox-val" id="heroFollowers">—</div>
+      <div class="hbox-lbl">متابع</div>
+    </div>
+    <!-- أصدقاء -->
+    <div class="hbox hbox-green">
+      <div class="hbox-ico">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+      </div>
+      <div class="hbox-val" id="heroFriends">—</div>
+      <div class="hbox-lbl">صديق</div>
+    </div>
+    <!-- منشورات -->
+    <div class="hbox hbox-purple">
+      <div class="hbox-ico">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+      </div>
+      <div class="hbox-val" id="heroPostsCount">—</div>
+      <div class="hbox-lbl">منشور</div>
+    </div>
+    <!-- ريلز -->
+    <div class="hbox hbox-red">
+      <div class="hbox-ico">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      </div>
+      <div class="hbox-val" id="heroReelsCount">—</div>
+      <div class="hbox-lbl">ريل</div>
+    </div>
+    <!-- مشاهدات الريلز -->
+    <div class="hbox hbox-teal">
+      <div class="hbox-ico">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="hbox-val" id="heroReelViews">—</div>
+      <div class="hbox-lbl">مشاهدة</div>
+    </div>
+    <!-- إعجابات -->
+    <div class="hbox hbox-orange">
+      <div class="hbox-ico">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="hbox-val" id="heroLikes">—</div>
+      <div class="hbox-lbl">إعجاب</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 1. المتابعون ══════════ -->
+<div class="sec-title">
+  <div class="sec-ico si-blue">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+  </div>
+  إحصائيات المتابعة
+</div>
+
+<div class="stat-card">
+  <div class="card-hdr">
+    <div class="card-title">
+      <div class="card-ico si-blue"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      المتابعون
+    </div>
+    <div class="badge badge-blue" id="fGrowthBadge">جاري التحميل...</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-blue" id="totalFollowers">0</div>
+    <div class="big-sub">إجمالي المتابعين</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-blue" id="fNew7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val pv-blue" id="fNew28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="fNew90">0</div><div class="pbox-lbl">آخر 90 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="fTotal2">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-row"><span>نمو هذا الشهر</span><span id="fProgPct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill pf-blue" id="fProgFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- ══════════ 2. الإعجابات ══════════ -->
+<div class="sec-title">
+  <div class="sec-ico si-red">
+    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  </div>
+  إحصائيات الإعجابات
+</div>
+
+<div class="stat-card">
+  <div class="card-hdr">
+    <div class="card-title">
+      <div class="card-ico si-red"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      إجمالي الإعجابات
+    </div>
+    <div class="badge badge-neu">تفاعل</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-red" id="totalLikes">0</div>
+    <div class="big-sub">إعجاب على منشوراتك</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-red" id="lNew7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val pv-red" id="lNew28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="lNew90">0</div><div class="pbox-lbl">آخر 90 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="lTotal">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+</div>
+
+<!-- ══════════ 3. الهدايا ══════════ -->
+<div class="sec-title">
+  <div class="sec-ico si-gold">
+    <svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+  </div>
+  إحصائيات الهدايا
+</div>
+
+<div class="stat-card">
+  <!-- مُرسَلة -->
+  <div class="card-hdr">
+    <div class="card-title">
+      <div class="card-ico si-gold"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+      هدايا أرسلتها
+    </div>
+    <div class="badge badge-gold">مُرسَلة</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-gold" id="totalGiftsSent">0</div>
+    <div class="big-sub">هدية</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-gold" id="gSentToday">0</div><div class="pbox-lbl">اليوم</div></div>
+    <div class="pbox"><div class="pbox-val pv-gold" id="gSent7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val" id="gSent28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="gSentAll">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+
+  <div class="card-divider"></div>
+
+  <!-- مُستلَمة -->
+  <div class="card-hdr" style="margin-bottom:14px;">
+    <div class="card-title">
+      <div class="card-ico si-purple"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+      هدايا استلمتها
+    </div>
+    <div class="badge badge-purple">مُستلَمة</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-purple" id="totalGiftsReceived">0</div>
+    <div class="big-sub">هدية</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-purple" id="gRecvToday">0</div><div class="pbox-lbl">اليوم</div></div>
+    <div class="pbox"><div class="pbox-val pv-purple" id="gRecv7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val" id="gRecv28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="gRecvAll">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+</div>
+
+<!-- ══════════ 4. المشاهدات ══════════ -->
+<div class="sec-title">
+  <div class="sec-ico si-teal">
+    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  </div>
+  إحصائيات المشاهدات
+</div>
+
+<div class="stat-card">
+  <!-- مشاهدات الريلز -->
+  <div class="card-hdr">
+    <div class="card-title">
+      <div class="card-ico si-red"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div>
+      مشاهدات الريلز
+    </div>
+    <div class="badge badge-red">فيديو</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-red" id="totalReelViews">0</div>
+    <div class="big-sub">مشاهدة لريلزك</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-red" id="rv7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val pv-red" id="rv28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="rv90">0</div><div class="pbox-lbl">آخر 90 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="rvAll">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+
+  <div class="card-divider"></div>
+
+  <!-- لايكات المنشورات -->
+  <div class="card-hdr" style="margin-bottom:14px;">
+    <div class="card-title">
+      <div class="card-ico si-red"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      لايكات المنشورات
+    </div>
+    <div class="badge badge-red">إعجابات</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-red" id="totalPostLikes">0</div>
+    <div class="big-sub">إعجاب على منشوراتك</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-red" id="pl7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val pv-red" id="pl28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="pl90">0</div><div class="pbox-lbl">آخر 90 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="plAll">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+
+  <div class="card-divider"></div>
+
+  <!-- مشاهدات الإعلانات -->
+  <div class="card-hdr" style="margin-bottom:14px;">
+    <div class="card-title">
+      <div class="card-ico si-orange"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      مشاهدات إعلاناتك
+    </div>
+    <div class="badge badge-orange">إعلانات</div>
+  </div>
+  <div class="big-row">
+    <div class="big-num bn-orange" id="totalAdViews">0</div>
+    <div class="big-sub">مشاهدة للإعلانات في فيديوهاتك</div>
+  </div>
+  <div class="periods">
+    <div class="pbox hi"><div class="pbox-val pv-orange" id="adv7">0</div><div class="pbox-lbl">آخر 7 أيام</div></div>
+    <div class="pbox"><div class="pbox-val pv-orange" id="adv28">0</div><div class="pbox-lbl">آخر 28 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="adv90">0</div><div class="pbox-lbl">آخر 90 يوم</div></div>
+    <div class="pbox"><div class="pbox-val" id="advAll">0</div><div class="pbox-lbl">الكل</div></div>
+  </div>
+</div>
+
+<!-- ══════════ 5. أرباح الإعلانات ══════════ -->
+<div class="sec-title">
+  <div class="sec-ico si-gold">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+  </div>
+  أرباح الإعلانات
+</div>
+
+<div class="rev-card">
+  <div class="rev-top">
+    <div class="rev-ico">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div>
+      <div class="rev-val">$<span id="totalAdRevenue">0.00</span></div>
+      <div class="rev-lbl">إجمالي أرباح الإعلانات</div>
+    </div>
+  </div>
+  <div class="rev-grid">
+    <div class="rev-box"><div class="rev-box-val">$<span id="adRevToday">0.00</span></div><div class="rev-box-lbl">أرباح اليوم</div></div>
+    <div class="rev-box"><div class="rev-box-val">$<span id="adRev7">0.00</span></div><div class="rev-box-lbl">آخر 7 أيام</div></div>
+    <div class="rev-box" style="margin-top:8px;"><div class="rev-box-val">$<span id="adRev28">0.00</span></div><div class="rev-box-lbl">آخر 28 يوم</div></div>
+    <div class="rev-box rev-pending" style="margin-top:8px;"><div class="rev-box-val" id="adRevPending">$0.00</div><div class="rev-box-lbl">قيد الصرف</div></div>
+  </div>
+</div>
+
+<!-- ══════════ 6. تحقيق الدخل ══════════ -->
+<div class="sec-title">
+  <div class="sec-ico si-blue">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  </div>
+  تحقيق الدخل من الإعلانات
+</div>
+
+<div class="mono-card">
+  <div class="mono-hdr">
+    <div class="mono-hdr-ico">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <div class="mono-title">تفعيل الإعلانات</div>
+  </div>
+  <div class="mono-sub" id="monoSub">استوفِ الشروط أدناه لتفعيل الإعلانات في فيديوهاتك ومنشوراتك</div>
+
+  <div id="suspBar" class="susp-bar" style="display:none;">
+    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    تم تعليق تحقيق الدخل مؤقتاً — تواصل مع الإدارة.
+  </div>
+
+  <div id="condsList"></div>
+
+  <div id="submittedInfoBox" style="display:none;"></div>
+
+  <button class="act-btn ab-notready" id="activateBtn" onclick="handleActivate()">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+    أكمل الشروط للتفعيل
+  </button>
+</div>
+
+<div style="height:10px;"></div>
+
+<!-- ══ Modal التفعيل ══ -->
+<div class="act-ov" id="actOv">
+  <div class="act-box">
+    <div class="act-hdr">
+      <h3>
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        تفعيل تحقيق الدخل
+      </h3>
+      <button class="act-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="act-body">
+      <div class="act-notice">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>لا يمكنك تغيير هذه البيانات بعد التأكيد إلا بالتواصل مع الإدارة مباشرةً. تأكد من صحة جميع المعلومات قبل الإرسال.</div>
+      </div>
+
+      <div class="act-sec">
+        <div class="act-sec-ttl">طريقة استلام الأموال</div>
+        <div class="pay-tabs">
+          <div class="pay-tab active" id="tabPP" onclick="switchPay('paypal')">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            PayPal
+          </div>
+          <div class="pay-tab" id="tabRIB" onclick="switchPay('rib')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            RIB بنكي
+          </div>
+        </div>
+      </div>
+
+      <div class="act-sec">
+        <div class="act-sec-ttl">البيانات الشخصية</div>
+        <div class="act-field"><label>الاسم الكامل *</label><input type="text" id="aFullName" placeholder="الاسم كما في الهوية"></div>
+        <div class="act-field"><label>رقم الهاتف *</label><input type="tel" id="aPhone" placeholder="+212 6XX XXXXXX"></div>
+        <div class="act-field"><label>الدولة / المدينة *</label><input type="text" id="aAddress" placeholder="المدينة، الدولة"></div>
+        <div class="act-field">
+          <label>البريد الإلكتروني للتواصل *</label>
+          <input type="email" id="aEmail" placeholder="email@example.com">
+          <div class="hint">للتواصل معك عند الحاجة</div>
+        </div>
+      </div>
+
+      <div class="act-sec" id="ppSec">
+        <div class="act-sec-ttl">بيانات PayPal</div>
+        <div class="act-field">
+          <label>بريد PayPal *</label>
+          <input type="email" id="aPP" placeholder="paypal@example.com">
+          <div class="hint">تأكد أن الحساب نشط ويقبل استلام المدفوعات</div>
+        </div>
+      </div>
+
+      <div class="act-sec" id="ribSec" style="display:none;">
+        <div class="act-sec-ttl">بيانات الحساب البنكي</div>
+        <div class="act-field"><label>اسم البنك *</label><input type="text" id="aBankName" placeholder="اسم البنك"></div>
+        <div class="act-field">
+          <label>رقم RIB / IBAN *</label>
+          <input type="text" id="aRib" placeholder="MAXXXXXXXXXXXXXXXXXX">
+          <div class="hint">تجده في كشف الحساب البنكي</div>
+        </div>
+        <div class="act-field"><label>اسم صاحب الحساب كما في البنك *</label><input type="text" id="aBankHolder" placeholder="الاسم بالضبط"></div>
+      </div>
+
+      <div class="act-field">
+        <div class="warn">بإرسال هذا الطلب تؤكد أن البيانات صحيحة ولا يمكن تعديلها لاحقاً إلا بطلب رسمي من الإدارة.</div>
+      </div>
+
+      <button class="act-submit" id="aSubmit" onclick="submitAct()">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        إرسال طلب التفعيل
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="location.href='home.html'">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>الرئيسية</span>
+  </button>
+  <button class="nav-item" onclick="location.href='search.html'">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>بحث</span>
+  </button>
+  <button class="nav-item" onclick="location.href='roomhom.html'">
+    <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    <span>غرف</span>
+  </button>
+  <button class="nav-item" onclick="location.href='messages.html'">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>دردشة</span>
+  </button>
+  <button class="nav-item active" onclick="location.href='profile.html'">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>ملفي</span>
+  </button>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({apiKey:"AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",authDomain:"a-comment-5a3e5.firebaseapp.com",databaseURL:"https://a-comment-5a3e5-default-rtdb.firebaseio.com",projectId:"a-comment-5a3e5",storageBucket:"a-comment-5a3e5.appspot.com",messagingSenderId:"557343451166",appId:"1:557343451166:web:d181f098cdeccf7691260f"});
+const db=firebase.database(),auth=firebase.auth();
+let me=null,myUid=null,monoStatus='none',payMethod='paypal';
+
+function fmt(n){n=parseFloat(n)||0;if(n>=1e9)return(n/1e9).toFixed(1).replace(/\.0$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return String(Math.round(n));}
+function dAgo(d){return Date.now()-d*864e5;}
+function todayStart(){var t=new Date();t.setHours(0,0,0,0);return t.getTime();}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2800);}
+
+auth.onAuthStateChanged(function(u){
+  if(!u){location.href='roomlogin.html';return;}
+  myUid=u.uid;
+  db.ref('users/'+myUid).once('value',function(s){
+    me=s.val()||{};me.uid=myUid;
+    document.getElementById('heroName').textContent=me.yourname||me.name||'مستخدم';
+    loadAll();
+    document.getElementById('loader').style.display='none';
+  });
+});
+
+function loadAll(){loadFollowers();loadLikes();loadGifts();loadReelViews();loadPostLikes();loadAdViews();loadAdRevenue();loadMonoStatus();loadMonoConds();}
+
+/* ── Followers ── */
+function loadFollowers(){
+  db.ref('followers').orderByChild('userId').equalTo(myUid).once('value',function(s){
+    var all=[];s.forEach(function(c){var v=c.val();if(v)all.push(v);});
+    var n=all.length,n7=all.filter(function(f){return f.createdAt&&f.createdAt>=dAgo(7);}).length,n28=all.filter(function(f){return f.createdAt&&f.createdAt>=dAgo(28);}).length,n90=all.filter(function(f){return f.createdAt&&f.createdAt>=dAgo(90);}).length;
+    set('heroFollowers',fmt(n));set('totalFollowers',fmt(n));set('fNew7',fmt(n7));set('fNew28',fmt(n28));set('fNew90',fmt(n90));set('fTotal2',fmt(n));
+    var pct=n>0?Math.min(100,Math.round(n28/n*100)):0;
+    document.getElementById('fProgFill').style.width=pct+'%';set('fProgPct',pct+'%');
+    set('fGrowthBadge',(n7>0?'+'+n7+' جديد':'لا تغيير'));
+  });
+  db.ref('friends').orderByChild('user1').equalTo(myUid).once('value',function(s){var c=0;s.forEach(function(r){if(r.val().status==='accepted')c++;});set('heroFriends',fmt(c));});
+  db.ref('posts').orderByChild('authorUid').equalTo(myUid).once('value',function(s){set('heroPostsCount',fmt(s.numChildren()));});
+  db.ref('reels').orderByChild('authorUid').equalTo(myUid).once('value',function(s){set('heroReelsCount',fmt(s.numChildren()));});
+}
+
+/* ── Likes ── */
+function loadLikes(){
+  db.ref('posts').orderByChild('authorUid').equalTo(myUid).once('value',function(s){
+    var total=0,pids=[];
+    s.forEach(function(p){var v=p.val();if(v){total+=(v.likesCount||0);pids.push(p.key);}});
+    set('totalLikes',fmt(total));set('lTotal',fmt(total));set('heroLikes',fmt(total));
+    if(!pids.length)return;
+    var done=0,a7=0,a28=0,a90=0;
+    pids.forEach(function(pid){db.ref('posts/'+pid+'/likers').once('value',function(ls){ls.forEach(function(l){var v=l.val();if(v&&v.ts){if(v.ts>=dAgo(7))a7++;if(v.ts>=dAgo(28))a28++;if(v.ts>=dAgo(90))a90++;}});done++;if(done===pids.length){set('lNew7',fmt(a7));set('lNew28',fmt(a28));set('lNew90',fmt(a90));}});});
+  });
+}
+
+/* ── Gifts ── */
+function loadGifts(){
+  db.ref('posts').once('value',function(s){
+    var td=todayStart(),sT=0,s7=0,s28=0,sA=0,rT=0,r7=0,r28=0,rA=0;
+    s.forEach(function(ps){var p=ps.val();if(!p||!p.gifts)return;Object.values(p.gifts).forEach(function(g){var q=g.qty||1;if(g.senderUid===myUid){sA+=q;if(g.ts&&g.ts>=td)sT+=q;if(g.ts&&g.ts>=dAgo(7))s7+=q;if(g.ts&&g.ts>=dAgo(28))s28+=q;}if(p.authorUid===myUid){rA+=q;if(g.ts&&g.ts>=td)rT+=q;if(g.ts&&g.ts>=dAgo(7))r7+=q;if(g.ts&&g.ts>=dAgo(28))r28+=q;}});});
+    set('totalGiftsSent',fmt(sA));set('gSentToday',fmt(sT));set('gSent7',fmt(s7));set('gSent28',fmt(s28));set('gSentAll',fmt(sA));
+    set('totalGiftsReceived',fmt(rA));set('gRecvToday',fmt(rT));set('gRecv7',fmt(r7));set('gRecv28',fmt(r28));set('gRecvAll',fmt(rA));
+  });
+}
+
+/* ── Reel Views — من viewsCount + viewsLog داخل كل ريل ── */
+function loadReelViews(){
+  db.ref('reels').orderByChild('authorUid').equalTo(myUid).once('value',function(snap){
+    var ids=[];snap.forEach(function(s){ids.push(s.key);});
+    set('heroReelsCount',fmt(ids.length));
+    if(!ids.length){['totalReelViews','rv7','rv28','rv90','rvAll','heroReelViews'].forEach(function(id){set(id,'0');});return;}
+    var doneLog=0,totalLog=0,log7=0,log28=0,log90=0;
+    ids.forEach(function(rid){
+      db.ref('reels/'+rid+'/viewsLog').once('value',function(ls){
+        ls.forEach(function(l){var v=l.val();if(v){totalLog++;if(v.ts&&v.ts>=dAgo(7))log7++;if(v.ts&&v.ts>=dAgo(28))log28++;if(v.ts&&v.ts>=dAgo(90))log90++;}});
+        doneLog++;
+        if(doneLog===ids.length){
+          if(totalLog>0){applyReelViews(totalLog,log7,log28,log90);}
+          else{
+            // fallback: sum viewsCount
+            var doneC=0,sumC=0;
+            ids.forEach(function(rid2){db.ref('reels/'+rid2+'/viewsCount').once('value',function(cs){sumC+=parseInt(cs.val()||0);doneC++;if(doneC===ids.length)applyReelViews(sumC,0,0,0);});});
+          }
+        }
+      });
+    });
+  });
+}
+function applyReelViews(total,v7,v28,v90){
+  set('totalReelViews',fmt(total));set('rvAll',fmt(total));set('heroReelViews',fmt(total));
+  set('rv7',fmt(v7));set('rv28',fmt(v28));set('rv90',fmt(v90));
+}
+
+/* ── Post Likes ── */
+function loadPostLikes(){
+  db.ref('posts').orderByChild('authorUid').equalTo(myUid).once('value',function(s){
+    var total=0,pids=[];
+    s.forEach(function(p){var v=p.val();if(v){total+=(v.likesCount||0);pids.push(p.key);}});
+    set('totalPostLikes',fmt(total));set('plAll',fmt(total));
+    if(!pids.length)return;
+    var done=0,l7=0,l28=0,l90=0;
+    pids.forEach(function(pid){
+      db.ref('posts/'+pid+'/likers').once('value',function(ls){
+        ls.forEach(function(l){var v=l.val();if(v&&v.ts){if(v.ts>=dAgo(7))l7++;if(v.ts>=dAgo(28))l28++;if(v.ts>=dAgo(90))l90++;}});
+        done++;
+        if(done===pids.length){set('pl7',fmt(l7));set('pl28',fmt(l28));set('pl90',fmt(l90));}
+      });
+    });
+  });
+}
+
+/* ── Ad Views ── */
+function loadAdViews(){
+  db.ref('users/'+myUid+'/adViewsLog').once('value',function(s){
+    var all=[];s.forEach(function(c){var v=c.val();if(v)all.push(v);});
+    var n=all.length,v7=all.filter(function(v){return v.ts&&v.ts>=dAgo(7);}).length,v28=all.filter(function(v){return v.ts&&v.ts>=dAgo(28);}).length,v90=all.filter(function(v){return v.ts&&v.ts>=dAgo(90);}).length;
+    set('totalAdViews',fmt(n));set('adv7',fmt(v7));set('adv28',fmt(v28));set('adv90',fmt(v90));set('advAll',fmt(n));
+  });
+}
+
+/* ── Ad Revenue ── */
+function loadAdRevenue(){
+  db.ref('users/'+myUid+'/adRevenue').once('value',function(s){
+    var u=s.val()||{};
+    set('totalAdRevenue',parseFloat(u.total||0).toFixed(2));
+    set('adRevToday',parseFloat(u.today||0).toFixed(2));
+    set('adRev7',parseFloat(u.week7||0).toFixed(2));
+    set('adRev28',parseFloat(u.week28||0).toFixed(2));
+    set('adRevPending','$'+parseFloat(u.pending||0).toFixed(2));
+  });
+}
+
+/* ── Mono Status ── */
+function loadMonoStatus(){
+  db.ref('users/'+myUid+'/monetization').once('value',function(s){
+    var m=s.val()||{};monoStatus=m.status||'none';updateMonoUI();
+    // إذا كان المستخدم قد قدّم طلباً (pending أو active أو suspended)
+    // اقرأ بيانات الطلب من monetizationRequests وأظهرها بدلاً من الشروط
+    if(monoStatus==='pending'||monoStatus==='active'||monoStatus==='suspended'){
+      db.ref('monetizationRequests/'+myUid).once('value',function(rs){
+        var reqData=rs.val();
+        if(reqData){showSubmittedInfo(reqData);}
+      });
+    }
+  });
+}
+function updateMonoUI(){
+  var btn=document.getElementById('activateBtn');
+  var sub=document.getElementById('monoSub');
+  var sb=document.getElementById('suspBar');
+  sb.style.display='none';
+  btn.onclick=function(){handleActivate();};
+
+  var svgCheck='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+  var svgClock='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+  var svgWarn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+  if(monoStatus==='active'){
+    btn.className='act-btn ab-active';btn.innerHTML=svgCheck+' الإعلانات مفعّلة';btn.onclick=null;
+    sub.textContent='تهانينا! تحقيق الدخل مفعّل. ستظهر الإعلانات في ريلزك ومنشوراتك.';
+  }else if(monoStatus==='pending'){
+    btn.className='act-btn ab-pending';btn.innerHTML=svgClock+' قيد المراجعة';btn.onclick=null;
+    sub.textContent='تم إرسال طلبك وهو قيد مراجعة الإدارة. سيتم إشعارك عند الموافقة.';
+  }else if(monoStatus==='suspended'){
+    btn.className='act-btn ab-suspended';btn.innerHTML=svgWarn+' تم تعليق الربح';btn.onclick=null;
+    sb.style.display='flex';sub.textContent='تم تعليق تحقيق الدخل مؤقتاً من قِبَل الإدارة.';
+  }
+}
+
+/* ── Conditions ── */
+var CSVG={
+  followersCount:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+  totalViews:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  postsCount:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  accountAge:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  reelsCount:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  giftsReceived:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>',
+};
+var CK_OK='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M20 6L9 17l-5-5"/></svg>';
+var CK_PA='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+var CK_LO='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+function loadMonoConds(){
+  // إذا كان المستخدم قدّم طلباً من قبل، اقرأ conditionsSnapshot المحفوظ
+  // حتى لا تتأثر الشروط التي حققها بتغيير الأدمن لاحقاً
+  db.ref('monetizationRequests/'+myUid+'/conditionsSnapshot').once('value',function(snpSnap){
+    if(snpSnap.val()!==null){
+      // يوجد snapshot محفوظ من وقت تقديم الطلب — استخدمه
+      var savedConds=snpSnap.val();
+      if(Array.isArray(savedConds)&&savedConds.length){
+        renderConds(savedConds);
+        return;
+      }
+    }
+    // لا يوجد snapshot — المستخدم لم يقدّم طلباً بعد
+    // قراءة شروط التحويل والسحب من الأدمن أولاً
+    db.ref('settings/transferConditions').once('value',function(ts){
+      var tc=ts.val()||{};
+      var transferConds=[];
+      // بناء قائمة الشروط من settings/transferConditions
+      if(tc.minFollowers!==undefined) transferConds.push({key:'tf1',label:'عدد المتابعين',field:'followersCount',target:tc.minFollowers,unit:'متابع'});
+      if(tc.minViews!==undefined)     transferConds.push({key:'tf2',label:'مشاهدات الريلز',field:'totalViews',target:tc.minViews,unit:'مشاهدة'});
+      if(tc.minLikes!==undefined)     transferConds.push({key:'tf3',label:'الإعجابات',field:'totalLikes',target:tc.minLikes,unit:'إعجاب'});
+      if(tc.minPosts!==undefined)     transferConds.push({key:'tf4',label:'عدد المنشورات',field:'postsCount',target:tc.minPosts,unit:'منشور'});
+      if(tc.minAge!==undefined)       transferConds.push({key:'tf5',label:'عمر الحساب',field:'accountAge',target:tc.minAge,unit:'يوم'});
+      if(transferConds.length){
+        // يوجد شروط في transferConditions — استخدمها
+        renderConds(transferConds);
+      } else {
+        // لا يوجد شروط في transferConditions — استخدم monetizationConditions
+        db.ref('settings/monetizationConditions').once('value',function(s){
+          var c=[];s.forEach(function(r){var v=r.val();if(v)c.push({key:r.key,...v});});
+          if(!c.length)c=[{key:'c1',label:'عدد المتابعين',field:'followersCount',target:1000,unit:'متابع'},{key:'c2',label:'مشاهدات الريلز',field:'totalViews',target:10000,unit:'مشاهدة'},{key:'c3',label:'عدد المنشورات',field:'postsCount',target:30,unit:'منشور'},{key:'c4',label:'عمر الحساب',field:'accountAge',target:30,unit:'يوم'}];
+          renderConds(c);
+        });
+      }
+    });
+  });
+}
+function renderConds(conds){
+  var list=document.getElementById('condsList');list.innerHTML='';
+  var allDone=true,done=0;
+  conds.forEach(function(c){
+    getCondVal(c,function(cur,tgt){
+      var tgtVal=(tgt!==undefined&&tgt!==null)?tgt:1;var pct=tgtVal===0?100:Math.min(100,Math.round((cur/tgtVal)*100));var isDone=cur>=tgtVal;
+      if(!isDone)allDone=false;
+      var fc=pct>=100?'cf-done':pct>=50?'cf-partial':'cf-low';
+      var kc=pct>=100?'ck-done':pct>=50?'ck-part':'ck-low';
+      var ck=pct>=100?CK_OK:pct>=50?CK_PA:CK_LO;
+      var ico=CSVG[c.field]||CSVG.postsCount;
+      var el=document.createElement('div');el.className='cond-item';
+      el.innerHTML='<div class="cond-sico">'+ico+'</div><div class="cond-body"><div class="cond-lbl">'+c.label+' ('+fmt(cur)+' / '+fmt(tgtVal)+' '+(c.unit||'')+')</div><div class="cond-track"><div class="cond-fill '+fc+'" style="width:'+pct+'%"></div></div><div class="cond-nums">'+(isDone?'اكتمل الشرط':'متبقي: '+fmt(Math.max(0,tgtVal-cur))+' '+(c.unit||''))+'</div></div><div class="cond-ck '+kc+'">'+ck+'</div>';
+      list.appendChild(el);done++;
+      if(done===conds.length&&monoStatus==='none'){
+        var btn=document.getElementById('activateBtn');
+        var svgPlay='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+        var svgWait='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>';
+        if(allDone){btn.className='act-btn ab-ready';btn.innerHTML=svgPlay+' ابدأ تحقيق الدخل';}
+        else{btn.className='act-btn ab-notready';btn.innerHTML=svgWait+' أكمل الشروط للتفعيل';}
+      }
+    });
+  });
+}
+function getCondVal(c,cb){
+  var f=c.field||'',t=(c.target!==undefined&&c.target!==null&&!isNaN(parseInt(c.target)))?parseInt(c.target):0;
+  if(f==='followersCount')db.ref('followers').orderByChild('userId').equalTo(myUid).once('value',function(s){cb(s.numChildren(),t);});
+  else if(f==='totalViews')db.ref('reels').orderByChild('authorUid').equalTo(myUid).once('value',function(s){var ids=[];s.forEach(function(r){ids.push(r.key);});if(!ids.length){cb(0,t);return;}var d=0,tot=0;ids.forEach(function(rid){db.ref('reels/'+rid+'/viewsCount').once('value',function(vs){tot+=parseInt(vs.val()||0);d++;if(d===ids.length)cb(tot,t);});});});
+  else if(f==='postsCount')db.ref('posts').orderByChild('authorUid').equalTo(myUid).once('value',function(s){cb(s.numChildren(),t);});
+  else if(f==='accountAge')db.ref('users/'+myUid+'/createdAt').once('value',function(s){cb(Math.floor((Date.now()-(s.val()||Date.now()))/864e5),t);});
+  else if(f==='reelsCount')db.ref('reels').orderByChild('authorUid').equalTo(myUid).once('value',function(s){cb(s.numChildren(),t);});
+  else if(f==='giftsReceived')db.ref('users/'+myUid+'/totalGiftsReceived').once('value',function(s){cb(parseInt(s.val())||0,t);});
+  else if(f==='totalLikes')db.ref('users/'+myUid+'/totalLikes').once('value',function(s){if(s.val()!==null){cb(parseInt(s.val())||0,t);}else{db.ref('posts').orderByChild('authorUid').equalTo(myUid).once('value',function(ps){var tot=0;ps.forEach(function(p){tot+=parseInt((p.val().likes&&Object.keys(p.val().likes).length)||0);});cb(tot,t);});}});
+  else db.ref('users/'+myUid+'/'+f).once('value',function(s){cb(parseInt(s.val())||0,t);});
+}
+
+function showSubmittedInfo(reqData){
+  // إخفاء قائمة الشروط
+  document.getElementById('condsList').style.display='none';
+  // إظهار div البيانات المُقدَّمة
+  var box=document.getElementById('submittedInfoBox');
+  box.style.display='block';
+  // استخراج البيانات: الاسم، البريد الإلكتروني، اسم البنك
+  var fullName=reqData.fullName||reqData.name||'—';
+  var contactEmail=reqData.contactEmail||reqData.email||'—';
+  var bankDisplay='—';
+  if(reqData.payment){
+    if(reqData.payment.method==='paypal'){
+      bankDisplay='PayPal: '+(reqData.payment.paypalEmail||'—');
+    } else if(reqData.payment.method==='rib'){
+      bankDisplay=reqData.payment.bankName||'—';
+    }
+  }
+  // SVG أيقونة الشخص
+  var svgPerson='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  // SVG أيقونة البريد الإلكتروني
+  var svgMail='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+  // SVG أيقونة البنك
+  var svgBank='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>';
+  // بناء HTML البيانات
+  box.innerHTML=
+    '<div class="submitted-info-box">'+
+      '<div class="submitted-info-row">'+
+        '<div class="submitted-info-ico">'+svgPerson+'</div>'+
+        '<div class="submitted-info-texts">'+
+          '<div class="submitted-info-label">الاسم</div>'+
+          '<div class="submitted-info-value">'+fullName+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="submitted-info-row">'+
+        '<div class="submitted-info-ico">'+svgMail+'</div>'+
+        '<div class="submitted-info-texts">'+
+          '<div class="submitted-info-label">البريد الإلكتروني</div>'+
+          '<div class="submitted-info-value">'+contactEmail+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="submitted-info-row">'+
+        '<div class="submitted-info-ico">'+svgBank+'</div>'+
+        '<div class="submitted-info-texts">'+
+          '<div class="submitted-info-label">طريقة الاستلام</div>'+
+          '<div class="submitted-info-value">'+bankDisplay+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function handleActivate(){
+  if(monoStatus!=='none')return;
+  if(document.getElementById('activateBtn').className.includes('notready')){toast('أكمل جميع الشروط أولاً');return;}
+  document.getElementById('aFullName').value=me.yourname||me.name||'';
+  document.getElementById('aEmail').value=me.email||'';
+  document.getElementById('actOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('actOv').classList.remove('open');document.body.style.overflow='';}
+function switchPay(m){
+  payMethod=m;
+  document.getElementById('tabPP').className='pay-tab'+(m==='paypal'?' active':'');
+  document.getElementById('tabRIB').className='pay-tab'+(m==='rib'?' active':'');
+  document.getElementById('ppSec').style.display=m==='paypal'?'block':'none';
+  document.getElementById('ribSec').style.display=m==='rib'?'block':'none';
+}
+function submitAct(){
+  var fn=document.getElementById('aFullName').value.trim();
+  var ph=document.getElementById('aPhone').value.trim();
+  var ad=document.getElementById('aAddress').value.trim();
+  var em=document.getElementById('aEmail').value.trim();
+  if(!fn||!ph||!ad||!em){toast('يرجى ملء جميع الحقول');return;}
+  var pay={};
+  if(payMethod==='paypal'){var pp=document.getElementById('aPP').value.trim();if(!pp){toast('أدخل بريد PayPal');return;}pay={method:'paypal',paypalEmail:pp};}
+  else{var bn=document.getElementById('aBankName').value.trim();var rb=document.getElementById('aRib').value.trim();var bh=document.getElementById('aBankHolder').value.trim();if(!bn||!rb||!bh){toast('أدخل بيانات RIB كاملة');return;}pay={method:'rib',bankName:bn,rib:rb,accountHolder:bh};}
+  var btn=document.getElementById('aSubmit');btn.disabled=true;btn.textContent='جاري الإرسال...';
+  // جمع الشروط الحالية من condsList لحفظها كـ snapshot مجمّد
+  var condsListEl=document.getElementById('condsList');
+  var condItems=condsListEl?condsListEl.querySelectorAll('.cond-item'):[];
+  // بناء conditionsSnapshot من الشروط الحالية في DOM
+  var conditionsSnapshot=[];
+  condItems.forEach(function(el){
+    var lbl=el.querySelector('.cond-lbl');
+    if(lbl){conditionsSnapshot.push({label:lbl.textContent||''});}
+  });
+  var data={uid:myUid,name:me.yourname||me.name||'',fullName:fn,phone:ph,address:ad,contactEmail:em,payment:pay,status:'pending',conditionsSnapshot:conditionsSnapshot,submittedAt:firebase.database.ServerValue.TIMESTAMP};
+  db.ref('monetizationRequests/'+myUid).set(data).then(function(){return db.ref('users/'+myUid+'/monetization').set({status:'pending',submittedAt:firebase.database.ServerValue.TIMESTAMP});}).then(function(){monoStatus='pending';updateMonoUI();closeModal();toast('تم إرسال طلبك بنجاح!');showSubmittedInfo(data);}).catch(function(){btn.disabled=false;btn.textContent='إرسال طلب التفعيل';toast('حدث خطأ، حاول مرة أخرى');});
+}
+
+function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+</script>
+</body>
+</html>

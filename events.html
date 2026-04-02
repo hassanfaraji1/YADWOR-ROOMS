@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الأنشطة والمهام</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary:#1877f2;--card:#fff;--border:#eee;--red:#e41e3f;--sub:#65676b;}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: linear-gradient(160deg, #0d1520 0%, #0a1018 50%, #0c1219 100%); min-height: 100vh; padding-bottom: 80px; }
+        /* ─── Bottom nav ─── */
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#111118;display:flex;justify-content:space-around;align-items:center;border-top:1px solid rgba(100,150,255,0.1);z-index:1000;}
+        .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#90949c;font-size:10px;gap:3px;flex:1;height:100%;cursor:pointer;border:none;background:none;font-family:'Tajawal',sans-serif;position:relative;}
+        .nav-item svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+        .nav-item.active{color:#4a90e2;}
+        .nav-item.active svg{stroke:#4a90e2;}
+        .nav-item span{color:inherit;}
+        .header { background: rgba(10, 10, 15, 0.98); padding: 12px 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(100, 150, 255, 0.08); }
+        .header-title { font-size: 18px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 12px; }
+        .sub-tabs { background: rgba(100, 150, 255, 0.03); padding: 8px; border-radius: 15px; display: flex; gap: 6px; overflow-x: auto; border: 1px solid rgba(100, 150, 255, 0.06); }
+        .sub-tabs::-webkit-scrollbar { display: none; }
+        .sub-tab { padding: 8px 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(100, 150, 255, 0.08); border-radius: 12px; color: rgba(255, 255, 255, 0.5); font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: all 0.3s ease; }
+        .sub-tab svg { width: 16px; height: 16px; fill: currentColor; }
+        .sub-tab.active { background: linear-gradient(135deg, #1a237e 0%, #283593 100%); color: #fff; border-color: rgba(100, 150, 255, 0.2); }
+        .period-info { background: rgba(100, 150, 255, 0.05); padding: 8px 12px; border-radius: 10px; font-size: 11px; text-align: center; color: rgba(255, 255, 255, 0.5); margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(100, 150, 255, 0.08); }
+        .period-info svg { width: 14px; height: 14px; fill: currentColor; }
+        .tab-content { display: none; padding: 12px; margin-top: 140px; animation: fadeIn 0.3s ease; padding-bottom: 80px; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .task-card { background: linear-gradient(135deg, rgba(18,32,70,0.6) 0%, rgba(10,18,45,0.65) 100%); border-radius: 14px; padding: 12px 13px; margin-bottom: 9px; border: 1px solid rgba(80,120,220,0.14); backdrop-filter: blur(8px); }
+        .task-card.is-completed { background: linear-gradient(135deg, rgba(14,18,28,0.82) 0%, rgba(10,13,20,0.88) 100%); border-color: rgba(255,255,255,0.06); }
+        .task-card.is-claimed { background: linear-gradient(135deg, rgba(14,18,28,0.82) 0%, rgba(10,13,20,0.88) 100%); border-color: rgba(255,193,7,0.12); }
+        .task-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .task-icon { width: 38px; height: 38px; background: linear-gradient(135deg, #1a3a7e 0%, #2a4aaa 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .task-icon svg { width: 20px; height: 20px; fill: #fff; }
+        .task-title h3 { color: #fff; font-size: 13px; margin-bottom: 2px; font-weight: 800; }
+        .task-title p { color: rgba(255, 255, 255, 0.4); font-size: 10px; }
+        .task-reward { display:none; }
+        .task-reward-imgs { display:none; }
+        .task-progress { background: rgba(255, 255, 255, 0.07); height: 5px; border-radius: 3px; margin: 8px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #FFC107 0%, #FFD700 100%); border-radius: 3px; transition: width 0.5s ease; }
+        .task-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .task-status { font-size: 11px; color: rgba(255, 255, 255, 0.4); font-weight: 600; }
+        .btn-claim { background: linear-gradient(135deg, #1e4db7 0%, #2855c8 100%); color: #fff; border: none; padding: 7px 18px; border-radius: 9px; font-weight: 700; cursor: pointer; font-size: 11px; font-family: 'Tajawal', sans-serif; }
+        .btn-claim:disabled { background: rgba(255, 255, 255, 0.08); cursor: not-allowed; color: rgba(255,255,255,0.35); }
+
+        /* ===== صور مكافآت المهمة ===== */
+        .task-reward-imgs { margin: 10px 0; }
+        .reward-imgs-label { font-size: 10px; color: rgba(255,255,255,0.35); display: block; margin-bottom: 7px; font-weight: 600; }
+        .reward-imgs-row { display: flex; flex-wrap: wrap; gap: 7px; }
+        .reward-img-chip { display: flex; align-items: center; gap: 5px; background: rgba(100,150,255,0.08); border: 1px solid rgba(100,150,255,0.15); border-radius: 10px; padding: 5px 9px; cursor: pointer; transition: all 0.25s; }
+        .reward-img-chip:hover { background: rgba(100,150,255,0.18); border-color: rgba(100,150,255,0.35); transform: scale(1.04); }
+        .reward-img-chip img { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; background: rgba(255,255,255,0.05); }
+        .reward-img-chip span { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.75); white-space: nowrap; }
+        .leaderboard-fixed-section { background: linear-gradient(135deg, rgba(20,35,80,0.5) 0%, rgba(10,20,50,0.55) 100%); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(100, 150, 255, 0.1); backdrop-filter: blur(8px); }
+        .leaderboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .leaderboard-title { color: #fff; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .leaderboard-title svg { width: 20px; height: 20px; fill: #FFC107; }
+        .btn-rewards { background: linear-gradient(135deg, #b45309 0%, #d97706 100%); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 5px; font-family: 'Tajawal', sans-serif; box-shadow: 0 3px 12px rgba(180,83,9,0.4); }
+        .btn-rewards svg { width: 16px; height: 16px; fill: #fff; }
+        .top-three { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 20px; padding: 16px; background: rgba(100, 150, 255, 0.03); border-radius: 16px; border: 1px solid rgba(100, 150, 255, 0.06); }
+        .top-player { text-align: center; flex: 1; position: relative; }
+        .top-player.second { order: 1; transform: translateY(12px); }
+        .top-player.first { order: 2; transform: translateY(0); }
+        .top-player.third { order: 3; transform: translateY(12px); }
+        .rank-badge { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; z-index: 10; }
+        .top-player.first .rank-badge { width: 35px; height: 35px; font-size: 18px; background: linear-gradient(135deg, #FFC107 0%, #FFA000 100%); color: #000; top: -12px; }
+        .top-player.second .rank-badge { background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%); color: #fff; }
+        .top-player.third .rank-badge { background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%); color: #fff; }
+        .player-avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #1a237e 0%, #283593 100%); margin: 15px auto 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid rgba(100, 150, 255, 0.15); color: #fff; font-weight: 700; overflow: hidden; position: relative; }
+        /* ── Facebook Shimmer للصور ── */
+        .av-shimmer { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.13) 40%, rgba(255,255,255,0.04) 80%); background-size: 200% 100%; animation: avShimmer 1.4s infinite; z-index: 2; pointer-events: none; }
+        @keyframes avShimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .av-shimmer.hidden { display: none; }
+        .av-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; position: relative; z-index: 1; }
+        .av-img.loaded { opacity: 1; }
+        .player-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .top-player.first .player-avatar { width: 75px; height: 75px; font-size: 28px; border: 3px solid #FFC107; }
+        .crown { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; }
+        .crown svg { width: 100%; height: 100%; fill: #FFC107; }
+        .player-name { font-weight: 700; color: #fff; font-size: 11px; margin-bottom: 4px; }
+        .player-points { color: #FFC107; font-weight: 700; font-size: 10px; }
+        .leaderboard-scroll-section { background: rgba(100, 150, 255, 0.02); border-radius: 16px; padding: 12px; border: 1px solid rgba(100, 150, 255, 0.06); }
+        .leaderboard-list { list-style: none; }
+        .leaderboard-item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.02); border-radius: 12px; border: 1px solid rgba(100, 150, 255, 0.05); }
+        .rank-number { width: 32px; height: 32px; background: rgba(100, 150, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: rgba(255, 255, 255, 0.6); margin-left: 12px; font-size: 13px; flex-shrink: 0; }
+        .rank-number.top { background: linear-gradient(135deg, #FFC107 0%, #FFA000 100%); color: #000; }
+        .leaderboard-item .player-avatar { width: 40px; height: 40px; font-size: 16px; margin: 0 12px 0 12px; }
+        .leaderboard-info { flex: 1; }
+        .leaderboard-name { font-weight: 700; color: #fff; margin-bottom: 2px; font-size: 12px; }
+        .leaderboard-stats { font-size: 10px; color: rgba(255, 255, 255, 0.4); }
+        .leaderboard-reward { background: rgba(100, 150, 255, 0.1); color: rgba(255, 255, 255, 0.7); padding: 6px 12px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+        /* ─── رتبتي فوق الشريط ─── */
+        .rank-pill { position: fixed; bottom: 68px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, rgba(26,35,126,0.95), rgba(40,53,147,0.95)); color: #fff; border: 1px solid rgba(100,150,255,0.3); padding: 7px 20px; border-radius: 30px; font-weight: 800; cursor: pointer; font-size: 12px; display: none; align-items: center; gap: 7px; z-index: 999; backdrop-filter: blur(12px); font-family: 'Tajawal', sans-serif; box-shadow: 0 4px 20px rgba(26,35,126,0.4); white-space: nowrap; }
+        .rank-pill svg { width: 16px; height: 16px; fill: #FFC107; }
+        .rank-pill-label { color: rgba(255,255,255,0.7); font-weight: 600; font-size: 11px; }
+        /* ─── أزرار جانبية عائمة (مربعة) ─── */
+        .side-btns { position: fixed; left: 14px; bottom: 140px; display: flex; flex-direction: column; gap: 10px; z-index: 998; }
+        .side-btn { width: 56px; height: 56px; border-radius: 16px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: 'Tajawal', sans-serif; font-size: 10px; font-weight: 800; transition: all 0.22s cubic-bezier(.4,0,.2,1); box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+        .side-btn svg { width: 22px; height: 22px; fill: #fff; flex-shrink: 0; }
+        .side-btn span { font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.9); line-height: 1; }
+        .side-btn-tasks { background: linear-gradient(145deg, #1e40af, #2563eb); border: 1px solid rgba(96,165,250,0.3); }
+        .side-btn-tasks.active { background: linear-gradient(145deg, #2563eb, #60a5fa); box-shadow: 0 0 0 3px rgba(96,165,250,0.35), 0 6px 20px rgba(30,64,175,0.5); transform: scale(1.06); border-color: rgba(96,165,250,0.5); }
+        .side-btn-tasks:active { transform: scale(0.94); }
+        .side-btn-lb { background: linear-gradient(145deg, #b45309, #d97706); border: 1px solid rgba(251,191,36,0.25); }
+        .side-btn-lb.active { background: linear-gradient(145deg, #d97706, #fbbf24); box-shadow: 0 0 0 3px rgba(251,191,36,0.35), 0 6px 20px rgba(180,83,9,0.5); transform: scale(1.06); border-color: rgba(251,191,36,0.5); }
+        .side-btn-lb:active { transform: scale(0.94); }
+        .side-btn-rank { background: linear-gradient(145deg, #6b21a8, #9333ea); border: 1px solid rgba(192,132,252,0.3); }
+        .side-btn-rank.active { background: linear-gradient(145deg, #9333ea, #c084fc); box-shadow: 0 0 0 3px rgba(192,132,252,0.35), 0 6px 20px rgba(107,33,168,0.5); transform: scale(1.06); border-color: rgba(192,132,252,0.5); }
+        .side-btn-rank:active { transform: scale(0.94); }
+        .side-btn-rank-num { font-size: 11px; font-weight: 900; color: #f0abfc; line-height: 1; }
+        .rewards-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+        .rewards-modal.active { display: flex; }
+        .modal-content { background: linear-gradient(180deg, #0f0f1a 0%, #0a0a10 100%); border-radius: 20px; padding: 25px; max-width: 480px; width: 100%; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s ease; border: 1px solid rgba(100, 150, 255, 0.1); }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { text-align: center; margin-bottom: 25px; }
+        .modal-header h2 { color: #FFC107; font-size: 22px; margin-bottom: 8px; font-weight: 900; }
+        .modal-header p { color: rgba(255, 255, 255, 0.4); font-size: 12px; }
+        .reward-item { display: flex; align-items: center; padding: 15px; background: rgba(255, 255, 255, 0.02); border-radius: 14px; margin-bottom: 12px; border: 1px solid rgba(100, 150, 255, 0.08); }
+        .reward-rank { width: 45px; height: 45px; background: linear-gradient(135deg, #FFC107 0%, #FFA000 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; margin-left: 18px; margin-right: 6px; font-size: 16px; flex-shrink: 0; }
+        .reward-details { flex: 1; }
+        .reward-details h4 { color: #fff; margin-bottom: 8px; font-weight: 800; font-size: 14px; }
+        .reward-items-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .reward-item-tag { background: rgba(100, 150, 255, 0.15); color: rgba(255, 255, 255, 0.8); padding: 5px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(100, 150, 255, 0.2); cursor: pointer; }
+        .reward-item-tag.coins { background: linear-gradient(135deg, #FFC107 0%, #FFA000 100%); color: #000; border: none; }
+        .reward-item-tag.dollars { background: linear-gradient(135deg, #00c853 0%, #69f0ae 100%); color: #000; border: none; }
+        .reward-item-tag img { width: 18px; height: 18px; object-fit: cover; border-radius: 4px; }
+        .close-modal { width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 150, 255, 0.1); border-radius: 12px; font-weight: 700; color: #fff; cursor: pointer; margin-top: 18px; font-family: 'Tajawal', sans-serif; font-size: 14px; }
+        .preview-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.95); z-index: 5000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+        .preview-modal.active { display: flex; }
+        .preview-content { background: linear-gradient(180deg, #0f0f1a 0%, #0a0a10 100%); border-radius: 20px; padding: 25px; max-width: 380px; width: 100%; text-align: center; border: 1px solid rgba(100, 150, 255, 0.1); animation: zoomIn 0.3s ease; }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .preview-image { width: 180px; height: 180px; background: rgba(100, 150, 255, 0.05); border-radius: 16px; margin: 0 auto 18px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(100, 150, 255, 0.1); overflow: hidden; }
+        .preview-image img { width: 100%; height: 100%; object-fit: contain; }
+        .preview-title { color: #FFC107; font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+        .preview-description { color: rgba(255, 255, 255, 0.5); font-size: 12px; margin-bottom: 18px; line-height: 1.6; }
+        .close-preview { padding: 12px 28px; background: linear-gradient(135deg, #1a237e 0%, #283593 100%); border: none; border-radius: 10px; color: #fff; font-weight: 700; cursor: pointer; font-size: 13px; font-family: 'Tajawal', sans-serif; }
+        .no-data { text-align: center; padding: 40px 20px; color: rgba(255, 255, 255, 0.4); font-size: 14px; }
+        /* ── تبويبات منجزة/غير منجزة داخل كل قسم ── */
+        .task-inner-tabs { display: flex; gap: 0; margin-bottom: 14px; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 4px; border: 1px solid rgba(100,150,255,0.08); }
+        .task-inner-tab { flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.45); background: none; border: none; border-radius: 9px; cursor: pointer; font-family: 'Tajawal', sans-serif; transition: all 0.22s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .task-inner-tab svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        .task-inner-tab.active { background: linear-gradient(135deg, #1a237e, #283593); color: #fff; box-shadow: 0 2px 10px rgba(26,35,126,0.4); }
+        .task-inner-tab.done-tab.active { background: linear-gradient(135deg, #1b5e20, #2e7d32); box-shadow: 0 2px 10px rgba(27,94,32,0.4); }
+        .task-sub-count { background: rgba(255,255,255,0.15); color: inherit; font-size: 10px; font-weight: 900; padding: 1px 6px; border-radius: 8px; }
+        /* ── صندوق المكافأة الجديد الرفيع ── */
+        .task-reward-slim { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; margin: 10px 0; background: rgba(255,193,7,0.06); border: 1px solid rgba(255,193,7,0.12); gap: 10px; }
+        .task-reward-slim-info { flex: 1; min-width: 0; }
+        .task-reward-slim-title { font-size: 12px; font-weight: 800; color: #FFC107; display: flex; align-items: center; gap: 6px; }
+        .task-reward-slim-title svg { width: 14px; height: 14px; fill: #FFC107; flex-shrink: 0; }
+        .task-reward-slim-sub { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        .btn-show-reward { background: linear-gradient(135deg, #1e40af, #2563eb); border: 1px solid rgba(96,165,250,0.35); color: #fff; padding: 6px 12px; border-radius: 9px; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; font-family: 'Tajawal', sans-serif; transition: all 0.2s; flex-shrink: 0; display:inline-flex; align-items:center; gap:4px; box-shadow: 0 2px 10px rgba(30,64,175,0.4); }
+        .btn-show-reward:hover { background: linear-gradient(135deg, #2563eb, #3b82f6); transform: scale(1.03); }
+        /* ── نافذة تفاصيل مكافأة المهمة - وسط الصفحة ── */
+        .task-reward-detail-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000; align-items: center; justify-content: center; backdrop-filter: blur(14px); padding: 20px; }
+        .task-reward-detail-modal.active { display: flex; }
+        .task-reward-detail-box { background: linear-gradient(170deg, #0f1a35 0%, #080e22 60%, #070c1c 100%); border-radius: 24px; width: 100%; max-width: 390px; padding: 0 0 22px; border: 1px solid rgba(100,150,255,0.2); animation: zoomIn 0.32s cubic-bezier(.22,.8,.44,1); max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04); }
+        .trd-modal-top { background: linear-gradient(135deg, #0d2060 0%, #1a3a8a 50%, #0d1f60 100%); border-radius: 24px 24px 0 0; padding: 20px 18px 18px; position:relative; overflow:hidden; }
+        .trd-modal-top::before { content:''; position:absolute; top:-30px; right:-30px; width:100px; height:100px; background:radial-gradient(circle, rgba(100,150,255,0.2), transparent 70%); border-radius:50%; }
+        .trd-modal-top-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+        .trd-modal-badge { display:flex; align-items:center; gap:9px; }
+        .trd-modal-icon { width:38px; height:38px; background:linear-gradient(135deg,#FFC107,#FF8F00); border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 14px rgba(255,193,7,0.4); }
+        .trd-modal-icon svg { width:20px; height:20px; fill:#000; }
+        .trd-modal-label { font-size:10px; color:rgba(255,255,255,0.5); font-weight:700; margin-bottom:2px; }
+        .trd-modal-taskname { font-size:14px; font-weight:900; color:#fff; }
+        .trd-modal-close { width:30px; height:30px; background:rgba(255,255,255,0.12); border:none; color:rgba(255,255,255,0.7); border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; position:relative; z-index:10; flex-shrink:0; }
+        .trd-modal-close:hover { background:rgba(255,255,255,0.22); }
+        .trd-body { padding: 18px 18px 0; }
+        .trd-handle { display:none; }
+        .trd-title { display:none; }
+        .trd-desc { display:none; }
+        .trd-coins { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(255,193,7,0.1), rgba(255,160,0,0.06)); border: 1px solid rgba(255,193,7,0.22); border-radius: 14px; padding: 13px 16px; margin-bottom: 12px; }
+        .trd-coins-icon { width: 38px; height: 38px; background: linear-gradient(135deg, #FFC107, #FF6F00); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 14px rgba(255,193,7,0.35); }
+        .trd-coins-icon svg { width: 20px; height: 20px; fill: #000; }
+        .trd-coins-val { font-size: 22px; font-weight: 900; color: #FFC107; line-height:1; }
+        .trd-coins-lbl { font-size: 11px; color: rgba(255,255,255,0.45); margin-top:2px; }
+        .trd-imgs-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 700; margin-bottom: 10px; display:flex; align-items:center; gap:6px; }
+        .trd-imgs-label::before { content:''; display:block; width:3px; height:12px; background:#3b82f6; border-radius:2px; }
+        .trd-imgs-row { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 6px; }
+        .trd-no-reward { text-align:center; padding:24px 10px; }
+        .trd-no-reward-icon { font-size:40px; margin-bottom:10px; }
+        .trd-no-reward-text { color:rgba(255,255,255,0.35); font-size:13px; font-weight:700; }
+        .trd-no-reward-sub { color:rgba(255,255,255,0.2); font-size:11px; margin-top:5px; }
+        .trd-close { width: calc(100% - 36px); margin: 16px 18px 0; padding: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(100,150,255,0.12); border-radius: 12px; color: rgba(255,255,255,0.6); font-weight: 700; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 13px; transition: background 0.2s; display:block; }
+        .trd-close:hover { background: rgba(255,255,255,0.1); }
+        .task-expiry { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; padding: 5px 10px; border-radius: 8px; margin-bottom: 10px; }
+        .task-expiry.exp-ok   { background: rgba(100,150,255,0.07); color: rgba(255,255,255,0.45); border: 1px solid rgba(100,150,255,0.1); }
+        .task-expiry.exp-soon { background: rgba(255,152,0,0.10);  color: #FFA726; border: 1px solid rgba(255,152,0,0.22); }
+        .task-expiry.exp-past { background: rgba(228,30,63,0.08);  color: #ef5350; border: 1px solid rgba(228,30,63,0.18); }
+        .task-expiry svg { width: 12px; height: 12px; fill: currentColor; flex-shrink: 0; }
+        .loading { text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.6); font-size: 14px; }
+
+        /* ── Facebook Shimmer ── */
+        #loader { position:fixed; inset:0; background:#0a0a0f; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px; padding-top:80px; }
+        .sk { background:linear-gradient(90deg,#1a1a2e 25%,#22223b 50%,#1a1a2e 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
+        @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .sk-circle { border-radius:50% !important; }
+        /* image shimmer */
+        .img-shimmer-host { position:relative; overflow:hidden; }
+        .img-shimmer-layer { position:absolute; inset:0; z-index:2; border-radius:inherit; }
+        img.img-loading { opacity:0; }
+        img.img-loaded  { opacity:1; transition:opacity .3s; }
+        @media (max-width: 480px) {
+            .header-title { font-size: 16px; }
+            .sub-tab { padding: 7px 12px; font-size: 11px; }
+            .btn-jump-to-user { padding: 6px 16px; font-size: 10px; bottom: 70px; }
+            .side-btn { width: 46px; height: 46px; }
+            .modal-content { padding: 18px; }
+        }
+
+        /* ─── نافذة رتبتي ─── */
+        .rank-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); z-index: 9999;
+            align-items: flex-end; justify-content: center;
+        }
+        .rank-modal-overlay.active { display: flex; }
+        .rank-modal-box {
+            background: linear-gradient(160deg, #0d1b4b 0%, #1a237e 60%, #0d1b4b 100%);
+            border-radius: 28px 28px 0 0;
+            width: 100%; max-width: 480px;
+            padding: 28px 24px 36px;
+            border-top: 1px solid rgba(100,150,255,0.3);
+            animation: slideUpRank .35s cubic-bezier(.22,.8,.44,1);
+            position: relative;
+        }
+        @keyframes slideUpRank {
+            from { transform: translateY(100%); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+        .rank-modal-close {
+            position: absolute; top: 14px; left: 18px;
+            background: rgba(255,255,255,0.1); border: none;
+            color: #fff; width: 32px; height: 32px;
+            border-radius: 50%; font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rank-modal-title {
+            text-align: center; color: #fff;
+            font-size: 16px; font-weight: 700; margin-bottom: 22px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .rank-modal-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 3px solid #FFC107;
+            object-fit: cover; display: block; margin: 0 auto 14px;
+            background: #1e3a8a;
+        }
+        .rank-modal-name {
+            text-align: center; color: #fff;
+            font-size: 18px; font-weight: 800; margin-bottom: 6px;
+        }
+        .rank-modal-category {
+            text-align: center; color: rgba(255,255,255,0.5);
+            font-size: 12px; margin-bottom: 24px;
+        }
+        .rank-modal-cards {
+            display: flex; gap: 12px; justify-content: center; margin-bottom: 20px;
+        }
+        .rank-modal-card {
+            flex: 1; background: rgba(255,255,255,0.07);
+            border-radius: 16px; padding: 14px 10px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .rank-modal-card-val {
+            font-size: 26px; font-weight: 900;
+            color: #FFC107; display: block; line-height: 1;
+        }
+        .rank-modal-card-lbl {
+            font-size: 11px; color: rgba(255,255,255,0.6);
+            margin-top: 6px; display: block;
+        }
+        .rank-modal-card.highlight {
+            background: linear-gradient(135deg, rgba(255,193,7,0.2), rgba(255,193,7,0.05));
+            border-color: rgba(255,193,7,0.4);
+        }
+        .rank-modal-card.highlight .rank-modal-card-val { color: #FFC107; }
+        .rank-modal-not-ranked {
+            text-align: center; padding: 20px;
+            color: rgba(255,255,255,0.5); font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div style="width:100%;max-width:540px;display:flex;flex-direction:column;gap:14px;">
+        <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:15px;display:flex;gap:10px;align-items:center;">
+            <div class="sk sk-circle" style="width:44px;height:44px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;"><div class="sk" style="height:14px;width:55%;"></div><div class="sk" style="height:11px;width:35%;"></div></div>
+        </div>
+        <div class="sk" style="height:200px;border-radius:12px;"></div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:15px;display:flex;gap:10px;align-items:center;">
+            <div class="sk sk-circle" style="width:44px;height:44px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;"><div class="sk" style="height:14px;width:50%;"></div><div class="sk" style="height:11px;width:70%;"></div></div>
+        </div>
+        <div class="sk" style="height:160px;border-radius:12px;"></div>
+    </div>
+</div>
+
+    <div class="header" id="mainHeader">
+        <div class="header-title" id="headerTitle">الأنشطة والمهام</div>
+        <div class="sub-tabs" id="subTabs"></div>
+        <div class="period-info" id="periodInfo" style="display: none;">
+            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            <span id="periodText">يتم التحديث أسبوعياً</span>
+        </div>
+    </div>
+
+    <div id="tasks" class="tab-content active">
+        <div id="tasks-container"><div class="loading">جاري تحميل المهام...</div></div>
+    </div>
+
+    <div id="leaderboard" class="tab-content">
+        <div id="leaderboard-content"><div class="loading">جاري تحميل التصنيف...</div></div>
+    </div>
+
+    <!-- رتبتي pill فوق الشريط -->
+    <div class="rank-pill" id="jumpToUserBtn" onclick="jumpToUser()">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span class="rank-pill-label">رتبتي</span>
+        <span id="userRankDisplay" style="color:#FFC107;font-weight:900;">#-</span>
+    </div>
+
+    <!-- أزرار جانبية عائمة -->
+    <div class="side-btns">
+        <button class="side-btn side-btn-tasks active" id="btn-tasks" onclick="switchMainView('tasks', this)">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="side-lbl-tasks">مهام</span>
+        </button>
+        <button class="side-btn side-btn-lb" id="btn-leaderboard" onclick="switchMainView('leaderboard', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
+            <span id="side-lbl-lb">تصنيف</span>
+        </button>
+        <button class="side-btn side-btn-rank" id="btn-my-rank" onclick="jumpToUser()" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="#f0abfc"><path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+            <span id="side-lbl-myrank">رتبتي</span>
+            <span class="side-btn-rank-num" id="sideRankNum">#-</span>
+        </button>
+    </div>
+
+    <!-- نافذة تفاصيل مكافأة المهمة -->
+    <div class="task-reward-detail-modal" id="taskRewardDetailModal">
+        <div class="task-reward-detail-box">
+            <div class="trd-modal-top">
+                <div class="trd-modal-top-row">
+                    <div class="trd-modal-badge">
+                        <div class="trd-modal-icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="trd-modal-label">مكافآت المهمة</div>
+                            <div class="trd-modal-taskname" id="trdTitle">—</div>
+                        </div>
+                    </div>
+                    <button class="trd-modal-close" onclick="closeTaskRewardDetail()">✕</button>
+                </div>
+            </div>
+            <div class="trd-body">
+                <div class="trd-desc" id="trdDesc"></div>
+                <div class="trd-coins" id="trdCoins" style="display:none">
+                    <div class="trd-coins-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+                    <div><div class="trd-coins-val" id="trdCoinsVal"></div><div class="trd-coins-lbl">عملة مكافأة</div></div>
+                </div>
+                <div id="trdRewardDuration"></div>
+                <div class="trd-imgs-label" id="trdImgsLabel" style="display:none">مكافآت إضافية</div>
+                <div class="trd-imgs-row" id="trdImgsRow"></div>
+            </div>
+            <button class="trd-close" onclick="closeTaskRewardDetail()">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="rewardsModal" class="rewards-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>المكافآت</h2><p>اضغط على أي صورة لمعاينتها</p></div>
+            <div id="rewardsList"></div>
+            <button class="close-modal" onclick="closeRewardsModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="previewModal" class="preview-modal">
+        <div class="preview-content">
+            <div class="preview-image" id="previewImage"></div>
+            <h3 class="preview-title" id="previewTitle"></h3>
+            <p class="preview-description" id="previewDescription"></p>
+            <button class="close-preview" onclick="closePreviewModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== الإعدادات ====================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",
+            authDomain: "a-comment-5a3e5.firebaseapp.com",
+            databaseURL: "https://a-comment-5a3e5-default-rtdb.firebaseio.com",
+            projectId: "a-comment-5a3e5",
+            storageBucket: "a-comment-5a3e5.appspot.com",
+            messagingSenderId: "557343451166",
+            appId: "1:557343451166:android:d181f098cdeccf7691260f"
+        };
+
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // ══════════════════════════════════════════════════════
+        // نظام الترجمة
+        // ══════════════════════════════════════════════════════
+        var _lang = 'ar';
+
+        var _TR = {
+          ar: {
+            // ── العنوان والتبويبات ──
+            pageTitle:      'الأنشطة والمهام',
+            tabTasks:       'المهام',
+            tabLeaderboard: 'التصنيف',
+            // ── تبويبات المهام ──
+            tPosts:      'المنشورات',
+            tSupport:    'الدعم',
+            tLikes:      'الإعجابات',
+            tViews:      'المشاهدات',
+            tVideoRoom:  'غرفة الفيديو',
+            tAudioRoom:  'غرفة الصوت',
+            tFollowers:  'المتابعين',
+            // ── تبويبات التصنيف ──
+            lLikes:      'الإعجابات',
+            lSupporters: 'الداعمون',
+            lViews:      'المشاهدات',
+            lFollowers:  'المتابعين',
+            lVideoRoom:  'غرفة الفيديو',
+            lAudioRoom:  'غرفة الصوت',
+            // ── حالة المهام ──
+            pending:        'قيد التنفيذ',
+            done:           'منجزة',
+            loadingTasks:   'جاري تحميل المهام...',
+            loadingRank:    'جاري تحميل التصنيف...',
+            noTasks:        'لا توجد مهام في هذا القسم',
+            noTasksYet:     'لا توجد مهام منشورة بعد',
+            noPending:      'لا توجد مهام قيد التنفيذ',
+            noDone:         'لا توجد مهام منجزة بعد',
+            loadError:      'خطأ في التحميل',
+            // ── أزرار المهام ──
+            claimBtn:       'استلام',
+            notComplete:    'لم تكتمل',
+            claimedBadge:   'تم الاستلام',
+            rewardBtn:      'مكافأة',
+            progressOf:     'من',
+            minuteUnit:     ' دقيقة',
+            expired:        'انتهت',
+            expireSoon:     'ينتهي قريباً:',
+            expireAt:       'ينتهي في:',
+            expiredAt:      'انتهى في:',
+            // ── نافذة تفاصيل المكافأة ──
+            rewardModalLabel: 'مكافآت المهمة',
+            rewardCoinsLbl:   'عملة مكافأة',
+            rewardImgsLbl:    'مكافآت إضافية',
+            noRewardTitle:    'لا توجد مكافآت لهذه المهمة',
+            noRewardSub:      'أكمل المهمة للحصول على الإنجاز',
+            closeBtn:         'إغلاق',
+            // ── التصنيف ──
+            rankingTitle:   'التصنيف',
+            rewardsBtn:     'المكافآت',
+            noLeaderReward: 'لا توجد مكافآت لهذا التصنيف',
+            weeklyUpdate:   'يتم التحديث أسبوعياً',
+            permanentRank:  'ترتيب دائم',
+            coinUnit:       'عملة',
+            // ── رتبتي ──
+            myRank:         'رتبتي',
+            myRankIn:       'رتبتي في',
+            notRanked:      'أنت غير مصنف في',
+            notRankedYet:   'بعد',
+            // ── نافذة المكافآت ──
+            rewardsTitle:   'المكافآت',
+            rewardsHint:    'اضغط على أي صورة لمعاينتها',
+            // ── أنواع المكافآت ──
+            rFrame:    'إطار',
+            rTitle:    'لقب',
+            rBigTitle: 'لقب أسطوري',
+            rBadge:    'شارة',
+            rEntry:    'تأثير دخول',
+            rCover:    'غلاف',
+            rLink:     'ربط',
+            // ── رتب التصنيف ──
+            rank1:    'المركز الأول',
+            rank2:    'المركز الثاني',
+            rank3:    'المركز الثالث',
+            rank4to10:'المركز 4 إلى 10',
+            rank11to20:'المركز 11 إلى 20',
+            // ── تنبيه الاستلام ──
+            alreadyClaimed:    'لقد استلمت المكافأة',
+            alreadyClaimedSub: 'لقد استلمت مكافأة هذه المهمة من قبل',
+            okBtn:             'حسناً',
+            loginRequired:     'يجب تسجيل الدخول أولاً',
+            notCompleteAlert:  'لم تكتمل المهمة بعد',
+            rewardReceived:    'لقد حصلت على مكافأة!',
+            // ── أسماء المكافآت في popup ──
+            rCoin:        'كوين',
+            rFrameLabel:  'إطار',
+            rCoverLabel:  'غلاف',
+            rTitleLabel:  'لقب',
+            rBigTitleLbl: 'لقب أسطوري',
+            rBadgeLabel:  'شارة',
+            rNameBadge:   'شارة الاسم',
+            rEntryLabel:  'دخولية',
+            rSoundLabel:  'صوت تأثير',
+            // ── الشريط السفلي ──
+            navHome:    'الرئيسية',
+            navSearch:  'بحث',
+            navRooms:   'غرف',
+            navEvents:  'أحداث',
+            navChat:    'دردشة',
+            navProfile: 'ملفي',
+            // ── الأزرار الجانبية ──
+            sideTasks: 'مهام',
+            sideRank:  'تصنيف',
+            sideMyRank:'رتبتي',
+            // ── فئات التصنيف ──
+            catLikes:     'اللايكات',
+            catViews:     'المشاهدات',
+            catFollowers: 'المتابعين',
+            catVideoRoom: 'غرف الفيديو',
+            catAudioRoom: 'غرف الصوت',
+            catSupporters:'الداعمون',
+            unitLikes:    'إعجاب',
+            unitViews:    'مشاهدة',
+            unitFollowers:'متابع',
+            unitHour:     'ساعة',
+            unitGift:     'هدية',
+            unitMinute:   'دقيقة',
+            // ── رتبتي ──
+            myRankLabel: 'رتبتي',
+            myValLabel:  'نقاطي',
+            // ── مدة المكافأة ──
+            durPermanent: 'دائم',
+            durDay:       'يوم',
+            durHour:      ' ساعة',
+            durMin:       ' دقيقة',
+            durYear:      ' يوم'
+          },
+          en: {
+            pageTitle:      'Activities & Tasks',
+            tabTasks:       'Tasks',
+            tabLeaderboard: 'Leaderboard',
+            tPosts:      'Posts',
+            tSupport:    'Support',
+            tLikes:      'Likes',
+            tViews:      'Views',
+            tVideoRoom:  'Video Room',
+            tAudioRoom:  'Audio Room',
+            tFollowers:  'Followers',
+            lLikes:      'Likes',
+            lSupporters: 'Supporters',
+            lViews:      'Views',
+            lFollowers:  'Followers',
+            lVideoRoom:  'Video Room',
+            lAudioRoom:  'Audio Room',
+            pending:        'In Progress',
+            done:           'Completed',
+            loadingTasks:   'Loading tasks...',
+            loadingRank:    'Loading leaderboard...',
+            noTasks:        'No tasks in this section',
+            noTasksYet:     'No tasks published yet',
+            noPending:      'No tasks in progress',
+            noDone:         'No completed tasks yet',
+            loadError:      'Load error',
+            claimBtn:       'Claim',
+            notComplete:    'Not complete',
+            claimedBadge:   'Claimed',
+            rewardBtn:      'Reward',
+            progressOf:     'of',
+            minuteUnit:     ' min',
+            expired:        'Expired',
+            expireSoon:     'Expiring soon:',
+            expireAt:       'Expires at:',
+            expiredAt:      'Expired at:',
+            rewardModalLabel: 'Task Rewards',
+            rewardCoinsLbl:   'Reward coins',
+            rewardImgsLbl:    'Extra rewards',
+            noRewardTitle:    'No rewards for this task',
+            noRewardSub:      'Complete the task to earn the achievement',
+            closeBtn:         'Close',
+            rankingTitle:   'Leaderboard',
+            rewardsBtn:     'Rewards',
+            noLeaderReward: 'No rewards for this leaderboard',
+            weeklyUpdate:   'Updated weekly',
+            permanentRank:  'Permanent ranking',
+            coinUnit:       'coins',
+            myRank:         'My Rank',
+            myRankIn:       'My rank in',
+            notRanked:      'You are not ranked in',
+            notRankedYet:   'yet',
+            rewardsTitle:   'Rewards',
+            rewardsHint:    'Tap any image to preview',
+            rFrame:    'Frame',
+            rTitle:    'Title',
+            rBigTitle: 'Legendary Title',
+            rBadge:    'Badge',
+            rEntry:    'Entry Effect',
+            rCover:    'Cover',
+            rLink:     'Link',
+            rank1:    '1st Place',
+            rank2:    '2nd Place',
+            rank3:    '3rd Place',
+            rank4to10:'4th to 10th',
+            rank11to20:'11th to 20th',
+            alreadyClaimed:    'Already Claimed',
+            alreadyClaimedSub: 'You have already claimed this task reward',
+            okBtn:             'OK',
+            loginRequired:     'Please log in first',
+            notCompleteAlert:  'Task not completed yet',
+            rewardReceived:    'You got a reward!',
+            rCoin:        'coins',
+            rFrameLabel:  'Frame',
+            rCoverLabel:  'Cover',
+            rTitleLabel:  'Title',
+            rBigTitleLbl: 'Legendary Title',
+            rBadgeLabel:  'Badge',
+            rNameBadge:   'Name Badge',
+            rEntryLabel:  'Entry Effect',
+            rSoundLabel:  'Sound Effect',
+            navHome:    'Home',
+            navSearch:  'Search',
+            navRooms:   'Rooms',
+            navEvents:  'Events',
+            navChat:    'Chat',
+            navProfile: 'Profile',
+            sideTasks: 'Tasks',
+            sideRank:  'Rankings',
+            sideMyRank:'My Rank',
+            catLikes:     'Likes',
+            catViews:     'Views',
+            catFollowers: 'Followers',
+            catVideoRoom: 'Video Rooms',
+            catAudioRoom: 'Audio Rooms',
+            catSupporters:'Supporters',
+            unitLikes:    'like',
+            unitViews:    'view',
+            unitFollowers:'follower',
+            unitHour:     'hr',
+            unitGift:     'gift',
+            unitMinute:   'min',
+            myRankLabel: 'My Rank',
+            myValLabel:  'My Score',
+            durPermanent: 'Permanent',
+            durDay:       'd',
+            durHour:      ' hr',
+            durMin:       ' min',
+            durYear:      ' day'
+          }
+        };
+
+        function T(k){ return (_TR[_lang] && _TR[_lang][k]) ? _TR[_lang][k] : (_TR['ar'][k] || k); }
+
+        // ── بناء avatar مع Facebook Shimmer ──
+        var _avCounter = 0;
+        function buildAvatar(photoURL, name, uid, extraStyle) {
+            var initial = name ? name.charAt(0).toUpperCase() : '?';
+            var wrap = document.createElement('div');
+            wrap.className = 'player-avatar';
+            if (uid && uid !== 'undefined') {
+                wrap.style.cursor = 'pointer';
+                wrap.dataset.uid = uid;
+                wrap.setAttribute('onclick', 'goToProfile(this.dataset.uid)');
+            }
+            if (extraStyle) wrap.style.cssText += extraStyle;
+            if (photoURL) {
+                _avCounter++;
+                var shimId = 'shim_av_' + _avCounter;
+                var shim = document.createElement('div');
+                shim.className = 'av-shimmer';
+                shim.id = shimId;
+                var img = document.createElement('img');
+                img.className = 'av-img';
+                img.src = photoURL;
+                img.alt = initial;
+                (function(sid, w, ini) {
+                    img.onload = function() {
+                        this.classList.add('loaded');
+                        var s = document.getElementById(sid);
+                        if (s) s.classList.add('hidden');
+                    };
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        var s = document.getElementById(sid);
+                        if (s) s.classList.add('hidden');
+                        w.textContent = ini;
+                    };
+                })(shimId, wrap, initial);
+                wrap.appendChild(shim);
+                wrap.appendChild(img);
+            } else {
+                wrap.textContent = initial;
+            }
+            return wrap.outerHTML;
+        }
+
+        function goToProfile(uid) {
+            if (!uid || uid === 'undefined' || uid === 'null') return;
+            // profile.html يقرأ uid من sessionStorage وليس من URL
+            sessionStorage.setItem('viewProfileUid', uid);
+            location.href = 'profile.html';
+        }
+
+        function applyLang(lang){
+          _lang = lang;
+          var isRtl = (lang === 'ar');
+          document.documentElement.setAttribute('lang', lang);
+          document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+
+          // ── عنوان الصفحة ──
+          document.title = T('pageTitle');
+          var ht = document.getElementById('headerTitle');
+          if(ht) ht.textContent = currentView === 'leaderboard' ? T('rankingTitle') : T('pageTitle');
+
+          // ── periodInfo ──
+          var pi = document.getElementById('periodInfo');
+          if(pi){
+            var pt = document.getElementById('periodText');
+            var type = currentView === 'leaderboard' ? currentLeaderboardType : '';
+            if(pt && type){
+              var pMap = {
+                likes:'weeklyUpdate', views:'weeklyUpdate',
+                'video-room':'weeklyUpdate','audio-room':'weeklyUpdate',
+                supporters:'weeklyUpdate', followers:'permanentRank'
+              };
+              pt.textContent = T(pMap[type] || 'weeklyUpdate');
+            }
+          }
+
+          // ── الأزرار الجانبية ──
+          var slT = document.getElementById('side-lbl-tasks');
+          if(slT) slT.textContent = T('sideTasks');
+          var slL = document.getElementById('side-lbl-lb');
+          if(slL) slL.textContent = T('sideRank');
+          var slM = document.getElementById('side-lbl-myrank');
+          if(slM) slM.textContent = T('sideMyRank');
+
+          // ── rank pill ──
+          var rpl = document.querySelector('.rank-pill-label');
+          if(rpl) rpl.textContent = T('myRank');
+
+          // ── الشريط السفلي ──
+          var navMap = {
+            'nav-lbl-home':    'navHome',
+            'nav-lbl-search':  'navSearch',
+            'nav-lbl-rooms':   'navRooms',
+            'nav-lbl-events':  'navEvents',
+            'nav-lbl-chat':    'navChat',
+            'nav-lbl-profile': 'navProfile'
+          };
+          Object.keys(navMap).forEach(function(id){
+            var el = document.getElementById(id);
+            if(el) el.textContent = T(navMap[id]);
+          });
+
+          // ── تبويبات فرعية: إعادة بناء ──
+          renderSubTabs(currentView);
+
+          // ── إعادة رسم المحتوى الحالي ──
+          if(currentView === 'tasks') renderTasks();
+          else if(currentView === 'leaderboard') loadLeaderboard(currentLeaderboardType);
+
+          // ── نوافذ ثابتة ──
+          var rwHdr = document.querySelector('#rewardsModal .modal-header h2');
+          if(rwHdr) rwHdr.textContent = T('rewardsTitle');
+          var rwSub = document.querySelector('#rewardsModal .modal-header p');
+          if(rwSub) rwSub.textContent = T('rewardsHint');
+          var rwClose = document.querySelector('#rewardsModal .close-modal');
+          if(rwClose) rwClose.textContent = T('closeBtn');
+          var pvClose = document.querySelector('#previewModal .close-preview');
+          if(pvClose) pvClose.textContent = T('closeBtn');
+          var trdClose = document.querySelector('.trd-close');
+          if(trdClose) trdClose.textContent = T('closeBtn');
+          var trdLbl = document.querySelector('.trd-modal-label');
+          if(trdLbl) trdLbl.textContent = T('rewardModalLabel');
+          var trdCoinsLbl = document.querySelector('.trd-coins-lbl');
+          if(trdCoinsLbl) trdCoinsLbl.textContent = T('rewardCoinsLbl');
+          // نافذة رتبتي
+          var rankClose = document.querySelector('.rank-modal-close');
+          if(rankClose) rankClose.setAttribute('aria-label', T('closeBtn'));
+
+          // ── نوافذ HTML الثابتة ──
+          var trdModalLabel = document.querySelector('.trd-modal-label');
+          if(trdModalLabel) trdModalLabel.textContent = T('rewardModalLabel');
+          var trdCoinsLblEl = document.querySelector('.trd-coins-lbl');
+          if(trdCoinsLblEl) trdCoinsLblEl.textContent = T('rewardCoinsLbl');
+          var trdImgsLabelEl = document.getElementById('trdImgsLabel');
+          if(trdImgsLabelEl) {
+              trdImgsLabelEl.childNodes.forEach(function(n){ if(n.nodeType===3) n.textContent=' '+T('rewardImgsLbl'); });
+          }
+          var trdCloseEl = document.querySelector('.trd-close');
+          if(trdCloseEl) trdCloseEl.textContent = T('closeBtn');
+          var modalH2 = document.querySelector('#rewardsModal .modal-header h2');
+          if(modalH2) modalH2.textContent = T('rewardsTitle');
+          var modalP = document.querySelector('#rewardsModal .modal-header p');
+          if(modalP) modalP.textContent = T('rewardsHint');
+          var closeModalBtn = document.querySelector('#rewardsModal .close-modal');
+          if(closeModalBtn) closeModalBtn.textContent = T('closeBtn');
+          var closePreviewBtn = document.querySelector('#previewModal .close-preview');
+          if(closePreviewBtn) closePreviewBtn.textContent = T('closeBtn');
+          // rank pill
+          var pillLbl = document.querySelector('.rank-pill-label');
+          if(pillLbl) pillLbl.textContent = T('myRank');
+          // title
+          document.title = T('pageTitle');
+        }
+
+        // ==================== بيانات التطبيق ====================
+        let currentUser = { name: 'أنت', rank: null, value: 0, uid: null };
+        let currentView = 'tasks'; // القسم النشط حالياً: 'tasks' أو 'leaderboard'
+        let currentTaskType = 'posts'; // نوع المهمة النشط
+        let currentLeaderboardType = 'likes'; // نوع التصنيف النشط
+        let currentTasks = {}; // كل المهام المحملة من Firebase
+        let currentLeaderboardRewards = {}; // مكافآت التصنيف
+
+        const periodInfo = {
+            likes: 'يتم التحديث أسبوعياً',
+            views: 'يتم التحديث أسبوعياً',
+            followers: 'ترتيب دائم',
+            'video-room': 'يتم التحديث أسبوعياً',
+            'audio-room': 'يتم التحديث أسبوعياً',
+            supporters: 'ترتيب دائم'
+        };
+
+        function getCategoryTexts() {
+            return {
+                likes:        { label: T('catLikes'),     unit: T('unitLikes'),    name: T('catLikes')      },
+                views:        { label: T('catViews'),     unit: T('unitViews'),    name: T('catViews')      },
+                followers:    { label: T('catFollowers'), unit: T('unitFollowers'),name: T('catFollowers')  },
+                'video-room': { label: T('catVideoRoom'), unit: T('unitMinute'),   name: T('catVideoRoom')  },
+                'audio-room': { label: T('catAudioRoom'), unit: T('unitMinute'),   name: T('catAudioRoom')  },
+                supporters:   { label: T('catSupporters'),unit: T('unitGift'),     name: T('catSupporters') }
+            };
+        }
+        var categoryTexts = {};
+
+        var _tabsIcons = {
+            posts:       'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z',
+            supporters:  'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z',
+            likes:       'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+            views:       'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z',
+            'video-room':'M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z',
+            'audio-room':'M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z',
+            followers:   'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'
+        };
+
+        function getTabsData() {
+            return {
+                tasks: [
+                    { id: 'posts',       name: T('tPosts'),     icon: _tabsIcons.posts       },
+                    { id: 'supporters',  name: T('tSupport'),   icon: _tabsIcons.supporters  },
+                    { id: 'likes',       name: T('tLikes'),     icon: _tabsIcons.likes       },
+                    { id: 'views',       name: T('tViews'),     icon: _tabsIcons.views       },
+                    { id: 'video-room',  name: T('tVideoRoom'), icon: _tabsIcons['video-room']},
+                    { id: 'audio-room',  name: T('tAudioRoom'), icon: _tabsIcons['audio-room']},
+                    { id: 'followers',   name: T('tFollowers'), icon: _tabsIcons.followers   }
+                ],
+                leaderboard: [
+                    { id: 'likes',       name: T('lLikes'),      icon: _tabsIcons.likes       },
+                    { id: 'supporters',  name: T('lSupporters'), icon: _tabsIcons.supporters  },
+                    { id: 'views',       name: T('lViews'),      icon: _tabsIcons.views       },
+                    { id: 'followers',   name: T('lFollowers'),  icon: _tabsIcons.followers   },
+                    { id: 'video-room',  name: T('lVideoRoom'),  icon: _tabsIcons['video-room']},
+                    { id: 'audio-room',  name: T('lAudioRoom'),  icon: _tabsIcons['audio-room']}
+                ]
+            };
+        }
+        // للتوافق مع الكود القديم
+        var tabsData = { tasks: [], leaderboard: [] };
+
+        // ==================== مراقبة حالة المصادقة ====================
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser.uid = user.uid;
+                currentUser.name = user.displayName || 'أنت';
+                database.ref('users/' + user.uid).once('value').then(function(s) {
+                    var d = s.val() || {};
+                    currentUser.name = d.yourname || d.name || user.displayName || 'أنت';
+                    currentUser.avatar = d.avatar || null;
+                    // قراءة اللغة
+                    var lang = (d.preferences && d.preferences.lang) || d.lang || 'ar';
+                    applyLang(lang);
+                });
+                console.log('✅ User logged in:', user.uid);
+            } else {
+                console.log('ℹ️ No user logged in - loading tasks anyway');
+                applyLang('ar');
+            }
+            initApp();
+        });
+
+        // ==================== تهيئة التطبيق ====================
+        function initApp() {
+            renderSubTabs('tasks');
+            // إخفاء شاشة التحميل
+            var loaderEl = document.getElementById('loader');
+            if (loaderEl) loaderEl.style.display = 'none';
+            loadTasks();
+            // فحص إعادة ضبط التصنيف الأسبوعي/الشهري
+            if (currentUser.uid) checkLeaderboardResets();
+        }
+
+        // ==================== بناء تبويبات الفرعية ====================
+        function renderSubTabs(viewName) {
+            var container = document.getElementById('subTabs');
+            var tdNow = getTabsData();
+            tabsData = tdNow; // تحديث المرجع العام
+            var tabs = tdNow[viewName] || [];
+            // الحفاظ على التبويب النشط
+            var activeId = viewName === 'tasks' ? currentTaskType : currentLeaderboardType;
+            container.innerHTML = tabs.map(function(tab, index) {
+                var isActive = tab.id === activeId || (index === 0 && !activeId);
+                return '<button class="sub-tab ' + (isActive ? 'active' : '') + '"' +
+                    ' data-view="' + viewName + '" data-type="' + tab.id + '"' +
+                    ' onclick="switchSubTab(\'' + viewName + '\', \'' + tab.id + '\', this)">' +
+                    '<svg viewBox="0 0 24 24"><path d="' + tab.icon + '"/></svg>' +
+                    tab.name + '</button>';
+            }).join('');
+
+            var periodInfoEl = document.getElementById('periodInfo');
+            var pMap = {
+                likes:'weeklyUpdate', views:'weeklyUpdate',
+                'video-room':'weeklyUpdate','audio-room':'weeklyUpdate',
+                supporters:'weeklyUpdate', followers:'permanentRank'
+            };
+            if (viewName === 'leaderboard') {
+                periodInfoEl.style.display = 'flex';
+                var activeType = activeId || (tabs[0] && tabs[0].id) || 'likes';
+                document.getElementById('periodText').textContent = T(pMap[activeType] || 'weeklyUpdate');
+            } else {
+                periodInfoEl.style.display = 'none';
+            }
+        }
+
+        // ==================== تبديل القسم الرئيسي ====================
+        function switchMainView(viewName, btn) {
+            currentView = viewName;
+
+            // تحديث الأزرار
+            document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // تحديث المحتوى
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(viewName).classList.add('active');
+
+            // تحديث العنوان
+            document.getElementById('headerTitle').textContent =
+                viewName === 'tasks' ? T('pageTitle') : T('rankingTitle');
+
+            // بناء التبويبات الفرعية
+            renderSubTabs(viewName);
+
+            // زر الرتبة الجانبي
+            const rankSideBtn = document.getElementById('btn-my-rank');
+            if (rankSideBtn) rankSideBtn.style.display = viewName === 'leaderboard' ? 'flex' : 'none';
+            // إخفاء rank-pill القديم دائماً
+            document.getElementById('jumpToUserBtn').style.display = 'none';
+
+            window.scrollTo(0, 0);
+
+            if (viewName === 'tasks') {
+                currentTaskType = tabsData.tasks[0].id;
+                renderTasks();
+            } else {
+                currentLeaderboardType = tabsData.leaderboard[0].id;
+                loadLeaderboard(currentLeaderboardType);
+            }
+        }
+
+        // ==================== تبديل التبويب الفرعي ====================
+        function switchSubTab(viewName, type, btn) {
+            // تحديث التبويب النشط
+            document.querySelectorAll('#subTabs .sub-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (viewName === 'tasks') {
+                currentTaskType = type;
+                _currentTaskSubTab = 'pending';
+                renderTasks();
+            } else {
+                currentLeaderboardType = type;
+                var _pMap = {likes:'weeklyUpdate',views:'weeklyUpdate','video-room':'weeklyUpdate','audio-room':'weeklyUpdate',supporters:'weeklyUpdate',followers:'permanentRank'};
+                document.getElementById('periodText').textContent = T(_pMap[type] || 'weeklyUpdate');
+                loadLeaderboard(type);
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // ==================== تحميل المهام من Firebase ====================
+        function loadTasks() {
+            var container = document.getElementById('tasks-container');
+            container.innerHTML = '<div class="loading">' + T('loadingTasks') + '</div>';
+            console.log('🔄 Loading tasks from Firebase...');
+
+            database.ref('tasks').once('value')
+                .then(async snapshot => {
+                    const val = snapshot.val();
+                    console.log('📥 Raw tasks from Firebase:', val);
+                    currentTasks = val || {};
+                    const count = Object.keys(currentTasks).length;
+                    console.log(`✅ Loaded ${count} tasks`);
+                    if (count === 0) {
+                        container.innerHTML = '<div class="no-data">' + T('noTasksYet') + '</div>';
+                        return;
+                    }
+                    const uid = currentUser.uid;
+                    if (uid) {
+                        // ── احتساب التقدم لكل مهمة بشكل مستقل بناءً على createdAt ──
+                        for (const tid of Object.keys(currentTasks)) {
+                            const t = currentTasks[tid];
+                            const taskCreatedAt = t.createdAt || 0;
+
+                            try {
+                                if (t.type === 'posts') {
+                                    // فقط المنشورات الجديدة بعد إنشاء المهمة
+                                    let count = 0;
+                                    const postsSnap = await database.ref('posts').orderByChild('authorUid').equalTo(uid).once('value');
+                                    postsSnap.forEach(c => {
+                                        const p = c.val();
+                                        const postTime = p.createdAt || p.timestamp || p.ts || 0;
+                                        if (postTime >= taskCreatedAt) {
+                                            // فحص requireImage إن وُجد
+                                            if (t.requireImage === true) {
+                                                if (p.imageUrl || p.image || p.mediaUrl || p.photoUrl) count++;
+                                            } else if (t.requireImage === false) {
+                                                if (!p.imageUrl && !p.image && !p.mediaUrl && !p.photoUrl) count++;
+                                            } else {
+                                                count++;
+                                            }
+                                        }
+                                    });
+                                    currentTasks[tid].currentProgress = count;
+
+                                } else if (t.type === 'likes') {
+                                    // اللايكات التي أعطاها المستخدم على منشورات بعد إنشاء المهمة
+                                    let likesCount = 0;
+                                    const likesSnap = await database.ref('likes').orderByChild('userId').equalTo(uid).once('value');
+                                    if (likesSnap.exists()) {
+                                        // جلب كل المنشورات دفعةً واحدة للمقارنة
+                                        const allPostsSnap = await database.ref('posts').once('value');
+                                        const allPosts = allPostsSnap.val() || {};
+                                        likesSnap.forEach(c => {
+                                            const lk = c.val();
+                                            const likeTime = lk.createdAt || lk.timestamp || lk.ts || 0;
+                                            if (likeTime < taskCreatedAt) return;
+                                            const postId = lk.postId || lk.targetId || '';
+                                            if (!postId) return;
+                                            const post = allPosts[postId];
+                                            if (!post) return;
+                                            const hasImg = !!(post.imageUrl || post.image || post.mediaUrl || post.photoUrl);
+                                            if (t.requireImage === true) {
+                                                if (hasImg) likesCount++;
+                                            } else if (t.requireImage === false) {
+                                                if (!hasImg) likesCount++;
+                                            } else {
+                                                likesCount++;
+                                            }
+                                        });
+                                    } else {
+                                        // fallback: إذا لم توجد بيانات likes مستقلة، نحتسب likesCount من المنشورات المستلمة
+                                        const likePostsSnap = await database.ref('posts').orderByChild('authorUid').equalTo(uid).once('value');
+                                        likePostsSnap.forEach(c => {
+                                            const p = c.val();
+                                            const postTime = p.createdAt || p.timestamp || p.ts || 0;
+                                            if (postTime < taskCreatedAt) return;
+                                            const hasImg = !!(p.imageUrl || p.image || p.mediaUrl || p.photoUrl);
+                                            if (t.requireImage === true) {
+                                                if (hasImg) likesCount += (p.likesCount || 0);
+                                            } else if (t.requireImage === false) {
+                                                if (!hasImg) likesCount += (p.likesCount || 0);
+                                            } else {
+                                                likesCount += (p.likesCount || 0);
+                                            }
+                                        });
+                                    }
+                                    currentTasks[tid].currentProgress = likesCount;
+
+                                } else if (t.type === 'views') {
+                                    // فقط المشاهدات على منشورات جديدة بعد إنشاء المهمة
+                                    let viewsCount = 0;
+                                    const viewPostsSnap = await database.ref('posts').orderByChild('authorUid').equalTo(uid).once('value');
+                                    viewPostsSnap.forEach(c => {
+                                        const p = c.val();
+                                        const postTime = p.createdAt || p.timestamp || p.ts || 0;
+                                        if (postTime >= taskCreatedAt) {
+                                            viewsCount += (p.viewsCount || p.views || 0);
+                                        }
+                                    });
+                                    currentTasks[tid].currentProgress = viewsCount;
+
+                                } else if (t.type === 'followers') {
+                                    // المتابعون الجدد بعد إنشاء المهمة
+                                    let folCount = 0;
+                                    const folSnap = await database.ref('followers').orderByChild('userId').equalTo(uid).once('value');
+                                    folSnap.forEach(c => {
+                                        const f = c.val();
+                                        const fTime = f.createdAt || f.timestamp || f.ts || 0;
+                                        if (fTime >= taskCreatedAt) folCount++;
+                                    });
+                                    currentTasks[tid].currentProgress = folCount;
+
+                                } else if (t.type === 'audio-room') {
+                                    // التقدم يُقرأ من userTaskProgress فقط (يُحدَّث عند الخروج من الغرفة)
+                                    // لا نقرأ audioRoomTime التراكمي لأنه لا يحترم وقت إنشاء المهمة
+
+                                } else if (t.type === 'video-room') {
+                                    // التقدم يُقرأ من userTaskProgress فقط (يُحدَّث عند الخروج من الغرفة)
+                                    // لا نقرأ videoRoomTime التراكمي لأنه لا يحترم وقت إنشاء المهمة
+
+                                } else if (t.type === 'supporters') {
+                                    // التقدم يُقرأ من userTaskProgress فقط (يُحدَّث عند إرسال هدية جديدة بعد إنشاء المهمة)
+                                    // لا نقرأ totalGiftsSent التراكمي لأنه يشمل الهدايا القديمة قبل المهمة
+                                }
+                            } catch(e) {
+                                console.warn('Progress calc error for task', tid, e);
+                            }
+                        }
+
+                        // ── مراقبة التقدم الشخصي للغرف بشكل فوري (يُطلق فوراً ثم عند كل تغيير) ──
+                        // نقرأ الاستلام مرة واحدة مسبقاً لتجنب التأخر
+                        database.ref('userClaimedTasks/' + uid).once('value').then(function(initClaimedSnap) {
+                            const initClaimed = initClaimedSnap.val() || {};
+                            Object.keys(currentTasks).forEach(tid => {
+                                currentTasks[tid]._claimed = !!initClaimed[tid];
+                            });
+                            database.ref('userTaskProgress/' + uid).on('value', function(progSnap) {
+                                const progData = progSnap.val() || {};
+                                Object.keys(currentTasks).forEach(tid => {
+                                    const t = currentTasks[tid];
+                                    const alreadyCalc = ['posts','likes','views','followers'];
+                                    if (!alreadyCalc.includes(t.type) && progData[tid] !== undefined) {
+                                        currentTasks[tid].currentProgress = progData[tid];
+                                    }
+                                });
+                                // تحديث حالة الاستلام قبل الرسم لضمان ظهور زر "تم الاستلام" بشكل صحيح
+                                database.ref('userClaimedTasks/' + uid).once('value').then(function(claimedSnap) {
+                                    const claimedData = claimedSnap.val() || {};
+                                    Object.keys(currentTasks).forEach(tid => {
+                                        currentTasks[tid]._claimed = !!claimedData[tid];
+                                    });
+                                    renderTasks();
+                                }).catch(function() { renderTasks(); });
+                            });
+                        }).catch(function() {
+                            database.ref('userTaskProgress/' + uid).on('value', function(progSnap) {
+                                const progData = progSnap.val() || {};
+                                Object.keys(currentTasks).forEach(tid => {
+                                    const t = currentTasks[tid];
+                                    const alreadyCalc = ['posts','likes','views','followers'];
+                                    if (!alreadyCalc.includes(t.type) && progData[tid] !== undefined) {
+                                        currentTasks[tid].currentProgress = progData[tid];
+                                    }
+                                });
+                                renderTasks();
+                            });
+                        });
+                    }
+                    // renderTasks تُستدعى من داخل الـ listener أعلاه مباشرةً
+                    if (!currentUser || !currentUser.uid) renderTasks();
+                })
+                .catch(error => {
+                    console.error('❌ Firebase tasks error:', error);
+                    container.innerHTML = '<div class="no-data">' + T('loadError') + ': ' + error.message + '</div>';
+                });
+        }
+
+        let _currentTaskSubTab = 'pending'; // 'pending' | 'done'
+
+        function switchTaskSubTab(tab) {
+            _currentTaskSubTab = tab;
+            renderTasks();
+        }
+
+        function openTaskRewardDetail(taskId) {
+            const task = currentTasks[taskId];
+            if (!task) return;
+            document.getElementById('trdTitle').textContent = task.title || T('rewardBtn');
+            document.getElementById('trdDesc').textContent = task.description || '';
+            const coinsEl = document.getElementById('trdCoins');
+            if (task.coins) {
+                coinsEl.style.display = 'flex';
+                document.getElementById('trdCoinsVal').textContent = task.coins;
+            } else { coinsEl.style.display = 'none'; }
+            var imgDefs = [
+                { key:'frameUrl',    label:T('rFrame'),    soundKey:null,          expiryKey:'frame'    },
+                { key:'titleUrl',    label:T('rTitle'),    soundKey:null,          expiryKey:'title'    },
+                { key:'bigTitleUrl', label:T('rBigTitle'), soundKey:null,          expiryKey:'bigTitle' },
+                { key:'badgeUrl',    label:T('rBadge'),    soundKey:null,          expiryKey:'badge'    },
+                { key:'nameBadgeUrl',label:T('rNameBadge'),soundKey:null,          expiryKey:'nameBadge'},
+                { key:'coverUrl',    label:T('rCover'),    soundKey:null,          expiryKey:'cover'    },
+                { key:'entryUrl',    label:T('rEntry'),    soundKey:'entrySoundUrl',expiryKey:'entry'   }
+            ];
+            const found = imgDefs.filter(d => task[d.key]);
+            const lbl = document.getElementById('trdImgsLabel');
+            const row = document.getElementById('trdImgsRow');
+            function msToText(ms) {
+                if (!ms) return T('durPermanent');
+                var d = Math.floor(ms / 86400000);
+                var h = Math.floor((ms % 86400000) / 3600000);
+                var m = Math.floor((ms % 3600000) / 60000);
+                if (d > 0 && h === 0) return d + ' ' + T('durDay');
+                if (d > 0) return d + T('durYear') + ' ' + h + T('durHour');
+                if (h > 0) return h + T('durHour') + ' ' + m + T('durMin');
+                return m + ' ' + T('durMin');
+            }
+            // بناء نص مدة بقاء المكافأة (عام - للكوينز)
+            function buildRewardDurationText(task) {
+                return '';
+            }
+            // إضافة عنصر مدة البقاء
+            document.getElementById('trdRewardDuration').innerHTML = buildRewardDurationText(task);
+            if (found.length) {
+                lbl.style.display = 'flex'; lbl.childNodes[lbl.childNodes.length-1] && (lbl.lastChild.textContent = T('rewardImgsLbl'));
+                row.innerHTML = found.map(d => {
+                    const snd = d.soundKey && task[d.soundKey] ? task[d.soundKey] : '';
+                    const exMs = task['expiry_' + d.expiryKey];
+                    const durTxt = msToText(exMs);
+                    const durColor = !exMs ? '#22c55e' : (exMs < 86400000 ? '#f97316' : (exMs < 259200000 ? '#eab308' : '#60a5fa'));
+                    const durBadge = `<div style="font-size:9px;color:${durColor};font-weight:700;background:rgba(0,0,0,0.04);padding:1px 5px;border-radius:5px;margin-top:2px;">${durTxt}</div>`;
+                    return `<div class="reward-img-chip" onclick="openTaskImgPreview('${task[d.key]}','${d.label}','${task.title||''}','${snd}')"><img src="${task[d.key]}" alt="${d.label}" onerror="this.parentElement.style.display='none'"><span>${d.label}${snd?' <svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z\"/></svg>':''}</span>${durBadge}</div>`;
+                }).join('');
+            } else { 
+                lbl.style.display = 'none'; 
+                row.innerHTML = '';
+                // إظهار رسالة لا توجد مكافآت إذا لم تكن هناك كوينز ولا صور
+                if (!task.coins) {
+                    row.innerHTML = '<div class="trd-no-reward">' +
+                        '<div class="trd-no-reward-icon">🎁</div>' +
+                        '<div class="trd-no-reward-text">' + T('noRewardTitle') + '</div>' +
+                        '<div class="trd-no-reward-sub">' + T('noRewardSub') + '</div>' +
+                        '</div>';
+                    row.style.display = 'block';
+                }
+            }
+            document.getElementById('taskRewardDetailModal').classList.add('active');
+        }
+
+        function closeTaskRewardDetail() {
+            document.getElementById('taskRewardDetailModal').classList.remove('active');
+        }
+
+        // ==================== مساعد وقت انتهاء المهمة ====================
+        function buildExpiryHtml(task) {
+            if (!task.expiresAt) return '';
+            var exp = typeof task.expiresAt === 'number' ? task.expiresAt : new Date(task.expiresAt).getTime();
+            if (!exp) return '';
+            var now = Date.now();
+            var diff = exp - now;
+            var d = new Date(exp);
+            var dateStr = d.toLocaleDateString('ar-SA-u-nu-latn', { year:'numeric', month:'long', day:'numeric' });
+            var timeStr = d.toLocaleTimeString('ar-SA-u-nu-latn', { hour:'2-digit', minute:'2-digit' });
+            var cls = 'exp-ok', prefix = T('expireAt');
+            if (diff < 0)           { cls = 'exp-past'; prefix = T('expiredAt'); }
+            else if (diff < 172800000) { cls = 'exp-soon'; prefix = T('expireSoon'); }
+            return `<div class="task-expiry ${cls}"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>${prefix} ${dateStr} — ${timeStr}</div>`;
+        }
+
+        // حذف المهام المنتهية التي لم تُنجز، والإبقاء على المنجزة غير المستلَمة
+        function checkAndExpireTasks() {
+            var now = Date.now();
+            Object.keys(currentTasks).forEach(tid => {
+                const t = currentTasks[tid];
+                if (!t.expiresAt) return;
+                const exp = typeof t.expiresAt === 'number' ? t.expiresAt : new Date(t.expiresAt).getTime();
+                if (!exp || now < exp) return;
+                if (t._claimed) {
+                    // استُلمت المكافأة + انتهى الوقت → احذف من Firebase
+                    database.ref('tasks/' + tid).remove().catch(() => {});
+                    return;
+                }
+                const progress = t.currentProgress || 0;
+                var isCompleted = progress >= (t.target || 1);
+                if (!isCompleted) {
+                    // لم تُنجز + انتهى الوقت → احذف
+                    database.ref('tasks/' + tid).remove().catch(() => {});
+                }
+                // أُنجزت ولم تُستلم → لا تحذف (المستخدم يحتاج للاستلام أولاً)
+            });
+        }
+
+        // ==================== عرض المهام ====================
+        function buildRewardImages(task) {
+            const imgDefs = [
+                { key: 'frameUrl',    label: 'إطار',        svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20 4h-4V2h-2v2h-4V2H8v2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H4V8h16v12z\"/></svg>', soundKey: null },
+                { key: 'titleUrl',    label: 'لقب',          svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z\"/></svg>', soundKey: null },
+                { key: 'bigTitleUrl', label: 'لقب كبير',     svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\"/></svg>', soundKey: null },
+                { key: 'badgeUrl',    label: 'شارة',         svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\"/></svg>', soundKey: null },
+                { key: 'coverUrl',    label: 'غلاف',         svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\"/></svg>', soundKey: null },
+                { key: 'linkUrl',     label: 'ربط',          svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z\"/></svg>', soundKey: null },
+                { key: 'entryUrl',    label: 'تأثير الدخول', svgIcon: '<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z\"/></svg>', soundKey: 'entrySoundUrl' }
+            ];
+            const found = imgDefs.filter(d => task[d.key]);
+            if (found.length === 0) return '';
+            return `
+                <div class="task-reward-imgs">
+                    <span class="reward-imgs-label">${T('rewardImgsLbl')}:</span>
+                    <div class="reward-imgs-row">
+                        ${found.map(d => {
+                            const sound = d.soundKey && task[d.soundKey] ? task[d.soundKey] : '';
+                            return `
+                            <div class="reward-img-chip" onclick="openTaskImgPreview('${task[d.key]}','${d.label}','${task.title || ''}','${sound}')" title="${d.label}">
+                                <img src="${task[d.key]}" alt="${d.label}" onerror="this.parentElement.style.display='none'">
+                                <span>${d.svgIcon || ''} ${d.label}${sound ? ' <svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z\"/></svg>' : ''}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTasks() {
+            var container = document.getElementById('tasks-container');
+            const allTasks = Object.values(currentTasks);
+            console.log(`🎯 Rendering tasks for type: "${currentTaskType}", total tasks: ${allTasks.length}`);
+            checkAndExpireTasks();
+            var now = Date.now();
+            const filtered = allTasks.filter(t => {
+                console.log(`  - Task: "${t.title}" | type: "${t.type}" | match: ${t.type === currentTaskType}`);
+                if (t.type !== currentTaskType) return false;
+                // إخفاء المهام المنتهية التي لم تُنجز
+                if (t.expiresAt) {
+                    const exp = typeof t.expiresAt === 'number' ? t.expiresAt : new Date(t.expiresAt).getTime();
+                    if (exp && now > exp) {
+                        const done = (t.currentProgress || 0) >= (t.target || 1);
+                        if (!done && !t._claimed) return false;
+                    }
+                }
+                return true;
+            });
+
+            console.log(`✅ ${filtered.length} tasks match type "${currentTaskType}"`);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-data">' + T('noTasks') + '</div>';
+                return;
+            }
+
+            const pendingTasks = filtered.filter(t => {
+                const prog = t.currentProgress || 0;
+                return prog < (t.target || 1) && !t._claimed;
+            });
+            const doneTasks = filtered.filter(t => {
+                const prog = t.currentProgress || 0;
+                return prog >= (t.target || 1) || t._claimed;
+            });
+
+            var subTabHtml =
+                '<div class="task-inner-tabs">' +
+                    '<button class="task-inner-tab ' + (_currentTaskSubTab === 'pending' ? 'active' : '') + '" onclick="switchTaskSubTab(&apos;pending&apos;)">' +
+                        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+                        T('pending') +
+                        '<span class="task-sub-count">' + pendingTasks.length + '</span>' +
+                    '</button>' +
+                    '<button class="task-inner-tab done-tab ' + (_currentTaskSubTab === 'done' ? 'active' : '') + '" onclick="switchTaskSubTab(&apos;done&apos;)">' +
+                        '<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+                        T('done') +
+                        '<span class="task-sub-count">' + doneTasks.length + '</span>' +
+                    '</button>' +
+                '</div>';
+
+            const activeTasks = _currentTaskSubTab === 'done' ? doneTasks : pendingTasks;
+
+            if (activeTasks.length === 0) {
+                container.innerHTML = subTabHtml + '<div class="no-data">' + (_currentTaskSubTab === 'done' ? T('noDone') : T('noPending')) + '</div>';
+                return;
+            }
+
+            container.innerHTML = subTabHtml + activeTasks.map(task => {
+                var isRoomTask = (task.type === 'video-room' || task.type === 'audio-room');
+                const progress = task.currentProgress || 0;
+                const target = task.target || 1;
+                // للغرف: الهدف يُعرض بالدقائق (roomMinutes)، والتقدم: 0 أو 1 (منجزة أم لا)
+                var roomMins = task.roomMinutes || 1;
+                var displayProgress = isRoomTask ? (progress >= 1 ? roomMins : 0) : progress;
+                var displayTarget = isRoomTask ? roomMins : target;
+                var displayUnit = isRoomTask ? T('minuteUnit') : '';
+                var percentage = isRoomTask
+                    ? (progress >= 1 ? 100 : 0)
+                    : Math.min((progress / target) * 100, 100);
+                var isCompleted = progress >= target;
+                var isClaimed = task._claimed || false;
+
+                // حساب العد التنازلي
+                var countdownHtml = '';
+                if (task.expiresAt) {
+                    var exp = typeof task.expiresAt === 'number' ? task.expiresAt : new Date(task.expiresAt).getTime();
+                    if (exp) {
+                        const diff = exp - Date.now();
+                        if (diff > 0) {
+                            const h = Math.floor(diff/3600000);
+                            const m = Math.floor((diff%3600000)/60000);
+                            const d = Math.floor(diff/86400000);
+                            var timeStr;
+                            if (d >= 1 && (h % 24) === 0) {
+                                timeStr = d + T('durYear');
+                            } else if (d >= 1) {
+                                timeStr = d + T('durYear') + ' و' + (h % 24) + T('durHour');
+                            } else if (h > 0) {
+                                timeStr = h + T('durHour') + ' و' + m + T('durMin');
+                            } else {
+                                timeStr = m + T('durMin');
+                            }
+                            countdownHtml = '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:#16a34a;background:#ffffff;padding:4px 10px;border-radius:8px;">' +
+                                '<svg width="12" height="12" viewBox="0 0 24 24" fill="#16a34a"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>' +
+                                timeStr + '</span>';
+                        } else {
+                            countdownHtml = '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:#ef5350;background:rgba(228,30,63,0.08);padding:4px 9px;border-radius:7px;border:1px solid rgba(228,30,63,0.2);"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg> ' + T('expired') + '</span>';
+                        }
+                    }
+                }
+
+                var claimBtnHtml = isClaimed
+                    ? '<span style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#a5d6a7;padding:6px 14px;border-radius:9px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(76,175,80,0.3);">' + T('claimedBadge') + '</span>'
+                    : '<button class="btn-claim" ' + (isCompleted ? '' : 'disabled') + ' onclick="claimReward(\'' + task.id + '\')">' +
+                      (isCompleted ? T('claimBtn') : T('notComplete')) +
+                      '</button>';
+
+                return `
+                    <div class="task-card ${isClaimed ? 'is-claimed' : (isCompleted ? 'is-completed' : '')}">
+                        <div class="task-header">
+                            <div class="task-icon">
+                                <svg viewBox="0 0 24 24"><path d="${getTaskIcon(task.type)}"/></svg>
+                            </div>
+                            <div class="task-title" style="flex:1;min-width:0;">
+                                <h3>${task.title || 'مهمة'}</h3>
+                                <p>${task.description || ''}</p>
+                            </div>
+                            <button class="btn-show-reward" onclick="openTaskRewardDetail('${task.id}')" style="margin-right:0;margin-left:0;flex-shrink:0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>
+                                ${T('rewardBtn')}
+                            </button>
+                        </div>
+                        <div class="task-progress">
+                            <div class="progress-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="task-footer">
+                            <span class="task-status">${displayProgress} ${T('progressOf')} ${displayTarget}${displayUnit}</span>
+                            <div style="display:flex;align-items:center;gap:7px;">
+                                ${countdownHtml}
+                                ${claimBtnHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        let _previewAudio = null;
+        function openTaskImgPreview(url, label, taskTitle, soundUrl) {
+            document.getElementById('previewImage').innerHTML = `<img src="${url}" alt="${label}">`;
+            document.getElementById('previewTitle').textContent = label;
+            document.getElementById('previewDescription').textContent = taskTitle;
+            document.getElementById('previewModal').classList.add('active');
+            if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+        }
+
+        function getTaskIcon(type) {
+            var icons = {
+                'posts':      'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z',
+                'supporters': 'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z',
+                'likes':      'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+                'views':      'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z',
+                'video-room': 'M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z',
+                'audio-room': 'M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z',
+                'followers':  'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+                'gifts':      'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z'
+            };
+            return icons[type] || icons['posts'];
+        }
+
+        function claimReward(taskId) {
+            if (!currentUser.uid) { alert(T('loginRequired')); return; }
+            // فحص أن المستخدم لم يستلم هذه المكافأة من قبل
+            database.ref('userClaimedTasks/' + currentUser.uid + '/' + taskId).once('value').then(function(claimedSnap) {
+                if (claimedSnap.val()) {
+                    var alreadyPopup = document.createElement('div');
+                    alreadyPopup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+                    var alreadyBox = document.createElement('div');
+                    alreadyBox.style.cssText = 'background:#fff;border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center;';
+                    alreadyBox.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">🎁</div><div style="font-size:16px;font-weight:800;color:#1a237e;margin-bottom:8px;">' + T('alreadyClaimed') + '</div><div style="font-size:13px;color:#666;">' + T('alreadyClaimedSub') + '</div>';
+                    var alreadyBtn = document.createElement('button');
+                    alreadyBtn.textContent = T('okBtn') + ' ✓';
+                    alreadyBtn.style.cssText = 'width:100%;margin-top:18px;padding:12px;background:linear-gradient(135deg,#1a237e,#283593);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;';
+                    alreadyBtn.onclick = function() { document.body.removeChild(alreadyPopup); };
+                    alreadyBox.appendChild(alreadyBtn);
+                    alreadyPopup.appendChild(alreadyBox);
+                    document.body.appendChild(alreadyPopup);
+                    return;
+                }
+                database.ref('tasks/' + taskId).once('value').then(function(snap) {
+                    var task = snap.val();
+                    if (!task) return;
+                    // استخدام التقدم الشخصي المحسوب
+                    var progress = (currentTasks[taskId] && currentTasks[taskId].currentProgress) || 0;
+                    var target   = task.target || 1;
+                    if (progress < target) { alert(T('notCompleteAlert') + ' (' + progress + ' ' + T('progressOf') + ' ' + target + ')'); return; }
+                    var coins = task.coins || 0;
+                    var updates = {};
+                    // ── تسجيل الاستلام لمنع الاستلام مرتين ──
+                    updates['userClaimedTasks/' + currentUser.uid + '/' + taskId] = { ts: Date.now(), taskTitle: task.title || '' };
+                    // ── حساب تاريخ انتهاء صلاحية كل مكافأة على حدة ──
+                    var now = Date.now();
+                    function calcExpiry(key) {
+                        var ms = task['expiry_' + key];
+                        return ms ? (now + ms) : null;
+                    }
+                    // ── إضافة الكوينز ──
+                    database.ref('users/' + currentUser.uid + '/coins').transaction(function(cur) {
+                        return (cur || 0) + coins;
+                    });
+                    // ── حفظ الإطار في حقيبة الأناقة → قسم الإطارات ──
+                    if (task.frameUrl) {
+                        var frameKey = 'task_' + taskId + '_frame';
+                        updates['users/' + currentUser.uid + '/ownedFrames/' + frameKey] = {
+                            imgUrl: task.frameUrl,
+                            name: task.title || 'إطار مهمة',
+                            source: 'task',
+                            ts: now,
+                            expiresAt: calcExpiry('frame')
+                        };
+                    }
+                    // ── حفظ الغلاف في حقيبة الأناقة → قسم غلاف الملف ──
+                    if (task.coverUrl) {
+                        var coverKey = 'task_' + taskId + '_cover';
+                        updates['users/' + currentUser.uid + '/ownedCovers/' + coverKey] = {
+                            imgUrl: task.coverUrl,
+                            name: task.title || 'غلاف مهمة',
+                            source: 'task',
+                            ts: now,
+                            expiresAt: calcExpiry('cover')
+                        };
+                    }
+                    // ── حفظ اللقب العادي في حقيبة الأناقة → قسم الألقاب ──
+                    if (task.titleUrl) {
+                        var titleKey = 'task_' + taskId + '_title';
+                        updates['users/' + currentUser.uid + '/ownedTitles/' + titleKey] = {
+                            imgUrl: task.titleUrl,
+                            name: task.title || 'لقب مهمة',
+                            source: 'task',
+                            bigTitle: false,
+                            ts: now,
+                            expiresAt: calcExpiry('title')
+                        };
+                    }
+                    // ── حفظ اللقب الكبير/الأسطوري في حقيبة الأناقة → قسم الأسطورية ──
+                    if (task.bigTitleUrl) {
+                        var bigTitleKey = 'task_' + taskId + '_bigtitle';
+                        updates['users/' + currentUser.uid + '/ownedTitles/' + bigTitleKey] = {
+                            imgUrl: task.bigTitleUrl,
+                            name:   task.bigTitleName  || task.title || 'لقب أسطوري',
+                            bg:     task.bigTitleBg    || '#1877f2',
+                            color:  task.bigTitleColor || '#ffffff',
+                            desc:   task.bigTitleDesc  || '',
+                            source: 'task',
+                            bigTitle: true,
+                            ts: now,
+                            expiresAt: calcExpiry('bigTitle')
+                        };
+                    }
+                    // ── حفظ تأثير الدخول/الدخولية في حقيبة الأناقة → قسم تأثير الدخول ──
+                    if (task.entryUrl || task.entrySoundUrl) {
+                        var entryKey = 'task_' + taskId + '_entry';
+                        updates['users/' + currentUser.uid + '/ownedEntryEffects/' + entryKey] = {
+                            imgUrl: task.entryUrl || '',
+                            soundUrl: task.entrySoundUrl || '',
+                            name: task.title || 'تأثير دخول',
+                            source: 'task',
+                            ts: now,
+                            expiresAt: calcExpiry('entry')
+                        };
+                    }
+                    // ── حفظ الشارة/اللقب القديم (badgeUrl) في ownedBadges ──
+                    if (task.badgeUrl) {
+                        var badgeKey = 'task_' + taskId + '_badge';
+                        updates['users/' + currentUser.uid + '/ownedBadges/' + badgeKey] = {
+                            imgUrl: task.badgeUrl,
+                            name: task.title || 'شارة مهمة',
+                            category: task.type === 'supporters' ? 'support' : 'rooms',
+                            roomType: (task.type === 'audio-room') ? 'audio' : (task.type === 'video-room' ? 'video' : undefined),
+                            source: 'task',
+                            ts: now,
+                            expiresAt: calcExpiry('badge')
+                        };
+                    }
+                    // ── حفظ شارة الدعم المنفصلة (badgeSupUrl) في ownedBadges → تصنيف دعم ──
+                    if (task.badgeSupUrl) {
+                        var badgeSupKey = 'task_' + taskId + '_badgesup';
+                        updates['users/' + currentUser.uid + '/ownedBadges/' + badgeSupKey] = {
+                            imgUrl: task.badgeSupUrl,
+                            name: task.title || 'شارة الدعم',
+                            category: 'support',
+                            source: 'task',
+                            ts: now,
+                            expiresAt: calcExpiry('badgeSup')
+                        };
+                    }
+                    // ── حفظ شارة الاسم (nameBadgeUrl) في ownedNameBadges ──
+                    if (task.nameBadgeUrl) {
+                        var nameBadgeKey = 'task_' + taskId + '_namebadge';
+                        updates['users/' + currentUser.uid + '/ownedNameBadges/' + nameBadgeKey] = {
+                            imgUrl: task.nameBadgeUrl,
+                            name: task.title || 'شارة الاسم',
+                            source: 'task',
+                            ts: now,
+                            expiresAt: calcExpiry('nameBadge')
+                        };
+                    }
+                    // ── تسجيل تاريخ الكسب ──
+                    updates['users/' + currentUser.uid + '/coinsHistory/' + database.ref().push().key] = {
+                        source: 'task', taskId: taskId, taskTitle: task.title || '', coins: coins, ts: Date.now()
+                    };
+                    database.ref().update(updates).then(function() {
+                        // ── تحديث currentTasks لإخفاء الزر فوراً ──
+                        if (currentTasks[taskId]) { currentTasks[taskId]._claimed = true; }
+                        renderTasks();
+                        // ── بناء رسالة المكافأة بالصور ──
+                        var items = [];
+                        if (coins > 0) items.push('<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fffde7;border-radius:10px;"><span style="font-size:24px;">💰</span><span style="font-weight:700;">' + coins + ' ' + T('rCoin') + '</span></div>');
+                        if (task.frameUrl) items.push('<div style="text-align:center;"><img src="' + task.frameUrl + '" style="width:80px;height:80px;object-fit:contain;border-radius:10px;border:2px solid #e0e0e0;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rFrameLabel')+'</div></div>');
+                        if (task.coverUrl) items.push('<div style="text-align:center;"><img src="' + task.coverUrl + '" style="width:80px;height:50px;object-fit:cover;border-radius:10px;border:2px solid #e0e0e0;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rCoverLabel')+'</div></div>');
+                        if (task.titleUrl) items.push('<div style="text-align:center;"><img src="' + task.titleUrl + '" style="width:60px;height:60px;object-fit:contain;border-radius:8px;border:2px solid #1877f2;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rTitleLabel')+'</div></div>');
+                        if (task.bigTitleUrl) items.push('<div style="text-align:center;"><img src="' + task.bigTitleUrl + '" style="width:80px;height:80px;object-fit:contain;border-radius:10px;border:2px solid #e67e22;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rBigTitleLbl')+' 👑</div></div>');
+                        if (task.badgeUrl) items.push('<div style="text-align:center;"><img src="' + task.badgeUrl + '" style="width:60px;height:60px;object-fit:contain;border-radius:50%;border:2px solid #FFC107;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rBadgeLabel')+'</div></div>');
+                        if (task.nameBadgeUrl) items.push('<div style="text-align:center;"><img src="' + task.nameBadgeUrl + '" style="width:60px;height:60px;object-fit:contain;border-radius:50%;border:2px solid #00bcd4;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rNameBadge')+'</div></div>');
+                        if (task.entryUrl) items.push('<div style="text-align:center;"><img src="' + task.entryUrl + '" style="width:80px;height:80px;object-fit:contain;border-radius:10px;border:2px solid #9c27b0;"><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rEntryLabel')+'</div></div>');
+                        if (task.entrySoundUrl && !task.entryUrl) items.push('<div style="text-align:center;padding:10px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="#5c6bc0"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16.5 3A9.96 9.96 0 0 1 21 12c0 3.36-1.66 6.34-4.22 8.19l-1.43-1.43A8.01 8.01 0 0 0 19 12c0-2.68-1.32-5.05-3.34-6.5L16.5 3z"/></svg><div style="font-size:11px;color:#666;margin-top:4px;">'+T('rSoundLabel')+'</div></div>');
+                        var msg = '<div style="text-align:center;margin-bottom:12px;font-size:16px;font-weight:800;color:#1a237e;">🎉 ' + T('rewardReceived') + '</div><div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">' + items.join('') + '</div>';
+                        var popup = document.createElement('div');
+                        popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+                        var box = document.createElement('div');
+                        box.style.cssText = 'background:#fff;border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);';
+                        box.innerHTML = msg;
+                        var closeBtn = document.createElement('button');
+                        closeBtn.textContent = T('okBtn') + ' ✓';
+                        closeBtn.style.cssText = 'width:100%;margin-top:18px;padding:12px;background:linear-gradient(135deg,#1a237e,#283593);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;';
+                        closeBtn.onclick = function() { document.body.removeChild(popup); };
+                        box.appendChild(closeBtn);
+                        popup.appendChild(box);
+                        document.body.appendChild(popup);
+                    });
+                });
+            });
+        }
+
+        // ==================== نظام إعادة ضبط التصنيف الأسبوعي/الشهري ====================
+        const RESET_PERIODS = {
+            likes:        { ms: 7  * 86400000 },
+            views:        { ms: 7  * 86400000 },
+            'video-room': { ms: 7  * 86400000 },
+            'audio-room': { ms: 7  * 86400000 },
+            supporters:   { ms: 7  * 86400000 },
+            followers:    { ms: 30 * 86400000 }
+        };
+
+        function getRankGroup(rank) {
+            if (rank === 1)  return '1';
+            if (rank === 2)  return '2';
+            if (rank === 3)  return '3';
+            if (rank >= 4  && rank <= 10)  return '4-10';
+            if (rank >= 11 && rank <= 20)  return '11-20';
+            if (rank >= 21 && rank <= 100) return '21-100';
+            return null;
+        }
+
+        async function checkLeaderboardResets() {
+            if (!currentUser.uid) return;
+            var now = Date.now();
+            for (const type of Object.keys(RESET_PERIODS)) {
+                try {
+                    const s = await database.ref('leaderboardResets/' + type + '/lastReset').once('value');
+                    const last = s.val() || 0;
+                    if (now - last >= RESET_PERIODS[type].ms) {
+                        await processLeaderboardReset(type, now);
+                    }
+                } catch(e) {}
+            }
+        }
+
+        async function processLeaderboardReset(type, now) {
+            // 1. مكافآت التصنيف
+            const rwSnap = await database.ref('leaderboardRewards/' + type).once('value');
+            const rwVal  = rwSnap.val();
+            const rewards = rwVal ? (Array.isArray(rwVal) ? rwVal : Object.values(rwVal)) : [];
+
+            // 2. بناء التصنيف
+            const usersSnap = await database.ref('users').once('value');
+            const usersRaw  = usersSnap.val() || {};
+            const userMap   = {};
+            Object.entries(usersRaw).forEach(([uid, u]) => {
+                userMap[uid] = { uid: uid, name: u.yourname || u.name || 'مستخدم', value: 0, photoURL: u.avatar || u.photoURL || null };
+            });
+
+            if (type === 'likes') {
+                const ps = await database.ref('posts').once('value');
+                Object.values(ps.val() || {}).forEach(p => { if (p.authorUid && userMap[p.authorUid]) userMap[p.authorUid].value += (p.likesCount || 0); });
+            } else if (type === 'views') {
+                const rs = await database.ref('reels').once('value');
+                Object.values(rs.val() || {}).forEach(r => { const u = r.authorUid || r.userId || r.uid; if (u && userMap[u]) userMap[u].value += (r.viewsCount || r.views || 0); });
+            } else if (type === 'followers') {
+                const fs = await database.ref('followers').once('value');
+                Object.values(fs.val() || {}).forEach(f => { const u = f.userId || f.followedId || f.uid; if (u && userMap[u]) userMap[u].value++; });
+            } else if (type === 'video-room' || type === 'audio-room') {
+                const field = type === 'video-room' ? 'videoRoomTime' : 'audioRoomTime';
+                Object.entries(usersRaw).forEach(([uid, u]) => { if (userMap[uid]) userMap[uid].value = u[field] || 0; });
+            } else if (type === 'supporters') {
+                Object.entries(usersRaw).forEach(([uid, u]) => { if (userMap[uid]) userMap[uid].value = u.giftLeaderPoints || u.totalGiftsSent || 0; });
+            }
+
+            const sorted = Object.values(userMap).filter(u => u.value > 0).sort((a, b) => b.value - a.value);
+            var _typeLabels = getCategoryTexts();
+            var typeName = (_typeLabels[type] && _typeLabels[type].name) || type;
+            var periodLabel = type === 'followers' ? (_lang === 'en' ? 'Monthly' : 'الشهري') : (_lang === 'en' ? 'Weekly' : 'الأسبوعي');
+
+            // 3. إرسال إشعار لكل مستخدم ضمن أول 100
+            for (let i = 0; i < Math.min(sorted.length, 100); i++) {
+                const rank = i + 1;
+                const user = sorted[i];
+                if (!user.uid) continue;
+                const group = getRankGroup(rank);
+                if (!group) continue;
+
+                // ابحث عن مكافأة هذه الرتبة
+                let rewardData = null;
+                if (group !== '21-100') {
+                    for (const r of rewards) {
+                        const rv = String(r.rank);
+                        if (rv === String(rank)) { rewardData = r; break; }
+                        if (rv.includes('-')) {
+                            const [mn, mx] = rv.split('-').map(Number);
+                            if (rank >= mn && rank <= mx) { rewardData = r; break; }
+                        }
+                    }
+                }
+
+                const hasReward = rewardData && (rewardData.coins || rewardData.dollars || rewardData.frameUrl || rewardData.titleUrl || rewardData.bigTitleUrl || rewardData.badgeUrl || rewardData.entryUrl || rewardData.coverUrl);
+                const isClaimable = group !== '21-100' && hasReward;
+
+                let notifText = `تم تحديث تصنيف ${typeName} ${periodLabel} — وصلت إلى المركز #${rank}`;
+                if (isClaimable && rewardData.coins) notifText += ` — مكافأتك: ${rewardData.coins} عملة`;
+
+                const nData = {
+                    type:               isClaimable ? 'leaderboard_reward' : 'leaderboard_update',
+                    toUserId:           user.uid,
+                    fromUserId:         'system',
+                    fromName:           'YADWOR',
+                    fromAvatar:         '',
+                    text:               notifText,
+                    leaderboardType:    type,
+                    leaderboardTypeName:typeName,
+                    rank:               rank,
+                    rankGroup:          group,
+                    reward:             isClaimable ? rewardData : null,
+                    claimed:            false,
+                    createdAt:          firebase.database.ServerValue.TIMESTAMP,
+                    isRead:             false
+                };
+                await database.ref('notifications').push(nData);
+            }
+
+            // 4. تحديث وقت آخر إعادة ضبط
+            await database.ref('leaderboardResets/' + type).update({ lastReset: now });
+        }
+
+        // ==================== تحميل التصنيف ====================
+        async function loadLeaderboard(type) {
+            currentLeaderboardType = type;
+            var container = document.getElementById('leaderboard-content');
+            container.innerHTML = '<div class="loading">' + T('loadingRank') + '</div>';
+
+            try {
+                // ── 1. تحميل مكافآت التصنيف ──
+                const rwSnap = await database.ref('leaderboardRewards/' + type).once('value');
+                const rwVal  = rwSnap.val();
+                currentLeaderboardRewards[type] = rwVal
+                    ? (Array.isArray(rwVal) ? rwVal : Object.values(rwVal))
+                    : [];
+
+                // ── 2. تحميل بيانات المستخدمين الأساسية ──
+                const usersSnap = await database.ref('users').once('value');
+                const usersRaw  = usersSnap.val() || {};
+
+                // بناء خريطة uid → {name, avatar}
+                const userMap = {};
+                Object.entries(usersRaw).forEach(([uid, u]) => {
+                    userMap[uid] = {
+                        uid,
+                        name:     u.yourname || u.name || u.displayName || u.username || 'مستخدم',
+                        photoURL: u.avatar || u.photoURL || null,
+                        value: 0
+                    };
+                });
+
+                // ── 3. حساب القيم حسب نوع التصنيف ──
+                if (type === 'likes') {
+                    // مجموع لايكات منشورات كل مستخدم
+                    const postsSnap = await database.ref('posts').once('value');
+                    const posts = postsSnap.val() || {};
+                    Object.values(posts).forEach(p => {
+                        if (p.authorUid && userMap[p.authorUid]) {
+                            userMap[p.authorUid].value += (p.likesCount || 0);
+                        }
+                    });
+
+                } else if (type === 'views') {
+                    // مجموع مشاهدات ريلز كل مستخدم
+                    const reelsSnap = await database.ref('reels').once('value');
+                    const reels = reelsSnap.val() || {};
+                    Object.values(reels).forEach(r => {
+                        const uid = r.authorUid || r.userId || r.uid;
+                        if (uid && userMap[uid]) {
+                            userMap[uid].value += (r.viewsCount || r.views || 0);
+                        }
+                    });
+
+                } else if (type === 'followers') {
+                    // عدد المتابعين من جدول followers
+                    const folSnap = await database.ref('followers').once('value');
+                    const fols = folSnap.val() || {};
+                    Object.values(fols).forEach(f => {
+                        const uid = f.userId || f.followedId || f.uid;
+                        if (uid && userMap[uid]) {
+                            userMap[uid].value += 1;
+                        }
+                    });
+
+                } else if (type === 'video-room' || type === 'audio-room') {
+                    // وقت الغرف من users node مباشرة
+                    const field = type === 'video-room' ? 'videoRoomTime' : 'audioRoomTime';
+                    Object.entries(usersRaw).forEach(([uid, u]) => {
+                        if (userMap[uid]) {
+                            userMap[uid].value = u[field] || u.roomTime || 0;
+                        }
+                    });
+
+                } else if (type === 'supporters') {
+                    // نقاط التصنيف: giftLeaderPoints = نقطة لكل هدية + senderPoints من إعداد الهدية
+                    Object.entries(usersRaw).forEach(([uid, u]) => {
+                        if (userMap[uid]) {
+                            userMap[uid].value = u.giftLeaderPoints || u.totalGiftsSent || u.giftsCount || u.supportersScore || 0;
+                        }
+                    });
+                }
+
+                renderLeaderboard(type, currentLeaderboardRewards[type], userMap);
+
+            } catch (err) {
+                console.error('❌ Leaderboard error:', err);
+                container.innerHTML = '<div class="no-data">' + T('loadError') + ': ' + err.message + '</div>';
+            }
+        }
+
+        // دالة تنسيق القيمة حسب نوع التصنيف
+        function fmtLeaderVal(val, t) {
+            if ((t === 'video-room' || t === 'audio-room') && val > 0) {
+                return val + ' دقيقة';
+            }
+            return val.toLocaleString();
+        }
+
+        function renderLeaderboard(type, rewards, users) {
+            categoryTexts = getCategoryTexts();
+            var container = document.getElementById('leaderboard-content');
+            var icons = {
+                supporters:  'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z',
+                likes:       'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+                views:       'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z',
+                followers:   'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+                'video-room':'M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z',
+                'audio-room':'M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z'
+            };
+
+            // users هنا هو userMap مع القيم المحسوبة مسبقاً في loadLeaderboard
+                var sortedUsers = Object.values(users)
+                .sort((a, b) => b.value - a.value);
+            // تحديد رتبة المستخدم الحالي
+            if (currentUser.uid) {
+                const idx = sortedUsers.findIndex(u => u.uid === currentUser.uid);
+                currentUser.rank  = idx >= 0 ? idx + 1 : null;
+                const me = sortedUsers[idx];
+                currentUser.value  = me ? me.value : 0;
+                currentUser.name   = me ? me.name  : (currentUser.name || '');
+                currentUser.avatar = me ? me.photoURL : (currentUser.avatar || '');
+            }
+            document.getElementById('userRankDisplay').textContent = currentUser.rank ? '#'+currentUser.rank : '#-';
+            const sideRankEl = document.getElementById('sideRankNum');
+            if (sideRankEl) sideRankEl.textContent = currentUser.rank ? '#'+currentUser.rank : '#-';
+
+            var top3 = sortedUsers.slice(0, 3);
+            var rest = sortedUsers.slice(3);
+
+            let html = `
+                <div class="leaderboard-fixed-section">
+                    <div class="leaderboard-header">
+                        <h3 class="leaderboard-title">
+                            <svg viewBox="0 0 24 24"><path d="${icons[type] || icons.likes}"/></svg>
+                            ${T('rankingTitle')}: ${(getCategoryTexts()[type] && getCategoryTexts()[type].name) || type}
+                        </h3>
+                        <button class="btn-rewards" onclick="showRewardsModal('${type}')">
+                            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            ${T('rewardsBtn')}
+                        </button>
+                    </div>
+                    <div class="top-three">
+                        ${renderPodiumItem(top3[1], 2, type)}
+                        ${renderPodiumItem(top3[0], 1, type)}
+                        ${renderPodiumItem(top3[2], 3, type)}
+                    </div>
+                </div>
+                <div class="leaderboard-scroll-section">
+                    <ul class="leaderboard-list">
+            `;
+
+            rest.forEach(function(item, idx) {
+                var rank = idx + 4;
+                var avHtml = buildAvatar(item.photoURL, item.name, item.uid, '');
+                html += '<li class="leaderboard-item">' +
+                    '<div class="rank-number ' + (rank <= 10 ? 'top' : '') + '">' + rank + '</div>' +
+                    avHtml +
+                    '<div class="leaderboard-info">' +
+                        '<div class="leaderboard-name">' + item.name + '</div>' +
+                        '<div class="leaderboard-stats">' + fmtLeaderVal(item.value, type) + ' ' + ((type === 'video-room' || type === 'audio-room') ? '' : ((getCategoryTexts()[type] && getCategoryTexts()[type].unit) || '')) + '</div>' +
+                    '</div>' +
+                    '<div class="leaderboard-reward">' + getRewardForRank(rank, type) + '</div>' +
+                    '</li>';
+            });
+
+            html += '</ul></div>';
+            container.innerHTML = html;
+        }
+
+        function renderPodiumItem(user, rank, type) {
+            var empty = !user;
+            var name  = empty ? '---' : user.name;
+            var rawVal = empty ? 0 : user.value;
+            var value  = empty ? '0' : fmtLeaderVal(rawVal, type);
+            var cls    = rank === 1 ? 'first' : rank === 2 ? 'second' : 'third';
+            var uid    = (!empty && user.uid) ? user.uid : '';
+            var avHtml = empty
+                ? '<div class="player-avatar"></div>'
+                : buildAvatar(user.photoURL, name, uid, '');
+            var crown  = (rank === 1 && !empty)
+                ? '<div class="crown"><svg viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg></div>'
+                : '';
+            return '<div class="top-player ' + cls + '">' +
+                '<div class="rank-badge">' + rank + '</div>' +
+                avHtml +
+                crown +
+                '<div class="player-name">' + name + '</div>' +
+                '<div class="player-points">' + value + '</div>' +
+                '</div>';
+        }
+
+        function getUserValue(user, type) {
+            switch (type) {
+                case 'likes':      return user.likesCount    || user.likes       || 0;
+                case 'views':      return user.viewsCount    || user.views       || 0;
+                case 'followers':  return user.followersCount|| user.followers   || 0;
+                case 'video-room': return user.videoRoomTime || 0;
+                case 'audio-room': return user.audioRoomTime || 0;
+                case 'supporters': return user.giftLeaderPoints || user.totalGiftsSent || user.giftsCount || user.supportersScore || 0;
+                default:           return 0;
+            }
+        }
+
+        function getRewardForRank(rank, type) {
+            const rewardType = type || currentLeaderboardType;
+            const rewards = currentLeaderboardRewards[rewardType] || [];
+            for (const r of rewards) {
+                const rv = String(r.rank);
+                if (rv === String(rank)) {
+                    return r.coins ? (r.coins + ' ' + T('coinUnit')) : (r.dollars ? ('$' + r.dollars) : '-');
+                }
+                if (rv.includes('-')) {
+                    const [min, max] = rv.split('-').map(Number);
+                    if (rank >= min && rank <= max) {
+                        return r.coins ? (r.coins + ' ' + T('coinUnit')) : (r.dollars ? ('$' + r.dollars) : '-');
+                    }
+                }
+            }
+            // قيم افتراضية إذا لم توجد بيانات
+            if (rank === 1) return '2000 ' + T('coinUnit');
+            if (rank === 2) return '1500 ' + T('coinUnit');
+            if (rank === 3) return '1000 ' + T('coinUnit');
+            if (rank >= 4 && rank <= 10) return '500 ' + T('coinUnit');
+            if (rank >= 11 && rank <= 20) return '200 ' + T('coinUnit');
+            return '50 ' + T('coinUnit');
+        }
+
+        // ==================== نافذة المكافآت ====================
+        function showRewardsModal(category) {
+            const modal = document.getElementById('rewardsModal');
+            const list = document.getElementById('rewardsList');
+            const rewards = currentLeaderboardRewards[category] || [];
+            var rankLabels = {
+                '1': T('rank1'), '2': T('rank2'), '3': T('rank3'),
+                '4-10': T('rank4to10'), '11-20': T('rank11to20')
+            };
+            var imgKeys = [
+                { k: 'frameUrl',    l: T('rFrame'),    snd: null             },
+                { k: 'titleUrl',    l: T('rTitle'),    snd: null             },
+                { k: 'bigTitleUrl', l: T('rBigTitle'), snd: null             },
+                { k: 'badgeUrl',    l: T('rBadge'),    snd: null             },
+                { k: 'entryUrl',    l: T('rEntry'),    snd: 'entrySoundUrl'  },
+                { k: 'coverUrl',    l: T('rCover'),    snd: null             },
+                { k: 'linkUrl',     l: T('rLink'),     snd: null             }
+            ];
+
+            if (rewards.length === 0) {
+                list.innerHTML = '<div class="no-data">' + T('noLeaderReward') + '</div>';
+            } else {
+                list.innerHTML = rewards.map(r => {
+                    var rankLabel = rankLabels[String(r.rank)] || (T('rankingTitle') + ' ' + r.rank);
+                    const imgs = imgKeys.filter(ik => r[ik.k]).map(ik => {
+                        const snd = ik.snd && r[ik.snd] ? r[ik.snd] : '';
+                        return `<span class="reward-item-tag" onclick="showPreview('${r[ik.k]}','${ik.l}','${rankLabel}','${snd}')">
+                            <img src="${r[ik.k]}">${ik.l}${snd ? ' <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>' : ''}
+                        </span>`;
+                    }).join('');
+                    return `
+                        <div class="reward-item">
+                            <div class="reward-rank">${r.rank}</div>
+                            <div class="reward-details">
+                                <h4>${rankLabel}</h4>
+                                <div class="reward-items-list">
+                                    ${r.coins  ? '<span class="reward-item-tag coins">' + r.coins + ' ' + T('coinUnit') + '</span>' : ''}
+                                    ${r.dollars ? `<span class="reward-item-tag dollars">$${r.dollars}</span>` : ''}
+                                    ${imgs}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            modal.classList.add('active');
+        }
+
+        function showPreview(imgUrl, title, description, soundUrl) {
+            document.getElementById('previewImage').innerHTML =
+                `<img src="${imgUrl}" alt="${title}">`;
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewDescription').textContent = description;
+            document.getElementById('previewModal').classList.add('active');
+            if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+            if (soundUrl) {
+                _previewAudio = new Audio(soundUrl);
+                _previewAudio.play().catch(()=>{});
+            }
+        }
+
+        function closeRewardsModal() { document.getElementById('rewardsModal').classList.remove('active'); }
+        function closePreviewModal() { document.getElementById('previewModal').classList.remove('active'); if(_previewAudio){_previewAudio.pause();_previewAudio=null;} }
+        function closeRankModal() {
+            document.getElementById('rankModal').classList.remove('active');
+        }
+
+        function jumpToUser() {
+            var type = currentLeaderboardType;
+            categoryTexts = getCategoryTexts();
+            var ct = categoryTexts[type] || { name: type, unit: '', label: '' };
+
+            // تحديث عنوان النافذة
+            categoryTexts = getCategoryTexts();
+            document.getElementById('rankModalTitle').textContent = T('myRankIn') + ' ' + ct.name;
+            document.getElementById('rankModalCategory').textContent = ct.label;
+
+            // صورة واسم المستخدم
+            var av = document.getElementById('rankModalAvatar');
+            if (currentUser.avatar) { av.src = currentUser.avatar; av.style.display = 'block'; }
+            else { av.style.display = 'none'; }
+            document.getElementById('rankModalName').textContent = currentUser.name || 'أنا';
+
+            var body = document.getElementById('rankModalBody');
+
+            if (currentUser.rank) {
+                var val = currentUser.value || 0;
+                body.innerHTML =
+                    '<div class="rank-modal-cards">' +
+                        '<div class="rank-modal-card highlight">' +
+                            '<span class="rank-modal-card-val">#' + currentUser.rank + '</span>' +
+                            '<span class="rank-modal-card-lbl">' + T('myRankLabel') + '</span>' +
+                        '</div>' +
+                        '<div class="rank-modal-card">' +
+                            '<span class="rank-modal-card-val">' + val.toLocaleString() + '</span>' +
+                            '<span class="rank-modal-card-lbl">' + ct.unit + '</span>' +
+                        '</div>' +
+                    '</div>';
+            } else {
+                body.innerHTML =
+                    '<div class="rank-modal-not-ranked">' +
+                        '<svg width="40" height="40" viewBox="0 0 24 24" fill="rgba(255,255,255,0.2)" style="margin-bottom:10px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' +
+                        '<p>' + T('notRanked') + ' ' + ct.name + ' ' + T('notRankedYet') + '</p>' +
+                    '</div>';
+            }
+
+            document.getElementById('rankModal').classList.add('active');
+        }
+
+        window.onclick = e => {
+            if (e.target.id === 'rewardsModal') closeRewardsModal();
+            if (e.target.id === 'previewModal') closePreviewModal();
+            if (e.target.id === 'rankModal') closeRankModal();
+            if (e.target.id === 'taskRewardDetailModal') closeTaskRewardDetail();
+        };
+    
+    // ── Image Shimmer ──
+    function ensureShimmerForImg(img) {
+        if (!img || img.dataset._shimmerBound === '1') return;
+        img.dataset._shimmerBound = '1';
+        var host = img.parentElement;
+        if (!host) return;
+        host.classList.add('img-shimmer-host');
+        var layer = host.querySelector(':scope > .img-shimmer-layer');
+        if (!layer) {
+            layer = document.createElement('div');
+            layer.className = 'img-shimmer-layer sk';
+            host.appendChild(layer);
+        }
+        function onOk() { img.classList.remove('img-loading'); img.classList.add('img-loaded'); if (layer) layer.style.display = 'none'; }
+        function onErr() { img.classList.add('img-loading'); if (layer) layer.style.display = 'block'; }
+        img.classList.add('img-loading');
+        img.addEventListener('load', onOk);
+        img.addEventListener('error', onErr);
+        if (img.complete) { if (img.naturalWidth && img.naturalHeight) onOk(); else onErr(); }
+    }
+    // Apply shimmer to all images dynamically
+    var _imgObs = new MutationObserver(function(muts) {
+        muts.forEach(function(m) { m.addedNodes.forEach(function(n) {
+            if (n.nodeType === 1) {
+                if (n.tagName === 'IMG') ensureShimmerForImg(n);
+                n.querySelectorAll && n.querySelectorAll('img').forEach(ensureShimmerForImg);
+            }
+        }); });
+    });
+    _imgObs.observe(document.body, { childList:true, subtree:true });
+    document.querySelectorAll('img').forEach(ensureShimmerForImg);
+</script>
+
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="location.href='home.html'">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span id="nav-lbl-home">الرئيسية</span>
+  </button>
+  <button class="nav-item" onclick="location.href='search.html'">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span id="nav-lbl-search">بحث</span>
+  </button>
+  <button class="nav-item" onclick="location.href='roomhom.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    <span id="nav-lbl-rooms">غرف</span>
+  </button>
+  <button class="nav-item active" onclick="location.href='events.html'" style="position:relative;">
+    <span id="eventsNavDot" style="display:none;position:absolute;top:6px;right:50%;transform:translateX(10px);width:8px;height:8px;background:#e41e3f;border-radius:50%;border:2px solid #111118;"></span>
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span id="nav-lbl-events">أحداث</span>
+  </button>
+  <button class="nav-item" id="msgsNavBtn" onclick="location.href='messages.html'" style="position:relative;">
+    <span id="msgsNavDot" style="display:none;position:absolute;top:6px;right:50%;transform:translateX(10px);width:8px;height:8px;background:#e41e3f;border-radius:50%;border:2px solid #111118;"></span>
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="nav-lbl-chat">دردشة</span>
+  </button>
+  <button class="nav-item" onclick="location.href='profile.html'">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span id="nav-lbl-profile">ملفي</span>
+  </button>
+</nav>
+
+<!-- ── نافذة رتبتي الجميلة ── -->
+<div class="rank-modal-overlay" id="rankModal">
+    <div class="rank-modal-box">
+        <button class="rank-modal-close" onclick="closeRankModal()">✕</button>
+        <div class="rank-modal-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFC107"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span id="rankModalTitle">رتبتي في التصنيف</span>
+        </div>
+        <img id="rankModalAvatar" class="rank-modal-avatar" src="" onerror="this.style.display='none'">
+        <div class="rank-modal-name" id="rankModalName"></div>
+        <div class="rank-modal-category" id="rankModalCategory"></div>
+        <div id="rankModalBody"></div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,3087 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>غرفة صوتية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ========== نفس متغيرات inbox.html 100% ========== */
+        :root {
+            --bg-light: #f4f8fb;
+            --white: #ffffff;
+            --accent-blue: #0084ff;
+            --accent-red: #ff4757;
+            --accent-gold: #f1c40f;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --seat-size: 60px;
+            --minimal-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            --gift-bg: #1c1c1e;
+            --gift-card-bg: #2c2c2e;
+            --gift-text: #ffffff;
+            --gift-text-muted: #8e8e93;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', Tahoma, sans-serif; }
+        html, body { height: 100%; width: 100%; overflow: hidden; background-color: var(--bg-light); position: relative; }
+
+
+        /* ===== Facebook Shimmer Loader ===== */
+        #loader {
+            position: fixed; inset: 0; background: #f0f4f8;
+            z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; padding-top: 20px; gap: 0;
+            overflow: hidden;
+        }
+        .fb-shimmer-header {
+            width: 100%; padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            background: white; border-bottom: 1px solid #eee;
+        }
+        .sh-circle { border-radius: 50%; flex-shrink: 0; }
+        .sh-block  { border-radius: 6px; flex: 1; }
+        .sh-line   { border-radius: 6px; }
+
+        /* المستطيلات الوهمية للمقاعد */
+        .fb-shimmer-seats {
+            width: 100%; padding: 28px 20px 0;
+            display: flex; flex-direction: column; gap: 32px; align-items: center;
+        }
+        .fb-shimmer-row { display: flex; gap: 40px; justify-content: center; }
+        .fb-shimmer-seat { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .sh-seat-circle { width: 65px; height: 65px; border-radius: 50%; }
+        .sh-seat-label  { width: 48px; height: 11px; border-radius: 6px; }
+
+        /* خط الدردشة الوهمي */
+        .fb-shimmer-chat {
+            width: 100%; padding: 16px;
+            display: flex; flex-direction: column; gap: 10px; margin-top: 8px;
+        }
+        .sh-msg-row { display: flex; align-items: center; gap: 10px; }
+        .sh-msg-av  { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; }
+        .sh-msg-lines { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+
+        /* الشريط السفلي الوهمي */
+        .fb-shimmer-nav {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 58px; background: white;
+            display: flex; align-items: center; gap: 8px; padding: 0 12px;
+        }
+        .sh-nav-circle { width: 34px; height: 34px; border-radius: 50%; }
+        .sh-nav-input  { flex: 1; height: 36px; border-radius: 20px; }
+
+        /* تأثير الـ shimmer المتحرك */
+        .sh-circle, .sh-block, .sh-line,
+        .sh-seat-circle, .sh-seat-label,
+        .sh-msg-av, .sh-msg-lines > div,
+        .sh-nav-circle, .sh-nav-input {
+            background: linear-gradient(90deg, #e8edf2 25%, #f5f7fa 50%, #e8edf2 75%);
+            background-size: 400% 100%;
+            animation: fbShimmer 1.4s ease-in-out infinite;
+        }
+        @keyframes fbShimmer {
+            0%   { background-position: 100% 50%; }
+            100% { background-position: -100% 50%; }
+        }
+
+
+        .app-container {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            background: linear-gradient(180deg, #f0f4f8 0%, #e2ebf0 100%);
+        }
+
+        /* ========== الهيدر - نفس inbox.html ========== */
+        .top-header { width: 100%; padding: 8px 9px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+        .header-left-group { display: flex; align-items: flex-start; gap: 10px; flex: 1; }
+
+        .room-badge {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 12px;
+            border-radius: 30px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.01);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.8);
+            min-width: 180px;
+        }
+        .info-text { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        .top-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .room-name-group { display: flex; align-items: center; gap: 4px; }
+        .room-name { font-size: 15px; font-weight: bold; color: var(--text-main); }
+        .room-title-img { height: 12px; width: auto; border-radius: 3px; object-fit: contain; }
+        .bottom-info { display: flex; align-items: center; gap: 4px; }
+        .room-id { font-size: 13px; color: var(--text-sub); font-weight: 600; }
+        .support-badge { background: linear-gradient(45deg, #f1c40f, #f39c12); color: white; font-size: 10.5px; padding: 1.5px 6px; border-radius: 10px; display: flex; align-items: center; gap: 3px; font-weight: bold; }
+        .viewers-badge { background: rgba(46, 204, 113, 0.1); color: #2ecc71; font-size: 11px; padding: 2px 8px; border-radius: 10px; display: flex; align-items: center; gap: 5px; font-weight: bold; border: 0px solid rgba(46, 204, 113, 0.2); }
+
+        .top-supporters { display: flex; align-items: center; cursor: pointer; background: rgba(255, 255, 255, 0.6); padding: 4px 8px; border-radius: 20px; box-shadow: var(--minimal-shadow); transition: 0.2s; }
+        .top-supporters:active { transform: scale(0.95); }
+        .supporter-avatars { display: flex; flex-direction: row-reverse; }
+        .supporter-dot { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--white); margin-right: -10px; object-fit: cover; }
+        .exit-icon-btn { width: 36px; height: 36px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-red); box-shadow: var(--minimal-shadow); cursor: pointer; flex-shrink: 0; }
+
+        /* ========== المقاعد - تخطيط محكم لا يخرج من الشاشة ========== */
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 10px 8px; gap: 18px; overflow: hidden; width: 100%; box-sizing: border-box; }
+        .row { display: flex; justify-content: center; width: 100%; gap: 20px; flex-wrap: nowrap; }
+        .sub-group { display: flex; gap: 12px; }
+
+        /* seat-box */
+        .seat-box { width: calc(var(--seat-size) + 16px); display: flex; flex-direction: column; align-items: center; position: relative; }
+
+        /* الدائرة الرئيسية - نفس inbox.html */
+        /* circle-frame -> see fbShimmer section below */
+        .user-label { font-size: 11px; font-weight: 700; color: var(--text-main); margin-top: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px; }
+
+        /* ===== إطار المقعد - مطابق roomvideo ===== */
+        .av-outer-frame {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150%;
+            height: 150%;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* بادج تحت الاسم (BadgeDon) */
+        .seat-badge {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 16px;
+            width: auto;
+            object-fit: contain;
+            z-index: 25;
+            pointer-events: none;
+        }
+
+        /* بادج المايك */
+        .mic-badge {
+            position: absolute;
+            bottom: -4px;
+            right: -2px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px;
+            z-index: 30;
+            cursor: pointer;
+        }
+        .mic-badge.on  { background: #2ecc71; color: white; }
+        .mic-badge.off { background: var(--accent-red); color: white; }
+
+        /* ========== الدردشة - نفس inbox.html ========== */
+        .chat-view { flex: 0 0 200px; padding: 10px 20px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; scroll-behavior: smooth; }
+        .chat-view::-webkit-scrollbar { display: none; }
+        .msg-line { display: flex; align-items: flex-start; gap: 8px; background: rgba(255, 255, 255, 0.6); padding: 8px 12px; border-radius: 12px; width: fit-content; max-width: 90%; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #ddd; }
+        .msg-content { display: flex; flex-direction: column; gap: 4px; }
+        .msg-header { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .badge { font-size: 9px; color: white; padding: 1px 6px; border-radius: 4px; font-weight: bold; }
+        .badge-system { background: #a29bfe; }
+        .chat-name { color: var(--accent-blue); font-size: 12px; font-weight: bold; }
+        .chat-text { color: var(--text-main); font-size: 12px; line-height: 1.4; font-weight: 500; word-break: break-word; }
+
+        /* ========== الشريط السفلي - نفس inbox.html ========== */
+        .bottom-nav { padding: 10px; display: flex; align-items: center; gap: 6px; background: transparent; z-index: 10; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; transition: 0.3s; flex-shrink: 0; }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+        .nav-circle-btn { width: 34px; height: 34px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; border: none; box-shadow: var(--minimal-shadow); cursor: pointer; flex-shrink: 0; }
+
+        /* حقل الإدخال - زر الإرسال على اليمين داخل الحقل */
+        .nav-input-box { flex: 1; min-width: 140px; background: rgba(255, 255, 255, 0.9); border-radius: 20px; padding: 4px 4px 4px 4px; height: 42px; display: flex; align-items: center; box-shadow: var(--minimal-shadow); gap: 6px; transition: 0.3s; }
+        .nav-input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; color: var(--text-main); text-align: right; width: 100%; height: 100%; font-family: 'Tajawal', sans-serif; }
+
+        /* زر الإرسال - على اليمين دائماً */
+        .send-chat-btn { background: var(--accent-blue); color: white; border: none; width: 34px; height: 34px; border-radius: 50%; display: flex !important; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; flex-shrink: 0; }
+        .send-chat-btn:active { transform: scale(0.9); }
+        .send-chat-btn svg { width: 16px; height: 16px; }
+
+        /* إخفاء/إظهار عند التركيز */
+        .typing-mode .hide-on-focus { display: none !important; }
+        .show-on-focus { display: none !important; }
+        .typing-mode .show-on-focus { display: flex !important; }
+        .typing-mode.bottom-nav { background: var(--white); box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
+        .typing-mode .nav-input-box { background: var(--bg-light); border: 1px solid #e1e8ed; }
+
+        /* ========== أزرار عامة ========== */
+        .btn-action { border: none; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; font-family: 'Tajawal', sans-serif; }
+        .btn-action:active { transform: scale(0.95); }
+        .btn-follow { background: var(--accent-blue); color: white; }
+        .btn-msg { background: #f1f2f6; color: var(--text-main); border: 1px solid #e1e8ed; }
+
+        /* ========== نوافذ منبثقة - نفس inbox.html ========== */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s ease; }
+
+        /* نافذة الهدايا */
+        .gift-modal { position: fixed; bottom: -100%; left: 0; width: 100%; background-color: var(--gift-bg); border-radius: 20px 20px 0 0; z-index: 1000; display: flex; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); color: var(--gift-text); height: auto; max-height: 65vh; }
+        .gift-description { text-align: center; font-size: 11px; color: var(--gift-text-muted); padding: 10px 15px 0 15px; min-height: 25px; }
+        /* نافذة معاينة الهدية */
+        .gp-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:3200; align-items:center; justify-content:center; }
+        .gp-ov.open { display:flex; }
+        .gp-box { background:#1c1c1e; border-radius:20px; width:90%; max-width:380px; max-height:80vh; overflow-y:auto; padding:20px 18px 24px; color:white; position:relative; }
+        .gp-close { position:absolute; top:12px; left:14px; background:none; border:none; color:#aaa; font-size:22px; cursor:pointer; line-height:1; font-family:'Tajawal',sans-serif; }
+        .gp-gift-img { width:90px; height:90px; object-fit:contain; display:block; margin:0 auto 12px; border-radius:12px; }
+        .gp-name { font-size:17px; font-weight:800; text-align:center; margin-bottom:4px; font-family:'Tajawal',sans-serif; }
+        .gp-price { text-align:center; font-size:13px; color:#f1c40f; font-weight:700; margin-bottom:16px; }
+        .gp-section { margin-bottom:14px; }
+        .gp-section-title { font-size:12px; color:#aaa; font-weight:700; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px; font-family:'Tajawal',sans-serif; }
+        .gp-reward-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .gp-reward-img { width:44px; height:44px; object-fit:contain; border-radius:8px; background:#2c2c2e; flex-shrink:0; }
+        .gp-reward-txt { font-size:12px; color:#e0e0e0; flex:1; font-family:'Tajawal',sans-serif; }
+        .gp-pts { background:linear-gradient(135deg,#f1c40f,#e67e22); color:#1c1c1e; border-radius:20px; padding:6px 14px; font-size:13px; font-weight:800; text-align:center; margin-bottom:10px; font-family:'Tajawal',sans-serif; }
+        .recipients-bar { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-bottom: 1px solid #333; overflow-x: auto; }
+        .recipients-bar::-webkit-scrollbar { display: none; }
+        .recipient-avatar-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; min-width: 45px; opacity: 0.6; transition: 0.2s; }
+        .recipient-avatar-btn.active { opacity: 1; }
+        .recipient-avatar-btn img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; }
+        .recipient-avatar-btn.active img { border-color: var(--accent-red); }
+        .recipient-avatar-btn span { font-size: 9px; font-weight: bold; }
+        .tabs-nav { display: flex; padding: 0 10px; border-bottom: 1px solid #333; overflow-x: auto; scroll-behavior: smooth; }
+        .tabs-nav::-webkit-scrollbar { display: none; }
+        .tab-item { padding: 12px 15px; font-size: 13px; font-weight: bold; color: var(--gift-text-muted); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .tab-item.active { color: var(--white); border-bottom-color: var(--accent-red); }
+        .gifts-grid-container { height: 220px; overflow-y: auto; overflow-x: hidden; padding: 10px 15px; touch-action: pan-y; }
+        .gifts-grid-container::-webkit-scrollbar { width: 4px; }
+        .gifts-grid-container::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+        .gifts-grid { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .gifts-grid.active { display: grid; }
+        @keyframes fadeSlideUp { 0% { opacity: 0; transform: translateY(15px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        .gift-item { background: var(--gift-card-bg); border-radius: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; position: relative; border: 1px solid transparent; transition: 0.2s; height: 95px; opacity: 0; }
+        .gifts-grid.active .gift-item { animation: fadeSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
+        .gift-item.active { border-color: var(--accent-red); background: rgba(255, 71, 87, 0.1); }
+        .gift-badge { position: absolute; top: 2px; right: 2px; background: var(--accent-red); font-size: 8px; padding: 2px 5px; border-radius: 6px; font-weight: bold; z-index: 2; pointer-events: none; }
+        .gift-icon { font-size: 32px; margin-bottom: 5px; }
+        .gift-name { font-size: 10px; font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .gift-price { font-size: 10px; color: var(--accent-gold); display: flex; align-items: center; gap: 3px; }
+        .tabs-dots { display: flex; justify-content: center; gap: 6px; padding: 8px 0; background: var(--gift-bg); }
+        .dot { width: 6px; height: 6px; background: #444; border-radius: 50%; transition: 0.3s; }
+        .dot.active { width: 16px; background: var(--accent-red); border-radius: 10px; }
+        .modal-bottom-bar { padding: 10px 15px 15px 15px; background: #151516; display: flex; justify-content: space-between; align-items: center; }
+        .balance { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .send-actions { display: flex; align-items: center; gap: 8px; }
+        .qty-select { background: var(--gift-card-bg); color: white; border: 1px solid #444; padding: 6px 10px; border-radius: 20px; font-size: 13px; outline: none; cursor: pointer; }
+        .send-btn { background: var(--accent-red); color: white; border: none; padding: 8px 25px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; font-family: 'Tajawal', sans-serif; }
+
+        /* نافذة الملف الشخصي */
+        .profile-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: calc(100% - 40px); max-width: 400px; background: var(--white); border-radius: 20px; padding: 32px 24px 24px; z-index: 1100; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; max-height: 88vh; overflow-y: auto; }
+        .profile-modal.show { display: block; opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 18px; color: #999; cursor: pointer; }
+        .profile-avatar-img { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--accent-blue); object-fit: cover; margin: 0 auto 12px; padding: 3px; display: block; }
+        .profile-name-text { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+        .profile-id-text { font-size: 12px; color: var(--text-sub); font-weight: 600; margin-bottom: 20px; }
+        .profile-badges-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .profile-badge-item { background: linear-gradient(45deg, #f1c40f, #f39c12); color: white; padding: 5px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; flex: 1 1 20%; max-width: max-content; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: var(--minimal-shadow); }
+        .profile-badge-item.long { flex: 1 1 45%; }
+        .profile-actions { display: flex; justify-content: center; gap: 10px; }
+
+        /* نافذة الداعمين */
+        .supporters-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--white); width: calc(100% - 28px); max-width: 360px; max-height: 72vh; border-radius: 20px; padding: 0; z-index: 1001; display: none; opacity: 0; transition: 0.3s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.15); flex-direction: column; overflow: hidden; }
+        .supporters-modal.show { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .supporters-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px 14px; border-bottom: 1px solid #eee; font-weight: bold; color: var(--text-main); font-size: 16px; flex-shrink: 0; }
+        .supporters-list { overflow-y: auto; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+        .supporter-item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f4f8fb; padding: 8px 0; gap: 8px; }
+        .supporter-item:last-child { border-bottom: none; }
+        .supporter-info-group { display:flex; align-items:center; gap:8px; flex:1; min-width:0; overflow:hidden; }
+        .supporter-details { flex:1; min-width:0; overflow:hidden; }
+        .supporter-name { font-size:13px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; display:block; }
+        .supporter-id { font-size:10px; color:var(--text-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+        .supporter-actions { flex-shrink:0; }
+        .supporter-info-group { display: flex; align-items: center; gap: 12px; }
+        .supporter-item img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #e1e8ed; flex-shrink:0; }
+        .supporter-details { display: flex; flex-direction: column; gap: 2px; }
+        .supporter-name-row { display: flex; align-items: center; gap: 8px; }
+        .supporter-name { font-size: 14px; font-weight: bold; color: var(--text-main); }
+        .supporter-amount { font-size: 11px; color: var(--accent-gold); font-weight: bold; display: flex; align-items: center; gap: 3px; background: rgba(241, 196, 15, 0.1); padding: 2px 6px; border-radius: 10px; }
+        .supporter-id { font-size: 11px; color: var(--text-sub); }
+        .supporter-actions { display: flex; gap: 8px; }
+
+        /* إشعار الهدايا الجانبي */
+        #gift-notification-container { position: fixed; left: 15px; top: 45%; transform: translateY(-50%); z-index: 800; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .gift-alert { background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%); border-radius: 30px; padding: 6px 15px 6px 6px; display: flex; align-items: center; gap: 12px; color: white; animation: slideInLeft 0.5s cubic-bezier(0.25, 1, 0.5, 1), fadeOutLeft 0.5s ease-in 3.5s forwards; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes slideInLeft { 0% { transform: translateX(-120%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOutLeft { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(-120%); opacity: 0; } }
+        .gift-alert-avatars { display: flex; align-items: center; }
+        .gift-alert-avatars img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
+        .gift-alert-avatars img.recipient { margin-right: -15px; border-color: var(--accent-gold); z-index: 1; }
+        .gift-alert-avatars img.sender { z-index: 2; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
+        .gift-alert-text { display: flex; flex-direction: column; font-size: 11px; line-height: 1.4; text-align: right; }
+        .gift-alert-text .names { font-size: 12px; }
+        .gift-alert-text .names strong { color: var(--accent-gold); }
+        .gift-alert-text .action { color: #f1f2f6; font-weight: bold; }
+        .gift-alert-icon { font-size: 40px; text-shadow: 0 0 15px rgba(255,255,255,0.6); animation: bounceGift 0.6s infinite alternate; margin-right: 5px; }
+        @keyframes bounceGift { 0% { transform: translateY(0) scale(1) rotate(-5deg); } 100% { transform: translateY(-8px) scale(1.1) rotate(5deg); } }
+
+        /* نافذة الخروج */
+        .leave-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--white); width: 82%; max-width: 300px; border-radius: 20px; padding: 25px 20px; z-index: 1102; display: none; opacity: 0; transition: 0.3s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; font-family: 'Tajawal', sans-serif; }
+        .leave-modal.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .leave-modal h3 { margin-bottom: 8px; color: var(--text-main); font-size: 17px; }
+        .leave-modal p { font-size: 13px; color: var(--text-sub); margin-bottom: 18px; }
+        .leave-btns { display: flex; gap: 10px; justify-content: center; }
+        .leave-btns button { flex: 1; padding: 10px; border: none; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; font-family: 'Tajawal', sans-serif; }
+        .btn-yes { background: var(--accent-red); color: white; }
+        .btn-no  { background: #f1f2f6; color: #333; }
+
+        /* نافذة المهام */
+        .tasks-modal { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--white); border-radius: 20px 20px 0 0; z-index: 1000; display: flex; flex-direction: column; transition: bottom 0.3s cubic-bezier(0.25,0.8,0.25,1); max-height: 70vh; }
+        .tasks-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--text-main); font-size: 15px; }
+        .tasks-body { padding: 16px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8f9fa; border-radius: 12px; }
+        .task-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-blue), #0056cc); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+        .task-info { flex: 1; }
+        .task-title { font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
+        .task-sub { font-size: 11px; color: var(--text-sub); }
+        .task-reward { font-size: 12px; font-weight: 700; color: var(--accent-gold); display: flex; align-items: center; gap: 3px; }
+        .task-btn { padding: 6px 14px; border: none; border-radius: 8px; background: var(--accent-blue); color: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Tajawal',sans-serif; flex-shrink: 0; }
+
+        /* ===== Shimmer للمقاعد (Facebook style) ===== */
+        @keyframes vshMove { 0%{background-position:100% 50%} 100%{background-position:-100% 50%} }
+        @keyframes vmIn    { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+        @keyframes vmSlideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes emoIn { from{transform:translate(-50%,-50%) scale(.4);opacity:0;} to{transform:translate(-50%,-50%) scale(1);opacity:1;} }
+
+
+
+        /* ===== إيموجي على المقعد ===== */
+        .seat-emoji {
+            position:absolute; left:50%; top:50%;
+            transform:translate(-50%,-50%);
+            z-index:60; width:52px; height:52px; display:none;
+            align-items:center; justify-content:center;
+            border-radius:50%; background:rgba(0,0,0,.2);
+            backdrop-filter:blur(2px); pointer-events:none;
+            animation:emoIn .2s ease;
+        }
+        .seat-emoji.show { display:flex; }
+        .seat-emoji svg { width:34px; height:34px; }
+
+        /* ===== نافذة الملف الشخصي المُحسّنة ===== */
+        .pm-av-wrap {
+            width:96px; height:96px; border-radius:50%; position:relative;
+            overflow:visible; margin:0 auto 24px; border:3px solid var(--accent-blue);
+            background:#f0f4f8;
+        }
+        .pm-av-wrap img#prof-modal-img {
+            width:100%; height:100%; border-radius:50%; object-fit:cover;
+            display:block; opacity:0; transition:opacity .3s;
+            position:absolute; top:0; left:0; z-index:4;
+        }
+        .pm-av-wrap.loaded img#prof-modal-img { opacity:1; }
+        .pm-av-sh {
+            position:absolute; inset:0; border-radius:50%;
+            background:linear-gradient(90deg,#e8edf2 25%,#f5f7fa 50%,#e8edf2 75%);
+            background-size:400% 100%; animation:fbShimmer 1.4s ease-in-out infinite;
+            z-index:1;
+        }
+        .pm-av-wrap.loaded .pm-av-sh { display:none; }
+        /* إطار الملف الشخصي - فوق الصورة ومحيط بها */
+        .pm-av-frame {
+            position:absolute;
+            top:50%; left:50%;
+            transform:translate(-50%, -50%);
+            width:150%; height:150%;
+            border-radius:50%;
+            pointer-events:none;
+            z-index:5;
+            object-fit:contain;
+            display:block;
+        }
+
+        /* أزرار الملف الشخصي */
+        .pm-actions { display:flex; flex-direction:column; gap:9px; padding:0 2px; margin-bottom:8px; }
+        .pm-row2 { display:flex; gap:9px; }
+        .pm-row2 .pm-btn { flex:1; }
+        .pm-btn {
+            display:flex; align-items:center; justify-content:center; gap:7px;
+            padding:12px 16px; border-radius:12px; font-size:14px; font-weight:700;
+            cursor:pointer; font-family:'Tajawal',sans-serif; border:none; transition:.18s;
+            width:100%;
+        }
+        .pm-btn:active { transform:scale(.96); }
+        .pm-btn-follow  { background:#1877f2; color:white; }
+        .pm-btn-follow:hover { background:#1565c0; }
+        .pm-btn-follow.following { background:#e8f0fe; color:#1877f2; }
+        .pm-btn-msg     { background:#f0f2f5; color:#444; }
+        .pm-btn-msg:hover { background:#e4e6eb; }
+        .pm-btn-friend  { background:#e8f5e9; color:#2e7d32; }
+        .pm-btn-friend:hover { background:#c8e6c9; }
+        .pm-btn-fl-list { background:#ede7f6; color:#4527a0; }
+        .pm-btn-fl-list:hover { background:#d1c4e9; }
+
+        /* لوحة المالك في الملف الشخصي */
+        .pm-owner-panel { margin-top:10px; padding-top:10px; border-top:1px solid #f0f2f5; display:flex; flex-direction:column; gap:9px; }
+        .pm-own-btn {
+            width:100%; height:46px; border:none; border-radius:12px; font-weight:700;
+            cursor:pointer; font-family:'Tajawal',sans-serif; font-size:14px;
+            display:flex; align-items:center; justify-content:center; gap:8px; transition:.15s;
+        }
+        .pm-own-btn:active { transform:scale(.96); }
+        .pm-own-seat { background:#e8f5e9; color:#2e7d32; }
+        .pm-own-seat:hover { background:#c8e6c9; }
+        .pm-own-kick { background:#fff8e1; color:#e65100; }
+        .pm-own-kick:hover { background:#ffe0b2; }
+        .pm-own-ban  { background:#fce4ec; color:#c62828; }
+        .pm-own-ban:hover  { background:#ffcdd2; }
+
+        /* ===== نافذة المنظمين (slide from bottom) ===== */
+        .viewers-wrap {
+            position:fixed; inset:0; z-index:1050;
+            display:none; align-items:flex-end; justify-content:center;
+            background:rgba(0,0,0,.5);
+        }
+        .viewers-wrap.open { display:flex; }
+        .viewers-modal-box {
+            width:100%; max-width:520px; background:var(--white);
+            border-radius:20px 20px 0 0; max-height:82vh;
+            display:flex; flex-direction:column;
+            box-shadow:0 -4px 30px rgba(0,0,0,.18);
+            animation:vmSlideUp .3s cubic-bezier(.25,.8,.25,1);
+        }
+        .vm-hdr { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid #eee; flex-shrink:0; }
+        .vm-hdr-title { font-size:15px; font-weight:800; color:#111; }
+        .vm-x { background:none; border:none; font-size:24px; color:#aaa; cursor:pointer; line-height:1; }
+        .vm-body { overflow-y:auto; flex:1; padding:8px 16px 16px; display:flex; flex-direction:column; gap:2px; }
+        .vm-item { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid #f4f8fb; }
+        .vm-item:last-child { border-bottom:none; }
+        .vm-av-wrap { position:relative; width:46px; height:46px; flex-shrink:0; cursor:pointer; }
+        .vm-av-wrap img { width:46px; height:46px; border-radius:50%; object-fit:cover; border:2px solid #eee; display:block; opacity:0; transition:.22s; }
+        .vm-av-sh { position:absolute; inset:0; border-radius:50%; background:linear-gradient(90deg,#e8edf2 25%,#f5f7fa 50%,#e8edf2 75%); background-size:400% 100%; animation:vshMove 1.4s ease-in-out infinite; pointer-events:none; }
+        .vm-av-wrap.loaded img { opacity:1; }
+        .vm-av-wrap.loaded .vm-av-sh { display:none; }
+        .vm-info { flex:1; }
+        .vm-name { font-size:14px; font-weight:700; color:#111; }
+        .vm-sub  { font-size:11px; color:#888; margin-top:2px; }
+        .vm-actions { display:flex; gap:6px; flex-shrink:0; }
+        .vm-btn { height:30px; padding:0 12px; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Tajawal',sans-serif; transition:.15s; }
+        .vm-btn:active { transform:scale(.95); }
+        .vm-btn-kick { background:#fff8e1; color:#e65100; }
+        .vm-btn-ban  { background:#fce4ec; color:#c62828; }
+
+        /* ===== نافذة تأكيد ===== */
+        .cfm-wrap { position:fixed; inset:0; z-index:1200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.55); }
+        .cfm-wrap.open { display:flex; }
+        .cfm-box { width:100%; max-width:320px; background:white; border-radius:18px; padding:22px 20px; box-shadow:0 10px 40px rgba(0,0,0,.25); animation:vmIn .25s cubic-bezier(.25,.8,.25,1); }
+        .cfm-title { font-size:16px; font-weight:900; color:#111; margin-bottom:8px; }
+        .cfm-body  { font-size:13px; color:#666; line-height:1.6; margin-bottom:18px; }
+        .cfm-btns  { display:flex; gap:10px; }
+        .cfm-yes { flex:1; height:42px; border:none; border-radius:12px; background:#1877f2; color:white; font-weight:800; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:14px; }
+        .cfm-no  { flex:1; height:42px; border:none; border-radius:12px; background:#f1f3f5; color:#444; font-weight:800; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:14px; }
+
+        /* ===== نافذة قائمة الأصدقاء ===== */
+        .fm-wrap { position:fixed; inset:0; z-index:1100; display:none; align-items:flex-end; background:rgba(0,0,0,.5); }
+        .fm-wrap.open { display:flex; }
+        .fm-box { width:100%; background:white; border-radius:20px 20px 0 0; max-height:80vh; display:flex; flex-direction:column; animation:vmSlideUp .3s cubic-bezier(.25,.8,.25,1); }
+        .fm-hdr { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid #eee; flex-shrink:0; }
+        .fm-hdr span { font-size:15px; font-weight:800; }
+        .fm-body { overflow-y:auto; flex:1; padding:8px 16px 16px; display:flex; flex-direction:column; gap:2px; }
+        .fm-item { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid #f4f8fb; }
+        .fm-item:last-child { border-bottom:none; }
+        .fm-av-w { position:relative; width:44px; height:44px; flex-shrink:0; cursor:pointer; }
+        .fm-av-w img { width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid #eee; display:block; opacity:0; transition:.22s; }
+        .fm-av-sh { position:absolute; inset:0; border-radius:50%; background:linear-gradient(90deg,#e8edf2 25%,#f5f7fa 50%,#e8edf2 75%); background-size:400% 100%; animation:vshMove 1.4s ease-in-out infinite; }
+        .fm-av-w.loaded img { opacity:1; }
+        .fm-av-w.loaded .fm-av-sh { display:none; }
+        .fm-info { flex:1; }
+        .fm-name { font-size:14px; font-weight:700; color:#111; }
+        .fm-sub  { font-size:11px; color:#888; }
+        .fm-msg-btn { height:30px; padding:0 14px; background:#1877f2; color:white; border:none; border-radius:14px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Tajawal',sans-serif; }
+        .fm-msg-btn:hover { background:#1565c0; }
+
+        /* ===== Snack Bar ===== */
+        #vr-snack {
+            position:fixed; top:-70px; left:50%; transform:translateX(-50%);
+            z-index:3100; display:flex; align-items:center; gap:8px;
+            background:#fff; color:#111; border-radius:12px; padding:10px 18px;
+            box-shadow:0 4px 20px rgba(0,0,0,.15); font-size:13px; font-weight:700;
+            max-width:88%; transition:top .32s cubic-bezier(.25,.8,.25,1);
+            border-right:3px solid #1877f2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        #vr-snack.show { top:14px; }
+
+        /* ===== Emoji Picker ===== */
+        #vrEmojiBackdrop { position:fixed; inset:0; z-index:1050; background:rgba(0,0,0,.35); display:none; }
+        #vrEmojiBackdrop.show { display:block; }
+        #vrEmojiPicker {
+            position:fixed; bottom:-200px; left:0; right:0; z-index:1051;
+            background:#fff; border-radius:18px 18px 0 0;
+            padding:14px 14px 18px; box-shadow:0 -10px 30px rgba(0,0,0,.15);
+            transition:bottom .3s cubic-bezier(.25,.8,.25,1);
+        }
+        #vrEmojiPicker.open { bottom:0; }
+        .vep-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .vep-title { font-size:14px; font-weight:700; color:#333; }
+        .vep-x { background:#f1f2f3; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .vep-grid { display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; }
+        .vep-btn { border:0; background:#f5f6f7; border-radius:12px; height:48px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.15s; }
+        .vep-btn:hover { background:#e4e6eb; transform:scale(1.1); }
+        .vep-btn:active { transform:scale(.95); }
+        .vep-btn svg { width:26px; height:26px; }
+
+        /* ===== نافذة خطأ الغرفة ===== */
+        #roomErrWrap { position:fixed; inset:0; z-index:9999; background:rgba(10,15,30,.92); display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(6px); }
+        #roomErrWrap.show, #roomErrWrap[style*='flex'] { display:flex !important; }
+        #roomErrBox { background:#fff; border-radius:20px; padding:32px 24px 24px; max-width:340px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.4); animation:vmIn .3s cubic-bezier(.25,.8,.25,1); }
+        .re-icon { width:64px; height:64px; background:#fff3cd; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+        .re-icon svg { width:32px; height:32px; stroke:#f59e0b; fill:none; stroke-width:2; stroke-linecap:round; }
+        .re-title { font-size:17px; font-weight:900; color:#111; margin-bottom:16px; }
+        .re-btn { width:100%; height:44px; background:linear-gradient(135deg,#1877f2,#1565c0); color:white; border:none; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer; font-family:'Tajawal',sans-serif; }
+
+
+
+        /* ═══ داعمين فارغين - SVG profile ═══ */
+        .supporter-empty {
+            background: transparent;
+            border: none;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .supporter-empty svg { width: 100%; height: 100%; display: block; }
+
+        /* ═══ نافذة دعوة المقعد (مثل roomvideo) ═══ */
+        .seat-picker-ov {
+            position: fixed; inset:0; z-index:1105;
+            background: rgba(0,0,0,0.55);
+            display:none; align-items:center; justify-content:center; padding:16px;
+        }
+        .seat-picker-ov.open { display:flex; }
+        .seat-picker-box {
+            width:100%; max-width:420px;
+            background:#fff; border-radius:16px;
+            box-shadow:0 10px 40px rgba(0,0,0,0.25);
+            overflow:hidden; display:flex; flex-direction:column;
+            max-height:78vh;
+            animation: vmIn .25s cubic-bezier(.25,.8,.25,1);
+        }
+        .seat-picker-hdr {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:14px 18px 12px; border-bottom:1px solid #eee; flex-shrink:0;
+            background: linear-gradient(135deg,#0d47a1,#1565c0);
+        }
+        .seat-picker-hdr h3 { font-size:15px; font-weight:800; color:#fff; margin:0; }
+        .seat-picker-close { background:rgba(255,255,255,.2); border:none; color:#fff; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; }
+        .seat-picker-body { flex:1; overflow-y:auto; padding:6px 14px 10px; }
+        .seat-picker-body::-webkit-scrollbar { width:3px; }
+        .seat-picker-body::-webkit-scrollbar-thumb { background:#e0e0e0; border-radius:3px; }
+        .seat-picker-footer { display:flex; gap:10px; padding:12px 16px; border-top:1px solid #eee; flex-shrink:0; background:#fafafa; }
+        /* checkbox items */
+        .sp-check-item {
+            display:flex; align-items:center; gap:12px;
+            padding:11px 4px; border-bottom:1px solid #f0f0f0; cursor:pointer;
+            transition:background .15s; border-radius:10px;
+        }
+        .sp-check-item:last-child { border-bottom:none; }
+        .sp-check-item:active { background:#f5f7ff; }
+        .sp-checkbox {
+            width:22px; height:22px; border-radius:7px; border:2px solid #d0d5dd;
+            background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+            transition:.2s;
+        }
+        .sp-check-item.checked .sp-checkbox { background:#1877f2; border-color:#1877f2; }
+        .sp-check-item.checked .sp-checkbox::after {
+            content:''; display:block; width:6px; height:10px;
+            border:2.5px solid #fff; border-top:none; border-left:none;
+            transform:rotate(45deg) translateY(-1px);
+        }
+        .sp-av-wrap { position:relative; width:40px; height:40px; flex-shrink:0; }
+        .sp-av-wrap img { width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #eee; display:block; }
+        .sp-av-sh { position:absolute; inset:0; border-radius:50%; background:linear-gradient(90deg,#e8edf2 25%,#f5f7fa 50%,#e8edf2 75%); background-size:400% 100%; animation:fbShimmer 1.4s ease-in-out infinite; }
+        .sp-check-info { flex:1; }
+        .sp-check-name { font-weight:700; font-size:14px; color:#111; }
+        .sp-check-sub  { font-size:11px; color:#aaa; margin-top:2px; }
+        .cmbtn { flex:1; height:40px; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Tajawal',sans-serif; background:#f0f2f5; color:#444; }
+        .cmbtn2 { background:#1877f2; color:white; }
+        .cmbtn2:hover { background:#1565c0; }
+
+        /* ===== نافذة تأكيد (cm) مطابقة roomvideo ===== */
+        .cm { position: fixed; inset:0; z-index:1106; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,0.5); }
+        .cm.open { display:flex; }
+        .cmc { width:100%; max-width:380px; background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.3); padding:20px; animation: vmIn .25s cubic-bezier(.25,.8,.25,1); }
+        .cmt { font-weight:900; font-size:17px; margin-bottom:8px; color:#111; }
+        .cmb { white-space:pre-line; color:#444; line-height:1.6; font-size:14px; }
+
+        /* ═══ ترتيب نافذة الملف الشخصي - احترافي ═══ */
+        .profile-modal .profile-name-text {
+            font-size: 18px; font-weight: 800; color: #111; margin-bottom: 2px;
+        }
+        .profile-modal .profile-id-text {
+            font-size: 12px; color: #aaa; margin-bottom: 18px;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .pm-id-shimmer {
+            display: inline-block; width: 80px; height: 12px; border-radius: 6px;
+            background: linear-gradient(90deg,#e8edf2 25%,#f5f7fa 50%,#e8edf2 75%);
+            background-size: 400% 100%; animation: fbShimmer 1.4s ease-in-out infinite;
+            vertical-align: middle;
+        }
+        /* أزرار profile modal - صف+صف */
+        .pm-row2 { display: flex; gap: 9px; }
+        .pm-row2 .pm-btn { flex: 1; }
+        .pm-btn-follow { background: #1877f2; color: white; }
+        .pm-btn-follow:hover { background: #1565c0; }
+        .pm-btn-follow.following { background: #2ecc71; }
+        .pm-btn-msg { background: #f0f2f5; color: #333; }
+        .pm-btn-msg:hover { background: #e4e6eb; }
+        .pm-btn-friend { background: #e8f5e9; color: #2e7d32; }
+        .pm-btn-fl-list { background: #f0f4ff; color: #1565c0; }
+        .pm-own-btn.pm-own-seat { background: #e8f5e9; color: #1b5e20; }
+        .pm-own-btn.pm-own-kick { background: #fff3e0; color: #e65100; }
+        .pm-own-btn.pm-own-ban  { background: #fce4ec; color: #b71c1c; }
+        .pm-own-btn:hover { filter: brightness(0.95); }
+
+        /* ═══ Shimmer على مقاعد فارغة - بلا حروف ═══ */
+        .circle-frame {
+            width: var(--seat-size); height: var(--seat-size); border-radius: 50%;
+            background: #f0f2f5;
+            border: 1.5px solid #e1e8ed;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .circle-frame.active { border: 2px solid var(--accent-blue); padding: 2px; overflow: visible; }
+        .circle-frame.active .av-outer-frame { display: block; }
+        .circle-frame:not(.active) .av-outer-frame { display: none; }
+        .circle-frame img.avatar-img {
+            width:100%; height:100%; border-radius:50%; object-fit:cover;
+            display:block; opacity:0; transition:opacity .4s ease;
+            position:absolute; top:0; left:0; z-index:5;
+        }
+        .circle-frame.loaded img.avatar-img { opacity:1; }
+        .seat-shimmer {
+            position:absolute; inset:0; border-radius:50%;
+            background:linear-gradient(90deg,#e8edf2 25%,#f0f3f7 50%,#e8edf2 75%);
+            background-size:400% 100%;
+            animation:fbShimmer 1.4s ease-in-out infinite;
+            z-index:3; pointer-events:none; transition:opacity .3s;
+        }
+        .circle-frame.loaded .seat-shimmer { opacity:0; pointer-events:none; }
+        .circle-frame:not(.active) .plus-sign { position:relative; z-index:4; }
+
+        /* ═══ نافذة DM (رسائل خاصة داخل الغرفة) ═══ */
+        .dm-wrap {
+            position: fixed; inset: 0; z-index: 1200;
+            display: none; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.5);
+        }
+        .dm-wrap.open { display: flex; }
+        .dm-box {
+            width: 100%; max-width: 480px;
+            background: #fff; border-radius: 20px 20px 0 0;
+            display: flex; flex-direction: column;
+            max-height: 75vh; min-height: 320px;
+            animation: vmSlideUp .3s cubic-bezier(.25,.8,.25,1);
+            box-shadow: 0 -4px 24px rgba(0,0,0,.15);
+        }
+        .dm-hdr {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px 12px; border-bottom: 1px solid #f0f2f5;
+            flex-shrink: 0;
+        }
+        .dm-hdr-av { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e4e6eb; flex-shrink: 0; }
+        .dm-hdr-name { font-size: 15px; font-weight: 800; color: #111; flex: 1; }
+        .dm-close { background: none; border: none; font-size: 22px; color: #aaa; cursor: pointer; padding: 0 4px; line-height: 1; }
+        .dm-messages {
+            flex: 1; overflow-y: auto; padding: 12px 14px;
+            display: flex; flex-direction: column; gap: 8px;
+            scroll-behavior: smooth;
+        }
+        .dm-messages::-webkit-scrollbar { width: 3px; }
+        .dm-messages::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+        .dm-msg {
+            max-width: 75%; padding: 9px 13px; border-radius: 18px;
+            font-size: 14px; line-height: 1.4; word-break: break-word;
+        }
+        .dm-out {
+            align-self: flex-end; background: #0084ff; color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .dm-in {
+            align-self: flex-start; background: #f0f2f5; color: #111;
+            border-bottom-left-radius: 4px;
+        }
+        .dm-footer {
+            display: flex; gap: 10px; padding: 10px 14px 16px;
+            border-top: 1px solid #f0f2f5; flex-shrink: 0; align-items: center;
+        }
+        .dm-input {
+            flex: 1; height: 40px; border: 1.5px solid #e4e6eb; border-radius: 20px;
+            padding: 0 14px; font-size: 14px; font-family: 'Tajawal', sans-serif;
+            outline: none; direction: rtl;
+        }
+        .dm-input:focus { border-color: #0084ff; }
+        .dm-send {
+            width: 40px; height: 40px; border-radius: 50%; background: #0084ff;
+            border: none; color: #fff; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; flex-shrink: 0;
+            transition: .15s;
+        }
+        .dm-send:hover { background: #006dd9; }
+        .dm-empty { text-align: center; padding: 30px; color: #ccc; font-size: 13px; }
+
+        /* ═══ ألوان أزرار Profile مطابقة roomvideo ═══ */
+        .pm-btn-follow { background: #0d6efd !important; color: #fff !important; }
+        .pm-btn-follow.following { background: #2ecc71 !important; }
+        .pm-btn-msg    { background: #f0f2f5 !important; color: #333 !important; }
+        .pm-btn-friend { background: #e8f5e9 !important; color: #2e7d32 !important; }
+        .pm-btn-fl-list{ background: #f0f4ff !important; color: #1565c0 !important; }
+        .pm-own-btn.pm-own-seat { background: #e8f5e9 !important; color: #1b5e20 !important; }
+        .pm-own-btn.pm-own-kick { background: #fff3e0 !important; color: #e65100 !important; }
+        .pm-own-btn.pm-own-ban  { background: #fce4ec !important; color: #b71c1c !important; }
+
+
+        .fm-id { font-size: 10px; color: #aaa; margin-top: 1px; }
+
+        /* DM loading dots */
+        .dm-loading { display:flex; gap:6px; justify-content:center; align-items:center; padding:30px; }
+        .dm-load-dot { width:8px; height:8px; border-radius:50%; background:#0084ff; opacity:.3; animation:dmDot 1.2s ease-in-out infinite; }
+        .dm-load-dot:nth-child(2) { animation-delay:.2s; }
+        .dm-load-dot:nth-child(3) { animation-delay:.4s; }
+        @keyframes dmDot { 0%,80%,100%{opacity:.3;transform:scale(.8);} 40%{opacity:1;transform:scale(1.2);} }
+
+        .sys-av {
+            width: 36px; height: 36px; border-radius: 50%;
+            flex-shrink: 0; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(102,85,255,0.35);
+        }
+        .sys-av svg { display: block; }
+
+        /* تأثير الدخولية */
+        #vrEntryEffect { position:fixed; bottom:30%; left:50%; transform:translateX(-50%); z-index:2000; pointer-events:none; display:none; flex-direction:column; align-items:center; gap:8px; }
+        .vr-entry-card { background:rgba(0,0,0,0.75); border-radius:20px; padding:10px 18px; display:flex; align-items:center; gap:12px; color:white; animation:vrEntryIn .4s cubic-bezier(0.25,1,0.5,1); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,0.15); min-width:220px; }
+        @keyframes vrEntryIn { from{opacity:0;transform:scale(.7);} to{opacity:1;transform:scale(1);} }
+        .vr-entry-av { width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid #f1c40f; flex-shrink:0; }
+        .vr-entry-txt { font-size:12px; line-height:1.5; }
+        .vr-entry-txt strong { color:#f1c40f; font-size:13px; }
+        .vr-entry-ico { width:60px; height:60px; object-fit:contain; }
+
+    </style>
+</head>
+<body>
+
+<!-- Facebook Shimmer Loader -->
+<div id="loader">
+
+    <!-- هيدر وهمي -->
+    <div class="fb-shimmer-header">
+        <div class="sh-circle" style="width:38px;height:38px;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+            <div class="sh-block" style="height:13px;width:60%;"></div>
+            <div class="sh-block" style="height:11px;width:40%;"></div>
+        </div>
+        <div class="sh-circle" style="width:34px;height:34px;"></div>
+    </div>
+
+    <!-- مقاعد وهمية -->
+    <div class="fb-shimmer-seats">
+        <!-- صف 1: مقعدان -->
+        <div class="fb-shimmer-row">
+            <div class="fb-shimmer-seat">
+                <div class="sh-seat-circle"></div>
+                <div class="sh-seat-label"></div>
+            </div>
+            <div class="fb-shimmer-seat">
+                <div class="sh-seat-circle"></div>
+                <div class="sh-seat-label"></div>
+            </div>
+        </div>
+        <!-- صف 2: أربعة مقاعد -->
+        <div class="fb-shimmer-row" style="gap:22px;">
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+        </div>
+        <!-- صف 3: أربعة مقاعد -->
+        <div class="fb-shimmer-row" style="gap:22px;">
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+            <div class="fb-shimmer-seat"><div class="sh-seat-circle"></div><div class="sh-seat-label"></div></div>
+        </div>
+    </div>
+
+    <!-- رسائل دردشة وهمية -->
+    <div class="fb-shimmer-chat">
+        <div class="sh-msg-row">
+            <div class="sh-msg-av"></div>
+            <div class="sh-msg-lines">
+                <div style="height:11px;width:55%;border-radius:6px;"></div>
+                <div style="height:11px;width:80%;border-radius:6px;"></div>
+            </div>
+        </div>
+        <div class="sh-msg-row">
+            <div class="sh-msg-av"></div>
+            <div class="sh-msg-lines">
+                <div style="height:11px;width:40%;border-radius:6px;"></div>
+                <div style="height:11px;width:65%;border-radius:6px;"></div>
+            </div>
+        </div>
+        <div class="sh-msg-row">
+            <div class="sh-msg-av"></div>
+            <div class="sh-msg-lines">
+                <div style="height:11px;width:60%;border-radius:6px;"></div>
+                <div style="height:11px;width:45%;border-radius:6px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط تحكم سفلي وهمي -->
+    <div class="fb-shimmer-nav">
+        <div class="sh-nav-circle"></div>
+        <div class="sh-nav-circle"></div>
+        <div class="sh-nav-circle"></div>
+        <div class="sh-nav-input"></div>
+        <div class="sh-nav-circle"></div>
+    </div>
+
+</div>
+
+<div class="app-container" id="app" style="display:none;">
+
+    <!-- ===== الهيدر ===== -->
+    <header class="top-header">
+        <div class="header-left-group">
+            <div class="room-badge">
+                <i class="fas fa-chevron-right" style="font-size:10px; color:#a4b0be; cursor:pointer;" onclick="showLeave()"></i>
+                <div class="info-text">
+                    <div class="top-info">
+                        <div class="room-name-group">
+                            <span class="room-name" id="roomNameEl">الغرفة</span>
+                        </div>
+                        <div class="viewers-badge" id="vrViewersBadge" onclick="vrOpenViewers()" style="cursor:pointer;" title="عرض المنظمين"><i class="fas fa-user-friends"></i> <span id="viewersEl">0</span></div>
+                    </div>
+                    <div class="bottom-info">
+                        <span class="room-id" id="roomIdEl">ID: ---</span>
+                        <div class="support-badge"><span id="roomPointsEl">0</span><i class="fas fa-gem"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="top-supporters" onclick="openSupportersModal()">
+                <div class="supporter-avatars" id="topDonorsEl">
+                    <div class="supporter-dot supporter-empty"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="18" r="18" fill="#dde3ea"/><circle cx="18" cy="14" r="6" fill="#bac4d0"/><ellipse cx="18" cy="28" rx="10" ry="7" fill="#bac4d0"/></svg></div>
+                    <div class="supporter-dot supporter-empty"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="18" r="18" fill="#dde3ea"/><circle cx="18" cy="14" r="6" fill="#bac4d0"/><ellipse cx="18" cy="28" rx="10" ry="7" fill="#bac4d0"/></svg></div>
+                    <div class="supporter-dot supporter-empty"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="18" r="18" fill="#dde3ea"/><circle cx="18" cy="14" r="6" fill="#bac4d0"/><ellipse cx="18" cy="28" rx="10" ry="7" fill="#bac4d0"/></svg></div>
+                </div>
+            </div>
+        </div>
+        <div class="exit-icon-btn" onclick="showLeave()"><i class="fas fa-power-off"></i></div>
+    </header>
+
+    <!-- ===== المقاعد (2 + 4 + 4 = 10) ===== -->
+    <main class="main-content" id="seatsContainer">
+        <!-- صف 1 -->
+        <div class="row">
+            <div class="seat-box" id="sb0"><div class="circle-frame" id="sf0" onclick="onSeatClick(0)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl0">متاح</span></div>
+            <div class="seat-box" id="sb1"><div class="circle-frame" id="sf1" onclick="onSeatClick(1)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl1">متاح</span></div>
+        </div>
+        <!-- صف 2 -->
+        <div class="row">
+            <div class="sub-group">
+                <div class="seat-box" id="sb2"><div class="circle-frame" id="sf2" onclick="onSeatClick(2)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl2">متاح</span></div>
+                <div class="seat-box" id="sb3"><div class="circle-frame" id="sf3" onclick="onSeatClick(3)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl3">متاح</span></div>
+            </div>
+            <div class="sub-group">
+                <div class="seat-box" id="sb4"><div class="circle-frame" id="sf4" onclick="onSeatClick(4)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl4">متاح</span></div>
+                <div class="seat-box" id="sb5"><div class="circle-frame" id="sf5" onclick="onSeatClick(5)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl5">متاح</span></div>
+            </div>
+        </div>
+        <!-- صف 3 -->
+        <div class="row">
+            <div class="sub-group">
+                <div class="seat-box" id="sb6"><div class="circle-frame" id="sf6" onclick="onSeatClick(6)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl6">متاح</span></div>
+                <div class="seat-box" id="sb7"><div class="circle-frame" id="sf7" onclick="onSeatClick(7)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl7">متاح</span></div>
+            </div>
+            <div class="sub-group">
+                <div class="seat-box" id="sb8"><div class="circle-frame" id="sf8" onclick="onSeatClick(8)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl8">متاح</span></div>
+                <div class="seat-box" id="sb9"><div class="circle-frame" id="sf9" onclick="onSeatClick(9)"><i class="fas fa-plus plus-sign"></i></div><span class="user-label" id="sl9">متاح</span></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== الدردشة ===== -->
+    <div class="chat-view" id="chat-view">
+        <div class="msg-line">
+            <div class="sys-av">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+                  <circle cx="18" cy="18" r="18" fill="#6655ff"/>
+                  <path d="M18 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 8c4 0 6 2 6 3v1H12v-1c0-1 2-3 6-3z" fill="white" opacity=".9"/>
+                  <circle cx="26" cy="10" r="4" fill="#00d2ff"/>
+                  <path d="M24.5 10h3M26 8.5v3" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+                  <rect x="11" y="22" width="14" height="2" rx="1" fill="white" opacity=".5"/>
+                  <rect x="13" y="25" width="10" height="1.5" rx=".75" fill="white" opacity=".3"/>
+                </svg>
+            </div>
+            <div class="msg-content">
+                <div class="msg-header">
+                    <span class="chat-name" style="color:#6655ff">النظام</span>
+                    <span class="badge badge-system">تنبيه</span>
+                </div>
+                <span class="chat-text" style="color:#4a4a6a;font-size:12.5px;">🔒 مرحباً بكم! يُرجى الالتزام بقوانين الغرفة وشروط الاستخدام وسياسة الخصوصية. أي انتهاك سيؤدي إلى إجراءات فورية.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== الشريط السفلي ===== -->
+    <footer class="bottom-nav" id="bottom-nav">
+        <button class="nav-circle-btn hide-on-focus" id="speakerBtn" onclick="toggleSpeaker()">
+            <i class="fas fa-volume-up" id="speakerIco" style="color:#636e72"></i>
+        </button>
+        <button class="nav-circle-btn hide-on-focus" id="micBtn" onclick="toggleMic()">
+            <i class="fas fa-microphone" id="micIco" style="color:#0084ff"></i>
+        </button>
+        <button class="nav-circle-btn hide-on-focus" id="vrEmojiBtn" onclick="vrOpenEmojiPicker()"><i class="far fa-smile" style="color:#f39c12"></i></button>
+
+        <button class="nav-circle-btn show-on-focus"><i class="fas fa-image" style="color:#2ecc71"></i></button>
+
+        <!-- حقل الإدخال: زر الإرسال على اليمين دائماً -->
+        <div class="nav-input-box">
+            <button class="send-chat-btn" onclick="sendChatMessage()">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+            <input type="text" id="chat-input" placeholder="أدخل رسالتك هنا..." onkeypress="handleEnter(event)">
+        </div>
+
+        <button class="nav-circle-btn hide-on-focus" id="open-gift-btn">
+            <i class="fas fa-gift" style="color:#f1c40f"></i>
+        </button>
+
+    </footer>
+
+    <div id="gift-notification-container"></div>
+    <div class="modal-overlay" id="modal-overlay"></div>
+
+    <!-- ===== نافذة الهدايا ===== -->
+    <div class="gift-modal" id="gift-modal">
+        <div class="gift-description" id="gift-desc-text">اختر هدية لعرض تفاصيلها هنا...</div>
+        <div class="recipients-bar" id="recipients-container"></div>
+        <div class="tabs-nav" id="tabs-scroll">
+            <div class="tab-item active" onclick="switchTab(0)">الحقيبة</div>
+            <div class="tab-item" onclick="switchTab(1)">هدايا الأسبوع</div>
+            <div class="tab-item" onclick="switchTab(2)">هدايا أسطورية</div>
+            <div class="tab-item" onclick="switchTab(3)">هدايا نادرة</div>
+            <div class="tab-item" onclick="switchTab(4)">هدايا إنسانية</div>
+        </div>
+        <div class="gifts-grid-container" id="gifts-grids-container"></div>
+        <div class="tabs-dots" id="tabs-dots">
+            <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <div class="modal-bottom-bar">
+            <div class="balance"><i class="fas fa-coins" style="color:var(--accent-gold)"></i> <span id="user-balance">0</span></div>
+            <div class="send-actions">
+                <select class="qty-select" id="gift-qty">
+                    <option value="1">1</option><option value="5">5</option><option value="10">10</option>
+                    <option value="66">66</option><option value="99">99</option>
+                </select>
+                <button class="send-btn" onclick="sendGift()">إرسال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة الملف الشخصي (مطابقة roomvideo) ===== -->
+    <div class="profile-modal" id="profile-modal">
+        <button onclick="closeAllModals()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;">×</button>
+
+        <!-- الصورة مع Shimmer -->
+        <div class="pm-av-wrap" id="pmAvWrap">
+            <div class="pm-av-sh" id="pmAvSh"></div>
+            <img src="" id="prof-modal-img" alt="">
+        </div>
+
+        <!-- الاسم والـ ID -->
+        <div class="profile-name-text" id="prof-modal-name" style="font-size:18px;font-weight:800;color:#111;margin-bottom:4px;"></div>
+        <div class="profile-id-text"   id="prof-modal-id" style="font-size:12px;color:#888;margin-bottom:16px;"></div>
+
+        <!-- أزرار الصفوف (كل زر full-width) -->
+        <div class="pm-actions">
+            <div class="pm-row2">
+                <button class="pm-btn pm-btn-follow" id="pmFollowBtn">+ متابعة</button>
+                <button class="pm-btn pm-btn-msg"    id="pmMsgBtn">رسالة <i class="far fa-envelope"></i></button>
+            </div>
+            <button class="pm-btn pm-btn-friend"  id="pmFriendBtn"  style="display:none;">+ إضافة صديق</button>
+            <button class="pm-btn pm-btn-fl-list" id="pmFlListBtn" style="display:none;" onclick="vrOpenFriends()">قائمة الأصدقاء <i class="fas fa-users"></i></button>
+        </div>
+
+        <!-- لوحة المالك (مطابقة roomvideo) -->
+        <div class="pm-owner-panel" id="pmOwnerPanel" style="display:none;">
+            <button class="pm-own-btn pm-own-seat"  id="pmOwnSeatBtn">دعوة للمقعد</button>
+            <button class="pm-own-btn pm-own-kick"  id="pmOwnKickBtn">⊗ طرد مؤقت</button>
+            <button class="pm-own-btn pm-own-ban"   id="pmOwnBanBtn">⊘ حظر نهائي</button>
+        </div>
+    </div>
+
+    <!-- ===== نافذة الداعمين ===== -->
+    <div class="supporters-modal" id="supporters-modal">
+        <div class="supporters-header">
+            <span><i class="fas fa-crown" style="color:var(--accent-gold)"></i> قائمة الداعمين</span>
+            <button class="close-modal-btn" style="position:static;" onclick="closeAllModals()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="supporters-list" id="supporters-list-container"></div>
+    </div>
+
+    <!-- ===== نافذة الخروج ===== -->
+    <div class="modal-overlay" id="leave-overlay" style="z-index:1101;"></div>
+    <div class="leave-modal" id="leave-modal">
+        <h3>تأكيد الخروج</h3>
+        <p>هل تريد مغادرة الغرفة؟</p>
+        <div class="leave-btns">
+            <button class="btn-yes" onclick="doLeave()">نعم، اخرج</button>
+            <button class="btn-no" onclick="hideLeave()">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- ===== نافذة المهام ===== -->
+    <div class="tasks-modal" id="tasks-modal">
+        <div class="tasks-header">
+            <span>📋 المهام اليومية</span>
+            <button style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;" onclick="closeTasksModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="tasks-body">
+            <div class="task-item">
+                <div class="task-icon"><i class="fas fa-microphone"></i></div>
+                <div class="task-info">
+                    <div class="task-title">تحدث في الغرفة 10 دقائق</div>
+                    <div class="task-sub">يتجدد يومياً</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <div class="task-reward">+50 <i class="fas fa-gem"></i></div>
+                    <button class="task-btn">ابدأ</button>
+                </div>
+            </div>
+            <div class="task-item">
+                <div class="task-icon"><i class="fas fa-gift"></i></div>
+                <div class="task-info">
+                    <div class="task-title">أرسل 3 هدايا للأعضاء</div>
+                    <div class="task-sub">يتجدد يومياً</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <div class="task-reward">+30 <i class="fas fa-gem"></i></div>
+                    <button class="task-btn">ابدأ</button>
+                </div>
+            </div>
+            <div class="task-item">
+                <div class="task-icon"><i class="fas fa-comments"></i></div>
+                <div class="task-info">
+                    <div class="task-title">أرسل 5 رسائل في الدردشة</div>
+                    <div class="task-sub">يتجدد يومياً</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <div class="task-reward">+20 <i class="fas fa-gem"></i></div>
+                    <button class="task-btn">ابدأ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end app-container -->
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+
+    firebase.initializeApp({
+        apiKey: "AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",
+        authDomain: "a-comment-5a3e5.firebaseapp.com",
+        databaseURL: "https://a-comment-5a3e5-default-rtdb.firebaseio.com",
+        projectId: "a-comment-5a3e5",
+        storageBucket: "a-comment-5a3e5.appspot.com",
+        messagingSenderId: "557343451166",
+        appId: "1:557343451166:web:d181f098cdeccf7691260f"
+    });
+    const db = firebase.database(), auth = firebase.auth();
+
+    /* ════ حالة ════ */
+    var me = null, roomId = null, roomData = null, isOwner = false;
+    var mySeatIdx = null, localStream = null;
+    var micOn = false, speakerOn = true;
+    var selectedGift = null, selectedPrice = 0, selectedGiftIcon = "";
+    var currentTabIndex = 0;
+    var SEATS = 10;
+    var __vrSeatsSnap = {};
+    var __emoTimers = {};
+    var __ownerHiddenTO = null;
+    var studentRef = null, studentPC = null;
+    var teacherPeerConns = {};
+    const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
+    /* ════ بيانات الهدايا ════ */
+    var tabsKeys = ["tab1","tab2","tab3","tab4","tab5"];
+    var giftsData = { tab1:[], tab2:[], tab3:[], tab4:[], tab5:[] };
+    var _vrGiftSoundMap = {}; // key = giftName => soundUrl
+    var _vrGiftRecCoinsMap = {}; // key = giftName => receiverCoins
+    var _vrGiftSenderPtsMap = {}; // key = giftName => senderPoints
+    var _vrAllGiftsData = {}; // key = giftName => full firebase data
+    // تحميل الهدايا من Firebase بدلاً من الافتراضية
+    db.ref('settings/gifts').once('value', function(snap) {
+        var catMap = { bag:'tab1', weekly:'tab2', legendary:'tab3', rare:'tab4', humanitarian:'tab5' };
+        tabsKeys.forEach(function(k){ giftsData[k]=[]; });
+        snap.forEach(function(s) {
+            var g = s.val(); if(!g) return;
+            var key = catMap[g.category] || 'tab1';
+            giftsData[key].push({
+                id: s.key, name: g.name||'هدية', price: g.price||0,
+                icon: g.imgUrl||'🎁', desc: g.name||'هدية',
+                badge: g.badge||'', soundUrl: g.soundUrl||'',
+                receiverCoins: g.receiverCoins || 0
+            });
+            if (g.soundUrl) _vrGiftSoundMap[g.name] = g.soundUrl;
+            // نحفظ receiverCoins لكل هدية باسمها
+            _vrGiftRecCoinsMap[g.name] = (typeof g.receiverCoins === 'number') ? g.receiverCoins : 0;
+            // نحفظ senderPoints لكل هدية باسمها
+            _vrGiftSenderPtsMap[g.name] = (typeof g.senderPoints === 'number') ? g.senderPoints : 0;
+            // نحفظ البيانات الكاملة
+            _vrAllGiftsData[g.name] = g;
+        });
+        renderGifts();
+    });
+
+    /* ════ SVG الإيموجيات ════ */
+    function buildEmoSvg(type) {
+        var paths = {
+            like: "M2 21h4V9H2v12zm20-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L13 1 7.59 6.41C7.22 6.78 7 7.3 7 7.83V19c0 1.1.9 2 2 2h8c.82 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z",
+            love: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
+            clap: "M7 11V5a2 2 0 0 1 4 0v6h1V3a2 2 0 1 1 4 0v8h1V5a2 2 0 1 1 4 0v9c0 4-3 7-7 7H10c-2 0-3-1-4-3l-3-5a2 2 0 0 1 4-2z",
+            fire: "M13.5 0S14 3 12 5c-1.5 1.5-2 3-2 4.5 0 2.5 2 4.5 4.5 4.5 1.7 0 3.2-.9 4-2.3.9 1.4 1.5 3 1.5 4.8C20 20.1 16.4 24 12 24S4 20.1 4 15.5c0-4 2.7-7.4 6.4-8.6C10.1 3.8 11.6 1.7 13.5 0z",
+            wow:  "M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm-4-11a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm8 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-4 8c-2.21 0-4-1.79-4-4h8c0 2.21-1.79 4-4 4z",
+            sad:  "M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm-4.5-9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-9.3 5.3a1 1 0 0 1 0-1.41C8.38 15.72 10.06 15 12 15s3.62.72 4.8 1.89a1 1 0 1 1-1.41 1.41C14.6 17.5 13.4 17 12 17s-2.6.5-3.39 1.3a1 1 0 0 1-1.41 0z"
+        };
+        var fills = {like:"#1877f2", love:"#e53935", clap:"#f9a825", fire:"#f44336", wow:"#ff9800", sad:"#78909c"};
+        var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        svg.setAttribute("viewBox","0 0 24 24"); svg.style.width="34px"; svg.style.height="34px";
+        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", paths[type]||""); path.setAttribute("fill", fills[type]||"#888");
+        svg.appendChild(path); return svg;
+    }
+
+    /* ════ بدء ════ */
+    auth.onAuthStateChanged(function(user) {
+        if (!user) { location.href = "roomlogin.html"; return; }
+        db.ref("users/" + user.uid).once("value", function(snap) {
+            var u = snap.val() || {};
+            me = {
+                uid:    user.uid,
+                name:   u.yourname || u.name || user.displayName || "مستخدم",
+                avatar: u.avatar || user.photoURL || "",
+                frame:  u.activeFrameUrl || u.Cadar_Avatar || "",
+                badge:  u.BadgeDon_ || "",
+                points: u.coins || u.dimond || u.points || 0,
+                coins:  u.coins || u.dimond || 0,
+                numericId: u.numericId || null
+            };
+            document.getElementById("user-balance").textContent = me.coins;
+            // مراقبة تلقائية للكوينزات
+            db.ref("users/" + user.uid + "/coins").on("value", function(cs) {
+                var cv = cs.val() || 0;
+                me.coins = cv;
+                me.points = cv;
+                document.getElementById("user-balance").textContent = cv;
+            });
+            var rt = null;
+            try { rt = JSON.parse(sessionStorage.getItem("yw_room_target")); } catch(ex) {}
+            roomId = (rt && rt.roomId) || sessionStorage.getItem("targetVoiceRoom") || sessionStorage.getItem("targetRoom");
+            if (!roomId) { vrShowRoomError("لم يتم تحديد الغرفة"); return; }
+            loadRoom();
+        });
+    });
+
+    function loadRoom() {
+        db.ref("rooms/" + roomId).once("value", function(snap) {
+            // إخفاء الـ shimmer loader
+            var loader = document.getElementById("loader");
+            if (loader) loader.style.display = "none";
+            roomData = snap.val();
+            if (!roomData) { vrShowRoomError("الغرفة غير موجودة"); return; }
+            isOwner = (roomData.ownerId || roomData.teacherUid) === me.uid;
+            document.getElementById("roomNameEl").textContent = roomData.roomName || roomData.name || "غرفة صوتية";
+            document.getElementById("roomIdEl").textContent   = "ID: " + (roomData.roomCode || roomId.slice(-6).toUpperCase());
+            document.title = roomData.roomName || "غرفة صوتية";
+            // enterRoom أولاً لضمان جاهزية me قبل الـ listeners
+            enterRoom();
+            renderGifts();
+            // ثم ابدأ الاستماع للبيانات
+            listenSeats();
+            listenChat();
+            listenPoints();
+            listenRoomState();
+            listenKick();
+            listenBan();
+            listenDonors();
+            if (!isOwner) listenSeatInvites();
+            // إخفاء الـ loader وإظهار التطبيق
+            var loaderEl = document.getElementById("loader");
+            var appEl    = document.getElementById("app");
+            if (loaderEl) { loaderEl.style.opacity = "0"; setTimeout(function(){ loaderEl.style.display = "none"; }, 300); }
+            if (appEl)    appEl.style.display = "flex";
+        });
+    }
+
+    /* ════ WebRTC - نفس نظام roomvideo حرفياً ════ */
+
+    // صاحب الغرفة: ينشئ PC مع كل منظم
+    function createPeerForOrganizer(studentKey, studentUid) {
+        if (teacherPeerConns[studentKey]) return;
+        var pc = new RTCPeerConnection(servers);
+        var audioEl = document.createElement("audio");
+        audioEl.autoplay = true; audioEl.playsInline = true; audioEl.muted = !speakerOn;
+        document.body.appendChild(audioEl);
+        teacherPeerConns[studentKey] = { pc: pc, audioEl: audioEl, uid: studentUid || "" };
+
+        pc.onicecandidate = function(e) {
+            if (e.candidate) db.ref("rooms/" + roomId + "/candidates/" + studentKey + "/fromTeacher").push(JSON.stringify(e.candidate));
+        };
+        pc.ontrack = function(e) {
+            if (e.track.kind === "audio") {
+                audioEl.srcObject = e.streams[0];
+                audioEl.muted = !speakerOn;
+                audioEl.volume = 1.0;
+                audioEl.play().catch(function(){});
+            }
+        };
+
+        function addTracksAndOffer() {
+            if (localStream) {
+                localStream.getAudioTracks().forEach(function(track) {
+                    track.enabled = micOn; // ضبط enabled حسب حالة الميكروفون
+                    try { pc.addTrack(track, localStream); } catch(err) {}
+                });
+            }
+            pc.createOffer({ offerToReceiveAudio: true }).then(function(offer) {
+                return pc.setLocalDescription(offer).then(function() {
+                    return db.ref("rooms/" + roomId + "/offers/" + studentKey).set(JSON.stringify(offer));
+                });
+            }).catch(function(){});
+        }
+
+        if (localStream) {
+            addTracksAndOffer();
+        } else {
+            var waited = 0;
+            var waitInt = setInterval(function() {
+                waited += 200;
+                if (localStream || waited >= 5000) { clearInterval(waitInt); addTracksAndOffer(); }
+            }, 200);
+        }
+
+        db.ref("rooms/" + roomId + "/answers/" + studentKey).on("value", function(snap) {
+            if (snap.exists() && !pc.currentRemoteDescription) {
+                try { pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(snap.val()))); } catch(e) {}
+            }
+        });
+        db.ref("rooms/" + roomId + "/candidates/" + studentKey + "/fromStudent").on("child_added", function(snap) {
+            if (snap.val() && pc) try { pc.addIceCandidate(new RTCIceCandidate(JSON.parse(snap.val()))); } catch(e) {}
+        });
+    }
+
+    // المنظم: يرد على offer صاحب الغرفة
+    function createOrganizerPeerAndAnswer(offerStr) {
+        if (studentPC) { try { studentPC.close(); } catch(e) {} studentPC = null; }
+        studentPC = new RTCPeerConnection(servers);
+        var myKey = studentRef.key;
+
+        if (localStream) {
+            localStream.getTracks().forEach(function(track) { try { studentPC.addTrack(track, localStream); } catch(e) {} });
+        }
+        studentPC.onicecandidate = function(e) {
+            if (e.candidate) db.ref("rooms/" + roomId + "/candidates/" + myKey + "/fromStudent").push(JSON.stringify(e.candidate));
+        };
+        studentPC.ontrack = function(e) {
+            if (e.track.kind === "audio") {
+                var ra = document.getElementById("remoteAudio");
+                if (!ra) {
+                    ra = document.createElement("audio");
+                    ra.id = "remoteAudio"; ra.autoplay = true; ra.playsInline = true;
+                    document.body.appendChild(ra);
+                }
+                ra.srcObject = e.streams[0];
+                ra.muted = !speakerOn;
+                ra.volume = 1.0;
+                ra.play().catch(function(){});
+            }
+        };
+        studentPC.onconnectionstatechange = function() {
+            if (studentPC && (studentPC.connectionState === "failed" || studentPC.connectionState === "disconnected")) {
+                setTimeout(function() {
+                    if (studentRef) {
+                        db.ref("rooms/" + roomId + "/offers/" + myKey).once("value", function(snap) {
+                            if (snap.exists()) createOrganizerPeerAndAnswer(snap.val());
+                        });
+                    }
+                }, 2000);
+            }
+        };
+
+        studentPC.setRemoteDescription(new RTCSessionDescription(JSON.parse(offerStr)))
+            .then(function() { return studentPC.createAnswer(); })
+            .then(function(answer) {
+                return studentPC.setLocalDescription(answer).then(function() {
+                    return db.ref("rooms/" + roomId + "/answers/" + myKey).set(JSON.stringify(answer));
+                });
+            }).catch(function(){});
+    }
+
+    /* ════ المقاعد ════ */
+    function listenSeats() {
+        db.ref("rooms/" + roomId + "/seats").on("value", function(snap) {
+            if (!me) return; // انتظر حتى يكتمل الـ auth
+            var all = snap.val() || {};
+            __vrSeatsSnap = all;
+            var count = 0;
+            for (var i = 0; i < SEATS; i++) { renderSeat(i, all[i] || null); if (all[i] && all[i].userId) count++; }
+            document.getElementById("viewersEl").textContent = count;
+        });
+    }
+
+    function renderSeat(i, data) {
+        var sf = document.getElementById("sf" + i);
+        var sl = document.getElementById("sl" + i);
+        var sb = document.getElementById("sb" + i);
+        if (!sf || !sl || !sb) return;
+
+        sf.innerHTML = "";
+        sf.className = "circle-frame";
+        sf.onclick = function() { onSeatClick(i); };
+
+        var oldExtra = sb.querySelectorAll(".av-outer-frame,.seat-badge,.mic-badge,.seat-emoji");
+        for (var x = 0; x < oldExtra.length; x++) oldExtra[x].remove();
+
+        if (data && data.userId) {
+            var nm  = data.name   || "مستخدم";
+            var av  = data.avatar || "";
+            var isMe = me && data.userId === me.uid;
+
+            sf.classList.add("active");
+            sf.onclick = (function(n,a,uid,idx,fr){ return function(){ vrOpenProfile(n,a,uid,idx,true,fr); }; })(nm, av, data.userId, i, data.frame||'');
+
+            // shimmer يبقى حتى تُحمَّل الصورة
+            var sh = document.createElement("div"); sh.className = "seat-shimmer"; sf.appendChild(sh);
+
+            // avatar - تبقى مخفية (opacity:0) حتى تُحمَّل
+            var img = document.createElement("img"); img.className = "avatar-img"; img.alt = "";
+            img.onload  = function() {
+                sf.classList.add("loaded");   // يُظهر الصورة ويُخفي shimmer
+                sh.style.display = "none";
+            };
+            img.onerror = function() {
+                // عند فشل التحميل: أظهر أيقونة شخص بدلاً من صورة مكسورة
+                sh.style.display = "none";
+                sf.innerHTML = "";
+                var ic = document.createElement("div");
+                ic.style.cssText = "width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;";
+                ic.innerHTML = "<svg viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg' width='60%' height='60%'><circle cx='18' cy='14' r='7' fill='rgba(255,255,255,0.9)'/><ellipse cx='18' cy='30' rx='12' ry='8' fill='rgba(255,255,255,0.9)'/></svg>";
+                sf.appendChild(ic);
+                sf.classList.add("loaded");
+                // أعِد إضافة الـ onclick
+                sf.onclick = (function(n,a,uid,idx,fr){ return function(){ vrOpenProfile(n,a,uid,idx,true,fr); }; })(nm, av, data.userId, i, data.frame||'');
+            };
+            img.src = av;
+            sf.appendChild(img);
+
+            // frame - يُضاف إلى sf (circle-frame) مثل roomvideo تماماً
+            if (data.frame) {
+                var fr = document.createElement("img"); fr.className = "av-outer-frame";
+                fr.onerror = function() { fr.remove(); };
+                fr.src = data.frame;
+                sf.appendChild(fr); // ← داخل الدائرة مع overflow:visible يخرج خارجها
+            }
+            // badge
+            if (data.badge) {
+                var bdg = document.createElement("img"); bdg.className = "seat-badge";
+                bdg.onerror = function() { bdg.remove(); }; bdg.src = data.badge; sb.appendChild(bdg);
+            }
+            // mic badge (for self)
+            if (isMe) {
+                var mic = document.createElement("div"); mic.className = "mic-badge " + (micOn ? "on" : "off"); mic.id = "myMicBadge";
+                mic.onclick = function(e) { e.stopPropagation(); toggleMic(); };
+                var micI = document.createElement("i"); micI.className = micOn ? "fas fa-microphone" : "fas fa-microphone-slash"; micI.style.fontSize = "8px";
+                mic.appendChild(micI); sb.appendChild(mic);
+            }
+            // emoji overlay
+            var emoEl = document.createElement("div"); emoEl.className = "seat-emoji"; emoEl.id = "seatEmo" + i; sb.appendChild(emoEl);
+            if (data.emoji && data.emoji.id && data.emoji.ts) {
+                var left = (data.emoji.ts + 8000) - Date.now();
+                if (left > 0) {
+                    clearTimeout(__emoTimers[i]);
+                    if (data.emoji.imgUrl) {
+                        var emoImgSeat = document.createElement("img"); emoImgSeat.src = data.emoji.imgUrl;
+                        emoImgSeat.style.cssText = "width:34px;height:34px;object-fit:contain;"; emoEl.appendChild(emoImgSeat);
+                    } else { emoEl.appendChild(buildEmoSvg(data.emoji.id)); }
+                    emoEl.classList.add("show");
+                    __emoTimers[i] = setTimeout((function(el){ return function(){ el.classList.remove("show"); }; })(emoEl), left);
+                }
+            }
+
+            sl.textContent = nm.length > 9 ? nm.slice(0,9) + "…" : nm;
+            if (i === 0) sf.style.borderColor = "#f1c40f";
+
+        } else {
+            // مقعد فارغ - بدون حروف
+            var plusI = document.createElement("i"); plusI.className = "fas fa-plus plus-sign";
+            sf.appendChild(plusI);
+            sl.textContent = "متاح";
+        }
+    }
+
+    function onSeatClick(i) {
+        if (isOwner) {
+            if (i === 0) return;
+            vrOpenSeatPicker(i); return;
+        }
+        if (i === 0) { vrSnack("هذا المقعد مخصص لصاحب الغرفة"); return; }
+        if (mySeatIdx !== null && mySeatIdx !== i) db.ref("rooms/" + roomId + "/seats/" + mySeatIdx).remove();
+        if (mySeatIdx !== i) takeSeat(i);
+    }
+
+    function takeSeat(i) {
+        var sd = { userId:me.uid, name:me.name, avatar:me.avatar, frame:me.frame, badge:me.badge, micOn:micOn, ts:Date.now() };
+        db.ref("rooms/" + roomId + "/seats/" + i).set(sd);
+        mySeatIdx = i;
+        db.ref("rooms/" + roomId + "/seats/" + i).onDisconnect().remove();
+    }
+
+    /* ════ الدخول ════ */
+    var roomJoinTime = null; // وقت دخول الغرفة لحساب المدة
+    var _cachedRoomTasks = null; // المهام المحملة مسبقاً عند الدخول
+
+    function enterRoom() {
+        roomJoinTime = Date.now(); // ✅ تسجيل وقت الدخول
+        // ── تحميل المهام مسبقاً لضمان الحفظ الصحيح عند الخروج ──
+        db.ref('tasks').once('value').then(function(tsSnap) {
+            _cachedRoomTasks = tsSnap.val() || {};
+        }).catch(function() { _cachedRoomTasks = {}; });
+        // إيقاف أي interval سابق (لم يعد مستخدماً)
+        if (window.__roomPointsInt) { clearInterval(window.__roomPointsInt); window.__roomPointsInt = null; }
+        // إخفاء shimmer loader
+        var loader = document.getElementById("loader");
+        if (loader) { loader.style.opacity = "0"; setTimeout(function(){ loader.style.display = "none"; }, 400); }
+        db.ref("rooms/" + roomId + "/viewers/" + me.uid).set({ name:me.name, avatar:me.avatar, ts:Date.now() });
+        db.ref("rooms/" + roomId + "/viewers/" + me.uid).onDisconnect().remove();
+
+        // ── مراقبة الداخلين الجدد لعرض تأثير الدخولية ──
+        var _vrViewersInitDone = false;
+        var _vrViewersKnown = {};
+        db.ref("rooms/" + roomId + "/viewers").on("value", function(vSnap) {
+            var now = vSnap.val() || {};
+            if (!_vrViewersInitDone) {
+                // أول مرة: سجّل الموجودين دون عرض تأثير
+                Object.keys(now).forEach(function(uid) { _vrViewersKnown[uid] = true; });
+                _vrViewersInitDone = true;
+                return;
+            }
+            Object.keys(now).forEach(function(uid) {
+                if (!_vrViewersKnown[uid]) {
+                    _vrViewersKnown[uid] = true;
+                    // جلب بيانات الداخل الجديد
+                    db.ref("users/" + uid).once("value", function(us) {
+                        var uv = us.val() || {};
+                        var entryImgUrl = uv.activeEntryUrl || '';
+                        var entryName = uv.yourname || uv.name || now[uid].name || 'مستخدم';
+                        var entryAvatar = uv.avatar || now[uid].avatar || '';
+                        vrShowEntryEffect(entryName, entryAvatar, entryImgUrl);
+                    });
+                }
+            });
+            // تنظيف الخارجين
+            Object.keys(_vrViewersKnown).forEach(function(uid) {
+                if (!now[uid]) delete _vrViewersKnown[uid];
+            });
+        });
+
+        if (isOwner) {
+            // صاحب الغرفة يجلس في مقعد 0
+            db.ref("rooms/" + roomId + "/seats/0").set({ userId:me.uid, name:me.name, avatar:me.avatar, frame:me.frame, badge:me.badge, micOn:micOn, ts:Date.now(), isOwner:true });
+            mySeatIdx = 0;
+            // onDisconnect: عند الانقطاع الفجائي تلقائياً
+            db.ref("rooms/" + roomId + "/teacherOnline").onDisconnect().set(false);
+            db.ref("rooms/" + roomId + "/lastSeen").onDisconnect().set(Date.now());
+            // تأكيد الحضور
+            db.ref("rooms/" + roomId + "/teacherOnline").set(true);
+            db.ref("rooms/" + roomId + "/lastSeen").set(Date.now());
+            // keepAlive كل 90 ثانية - يُحدِّث lastSeen فقط
+            if (window.__keepAliveInt) clearInterval(window.__keepAliveInt);
+            window.__keepAliveInt = setInterval(function() {
+                if (!isOwner || !roomId || document.hidden) return;
+                db.ref("rooms/" + roomId + "/teacherOnline").set(true);
+                db.ref("rooms/" + roomId + "/lastSeen").set(Date.now());
+            }, 90000);
+
+            // تشغيل الميكروفون
+            navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } })
+                .then(function(s) {
+                    localStream = s;
+                    localStream.getAudioTracks().forEach(function(t){ t.enabled = micOn; });
+
+                    // أعِد offer لمن كان موجوداً مسبقاً
+                    Object.keys(teacherPeerConns).forEach(function(key) {
+                        var conn = teacherPeerConns[key];
+                        if (conn && conn.pc) localStream.getTracks().forEach(function(track){ try { conn.pc.addTrack(track, localStream); } catch(e){} });
+                    });
+                }).catch(function(){});
+
+            // استمع لانضمام المنظمين
+            var initialKeys = {};
+            db.ref("rooms/" + roomId + "/students").once("value", function(snap) {
+                snap.forEach(function(c) {
+                    initialKeys[c.key] = true;
+                    var v = c.val(); if (v) createPeerForOrganizer(c.key, v.uid || v.userId);
+                });
+            });
+            db.ref("rooms/" + roomId + "/students").on("child_added", function(snap) {
+                var key = snap.key; var val = snap.val();
+                if (!val || teacherPeerConns[key] || initialKeys[key]) return;
+                initialKeys[key] = true;
+                createPeerForOrganizer(key, val.uid || val.userId);
+            });
+            db.ref("rooms/" + roomId + "/students").on("child_removed", function(snap) {
+                var key = snap.key; var conn = teacherPeerConns[key];
+                if (conn) {
+                    if (conn.pc) conn.pc.close();
+                    if (conn.audioEl) conn.audioEl.remove();
+                    delete teacherPeerConns[key];
+                }
+                db.ref("rooms/" + roomId + "/offers/" + key).remove();
+                db.ref("rooms/" + roomId + "/answers/" + key).remove();
+                db.ref("rooms/" + roomId + "/candidates/" + key).remove();
+            });
+
+            startOwnerHiddenCountdown_init();
+
+        } else {
+            // المنظم يسجل في /students
+            var sid = "org_" + me.uid + "_" + Date.now();
+            studentRef = db.ref("rooms/" + roomId + "/students/" + sid);
+            studentRef.set({ userId:me.uid, uid:me.uid, name:me.name, avatar:me.avatar, frame:me.frame, badge:me.badge, mic:false, ts:Date.now() });
+            studentRef.onDisconnect().remove();
+
+            // المنظم يراقب teacherOnline - إذا غاب الصاحب ينتظر 5 دقائق
+            var __teacherGoneTO = null;
+            db.ref("rooms/" + roomId + "/teacherOnline").on("value", function(snap) {
+                var isOnline = snap.val();
+                if (isOnline === false || isOnline === null) {
+                    // الصاحب غاب أو الغرفة اختفت
+                    if (__teacherGoneTO) return;
+                    __teacherGoneTO = setTimeout(function() {
+                        __teacherGoneTO = null;
+                        db.ref("rooms/" + roomId + "/teacherOnline").once("value", function(s2) {
+                            if (!s2.val()) {
+                                cleanup();
+                                location.href = "roomhom.html";
+                            }
+                        });
+                    }, 300000); // 5 دقائق
+                } else if (isOnline === true) {
+                    // صاحب الغرفة عاد - ألغِ مؤقت الخروج
+                    if (__teacherGoneTO) { clearTimeout(__teacherGoneTO); __teacherGoneTO = null; }
+                }
+            });
+
+            // تشغيل الميكروفون (مطفأ)
+            navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } })
+                .then(function(s) {
+                    localStream = s;
+                    localStream.getTracks().forEach(function(t){ t.enabled = false; });
+                }).catch(function(){});
+
+            // استمع لـ offer من صاحب الغرفة
+            db.ref("rooms/" + roomId + "/offers/" + sid).on("value", function(snap) {
+                if (snap.exists()) {
+                    try {
+                        if (!studentPC || !studentPC.currentRemoteDescription || studentPC.signalingState === "closed") {
+                            createOrganizerPeerAndAnswer(snap.val());
+                        }
+                    } catch(e) {}
+                }
+            });
+
+            // ICE من صاحب الغرفة
+            db.ref("rooms/" + roomId + "/candidates/" + sid + "/fromTeacher").on("child_added", function(snap) {
+                if (snap.val() && studentPC) {
+                    try { if (studentPC.remoteDescription) studentPC.addIceCandidate(new RTCIceCandidate(JSON.parse(snap.val()))); } catch(e) {}
+                }
+            });
+        }
+    }
+
+    /* ════ مراقبة غياب صاحب الغرفة (نفس roomvideo - 2 دقيقة) ════ */
+    function startOwnerHiddenCountdown_init() {
+        if (!isOwner) return; // المنظمون لا يُخرَجون عند إخفاء الصفحة
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                startOwnerHiddenCountdown();
+            } else {
+                // عاد المالك → ألغِ مؤقت الإغلاق
+                stopOwnerHiddenCountdown();
+            }
+        });
+    }
+
+    function startOwnerHiddenCountdown() {
+        if (!isOwner || __ownerHiddenTO) return;
+        // سجّل آخر ظهور فقط - لا نُعطّل teacherOnline بعد (roomhom يحسب 5 دقائق من lastSeen)
+        db.ref("rooms/" + roomId + "/lastSeen").set(Date.now());
+        // بعد 5 دقائق إذا لم يعد → نُغلق ونحذف الغرفة نهائياً
+        __ownerHiddenTO = setTimeout(function() {
+            __ownerHiddenTO = null;
+            if (document.hidden && roomId) {
+                // 5 دقائق انتهت → احذف الغرفة نهائياً وأخرج الجميع
+                db.ref("rooms/" + roomId).update({
+                    closed: true,
+                    closedReason: "غاب صاحب الغرفة أكثر من 5 دقائق",
+                    teacherOnline: false,
+                    closedAt: Date.now()
+                }).then(function() {
+                    setTimeout(function() {
+                        db.ref("rooms/" + roomId).remove().catch(function(){});
+                    }, 5000);
+                });
+                vrShowRoomError("تم إغلاق الغرفة لغيابك أكثر من 5 دقائق");
+                setTimeout(function(){ location.href = "roomhom.html"; }, 3000);
+            }
+        }, 300000);
+    }
+
+    function stopOwnerHiddenCountdown() {
+        if (__ownerHiddenTO) { clearTimeout(__ownerHiddenTO); __ownerHiddenTO = null; }
+        // الصاحب عاد → تأكيد الحضور مرة أخرى
+        if (isOwner && roomId) {
+            db.ref("rooms/" + roomId + "/teacherOnline").set(true);
+            db.ref("rooms/" + roomId + "/lastSeen").set(Date.now());
+        }
+    }
+
+
+
+    /* ════ حالة الغرفة ════ */
+    var __roomNullTO = null;
+    function listenRoomState() {
+        db.ref("rooms/" + roomId).on("value", function(snap) {
+            var v = snap.val();
+            if (!v) {
+                // انتظر 8 ثواني قبل الإخراج - قد يكون انقطاع مؤقت
+                if (__roomNullTO) return;
+                __roomNullTO = setTimeout(function() {
+                    __roomNullTO = null;
+                    // تحقق مرة أخرى
+                    db.ref("rooms/" + roomId).once("value", function(s2) {
+                        if (!s2.val()) {
+                            gotoRoomHome(isOwner ? "لقد تم إخراج الجميع" : "تم إخراج الجميع بسبب خروج صاحب الغرفة");
+                        }
+                    });
+                }, 8000);
+                return;
+            }
+            // الغرفة موجودة - ألغِ مؤقت الإخراج إن وُجد
+            if (__roomNullTO) { clearTimeout(__roomNullTO); __roomNullTO = null; }
+
+            if (v.closed) {
+                var rs = v.closedReason || "تم إغلاق الغرفة";
+                if (!window.__roomRemoveScheduled) {
+                    window.__roomRemoveScheduled = true;
+                    setTimeout(function(){ db.ref("rooms/" + roomId).remove().catch(function(){}); }, 5000);
+                }
+                gotoRoomHome(rs);
+            }
+        });
+    }
+
+    function gotoRoomHome(reason) {
+        try { sessionStorage.setItem("roomKickReason", reason || ""); } catch(e) {}
+        location.href = "roomhom.html" + (reason ? ("?reason=" + encodeURIComponent(reason)) : "");
+    }
+
+    function endRoom(reason) {
+        db.ref("rooms/" + roomId).update({ closed:true, closedReason:reason||"تم إغلاق الغرفة", closedAt:Date.now(), closedBy:(me&&me.uid)||null });
+        setTimeout(function(){ db.ref("rooms/" + roomId).remove(); }, 6000);
+    }
+
+    /* ════ الطرد والحظر ════ */
+    function listenKick() {
+        db.ref("rooms/" + roomId + "/kicks/" + me.uid).on("value", function(snap) {
+            if (!snap.exists()) return;
+            var d = snap.val();
+            if (d && d.kickedAt && Date.now() - d.kickedAt < 10 * 60 * 1000) gotoRoomHome("تم طردك من الغرفة. يمكنك العودة بعد 10 دقائق.");
+        });
+    }
+
+    function listenBan() {
+        db.ref("rooms/" + roomId + "/bans/" + me.uid).on("value", function(snap) {
+            if (snap.exists() && snap.val()) gotoRoomHome("تم حظرك نهائياً من هذه الغرفة.");
+        });
+    }
+
+    function vrKickUser(uid, name) {
+        if (!isOwner || !uid) return;
+        vrCfmShow("طرد " + name + "؟", "سيُطرد مؤقتاً ويمكنه العودة بعد 10 دقائق.", function() {
+            db.ref("rooms/" + roomId + "/kicks/" + uid).set({ kickedAt:Date.now(), kickedBy:me.uid });
+            for (var i = 0; i < SEATS; i++) { var s = __vrSeatsSnap[i]; if (s && s.userId === uid) db.ref("rooms/" + roomId + "/seats/" + i).remove(); }
+            db.ref("rooms/" + roomId + "/viewers/" + uid).remove();
+            vrSnack(name + " تم طرده مؤقتاً");
+        });
+    }
+
+    function vrBanUser(uid, name) {
+        if (!isOwner || !uid) return;
+        vrCfmShow("حظر " + name + " نهائياً؟", "لن يتمكن من الدخول مجدداً.", function() {
+            db.ref("rooms/" + roomId + "/bans/" + uid).set({ bannedAt:Date.now(), bannedBy:me.uid });
+            for (var i = 0; i < SEATS; i++) { var s = __vrSeatsSnap[i]; if (s && s.userId === uid) db.ref("rooms/" + roomId + "/seats/" + i).remove(); }
+            db.ref("rooms/" + roomId + "/viewers/" + uid).remove();
+            vrSnack(name + " تم حظره نهائياً");
+        });
+    }
+
+    /* ════ دعوة المقعد ════ */
+    var _seatPickIdx = -1, _seatPickUid = null, _seatPickName = null;
+
+    function vrOpenSeatPicker(seatIdx) {
+        if (!isOwner) return;
+        _seatPickIdx = seatIdx; _seatPickUid = null; _seatPickName = null;
+        document.getElementById("spmt").textContent = "اختر شخصاً للمقعد رقم " + (seatIdx + 1);
+        var list = document.getElementById("spl"); list.innerHTML = "";
+        var hasAny = false;
+
+        db.ref("rooms/" + roomId + "/viewers").once("value", function(vSnap) {
+            db.ref("rooms/" + roomId + "/seats").once("value", function(sSnap) {
+                var viewers = vSnap.val() || {}, seats = sSnap.val() || {}, seated = {};
+                for (var i = 0; i < SEATS; i++) { if (seats[i] && seats[i].userId) seated[seats[i].userId] = true; }
+                Object.keys(viewers).forEach(function(uid) {
+                    if (!uid || (me && uid === me.uid)) return;
+                    hasAny = true;
+                    var vw = viewers[uid] || {};
+                    var nm = vw.name||"مستخدم", av = vw.avatar||"";
+                    var sub = seated[uid] ? "جالس حالياً" : "مشاهد";
+                    var it = document.createElement("div"); it.className = "sp-check-item"; it.dataset.u = uid; it.dataset.n = nm;
+                    var cb  = document.createElement("div"); cb.className  = "sp-checkbox";
+                    var avW = document.createElement("div"); avW.className = "sp-av-wrap";
+                    var avSh= document.createElement("div"); avSh.className= "sp-av-sh"; avW.appendChild(avSh);
+                    var img = document.createElement("img"); img.alt = "";
+                    img.onload  = function(){ avSh.style.display="none"; };
+                    img.onerror = function(){ avSh.style.display="none"; };
+                    img.src = av; avW.appendChild(img);
+                    var info= document.createElement("div"); info.className = "sp-check-info";
+                    var nmD = document.createElement("div"); nmD.className = "sp-check-name"; nmD.textContent = nm;
+                    var sbD = document.createElement("div"); sbD.className = "sp-check-sub";  sbD.textContent = sub;
+                    info.appendChild(nmD); info.appendChild(sbD);
+                    it.appendChild(cb); it.appendChild(avW); it.appendChild(info);
+                    it.addEventListener("click", function() {
+                        list.querySelectorAll(".sp-check-item").forEach(function(el){ el.classList.remove("checked"); });
+                        it.classList.add("checked"); _seatPickUid = uid; _seatPickName = nm;
+                    });
+                    list.appendChild(it);
+                });
+                if (!hasAny) list.innerHTML = "<div style='text-align:center;padding:30px;color:#ccc;font-size:13px;'>لا يوجد مشاهدون حالياً</div>";
+                document.getElementById("spm").classList.add("open");
+            });
+        });
+
+        document.getElementById("spInvite").onclick = function() {
+            if (!_seatPickUid) { vrSnack("اختر شخصاً أولاً"); return; }
+            db.ref("rooms/" + roomId + "/seatInvites/" + _seatPickUid).set({ seatIdx: _seatPickIdx, invitedBy: me.uid, name: me.name, ts: Date.now() });
+            vrSnack("تم إرسال الدعوة إلى " + _seatPickName);
+            vrCloseSeatPicker();
+        };
+    }
+
+    function vrCloseSeatPicker() { document.getElementById("spm").classList.remove("open"); }
+
+    /* ════ قبول دعوة المقعد ════ */
+    function listenSeatInvites() {
+        if (isOwner) return;
+        db.ref("rooms/" + roomId + "/seatInvites/" + me.uid).on("value", function(snap) {
+            var inv = snap.val();
+            if (!inv || typeof inv.seatIdx !== "number") return;
+            var seat = inv.seatIdx;
+            if (seat === 0) { db.ref("rooms/" + roomId + "/seatInvites/" + me.uid).remove(); return; }
+            var inviterName = inv.name || "المشرف";
+            vrCfmShow("دعوة للمقعد", "لقد دعاك " + inviterName + " للجلوس. هل تريد الجلوس في المقعد الآن؟", function() {
+                db.ref("rooms/" + roomId + "/seatInvites/" + me.uid).remove();
+                if (mySeatIdx !== null && mySeatIdx !== seat) db.ref("rooms/" + roomId + "/seats/" + mySeatIdx).remove();
+                db.ref("rooms/" + roomId + "/seats/" + seat).once("value", function(s) {
+                    var sv = s.val();
+                    if (sv && sv.userId && sv.userId !== me.uid) db.ref("rooms/" + roomId + "/seats/" + seat).remove();
+                    takeSeat(seat);
+                });
+            });
+            var noBtn = document.getElementById("cmNo");
+            if (noBtn) {
+                var origNo = noBtn.onclick;
+                noBtn.onclick = function() { db.ref("rooms/" + roomId + "/seatInvites/" + me.uid).remove(); if (typeof origNo === "function") origNo(); };
+            }
+        });
+    }
+
+    /* ════ الملف الشخصي ════ */
+    var _pmUid = "", _pmName = "", _pmSeat = null, _pmInRoom = false;
+
+    function vrOpenProfile(name, avatar, uid, seatIdx, inRoom, frame) {
+        _pmUid    = uid    || "";
+        _pmName   = name   || "";
+        _pmSeat   = (typeof seatIdx === "number") ? seatIdx : null;
+        _pmInRoom = inRoom === true || typeof seatIdx === "number";
+
+        var isSelf = me && uid === me.uid;
+
+        // صورة مع shimmer
+        var avWrap = document.getElementById("pmAvWrap");
+        var avSh   = document.getElementById("pmAvSh");
+        var img    = document.getElementById("prof-modal-img");
+        if (avWrap) avWrap.classList.remove("loaded");
+        if (img) { img.src = ""; img.onload = function(){ if(avWrap) avWrap.classList.add("loaded"); }; img.onerror = function(){ if(avWrap) avWrap.classList.add("loaded"); }; setTimeout(function(){ img.src = avatar||""; }, 10); }
+
+        // إطار الملف الشخصي
+        var oldFr = avWrap ? avWrap.querySelector(".pm-av-frame") : null;
+        if (oldFr) oldFr.remove();
+        if (avWrap && frame) {
+            var pmFr = document.createElement("img");
+            pmFr.className = "pm-av-frame";
+            pmFr.src = frame;
+            pmFr.onerror = function() { this.remove(); };
+            avWrap.appendChild(pmFr);
+        }
+
+        document.getElementById("prof-modal-name").textContent = name || "";
+
+        // ID بأرقام مع shimmer
+        var idEl = document.getElementById("prof-modal-id");
+        idEl.innerHTML = "<span class='pm-id-shimmer'></span>";
+        if (uid) {
+            db.ref("users/" + uid).once("value", function(snap) {
+                var u = snap.val() || {};
+                var nid = u.numericId || u.userId || null;
+                if (nid) idEl.innerHTML = "<i class='fas fa-id-badge' style='color:#1877f2;font-size:11px;'></i> " + nid;
+                else     idEl.innerHTML = "<i class='fas fa-id-badge' style='color:#ccc;font-size:11px;'></i> <span style='color:#ccc;'>------</span>";
+            });
+        }
+
+        // إظهار/إخفاء الأزرار
+        var followBtn  = document.getElementById("pmFollowBtn");
+        var msgBtn     = document.getElementById("pmMsgBtn");
+        var friendBtn  = document.getElementById("pmFriendBtn");
+        var flListBtn  = document.getElementById("pmFlListBtn");
+        var ownerPanel = document.getElementById("pmOwnerPanel");
+
+        if (followBtn) followBtn.style.display = isSelf ? "none" : "";
+        if (msgBtn)    msgBtn.style.display    = isSelf ? "none" : "";
+        if (flListBtn) flListBtn.style.display = isSelf ? "" : "none";
+        if (friendBtn) friendBtn.style.display = "none";
+
+        // متابعة
+        if (!isSelf && followBtn && me) {
+            // نفس بنية profile.html: /followers/{myUid}_{targetUid}
+            var followId = me.uid + "_" + uid;
+            db.ref("followers/" + followId).once("value", function(snap) {
+                if (snap.exists()) { followBtn.classList.add("following"); followBtn.innerHTML = "تمت المتابعة <i class='fas fa-check'></i>"; }
+                else { followBtn.classList.remove("following"); followBtn.textContent = "+ متابعة"; }
+            });
+        }
+        if (followBtn && !isSelf) followBtn.onclick = function() { vrToggleFollow(); };
+
+        // رسالة - تفتح نافذة DM في الغرفة
+        if (msgBtn && !isSelf) {
+            msgBtn.onclick = (function(tUid, tName, tAvatar){ return function() { closeAllModals(); vrOpenDM(tUid, tName, tAvatar); }; })(uid, name, avatar);
+        }
+
+        // صداقة - 4 حالات (user1/user2 البنية الحقيقية)
+        if (!isSelf && friendBtn && me) {
+            friendBtn.style.display = "";
+            var fid = [me.uid, uid].sort().join("_");
+            db.ref("friends/" + fid).once("value", function(snap) {
+                if (!snap.exists()) {
+                    friendBtn.textContent = "+ إضافة صديق";
+                    friendBtn.style.cssText = "background:#e8f5e9;color:#2e7d32;";
+                    friendBtn.onclick = function() { vrSendFriendRequest(uid, name, avatar, friendBtn); };
+                } else {
+                    var v = snap.val() || {};
+                    if (v.status === "accepted") {
+                        friendBtn.textContent = "✔ أصدقاء";
+                        friendBtn.style.cssText = "background:#e8f5e9;color:#2e7d32;";
+                        friendBtn.onclick = null;
+                    } else if (v.user1 === me.uid) {
+                        // أنت أرسلت الطلب (user1 = من أرسل)
+                        friendBtn.textContent = "⏳ طلب مُرسَل";
+                        friendBtn.style.cssText = "background:#fff3cd;color:#7a5b00;";
+                        friendBtn.onclick = null;
+                    } else {
+                        // هو أرسل لك → قبول
+                        friendBtn.textContent = "✅ قبول الصداقة";
+                        friendBtn.style.cssText = "background:#0d6efd;color:#fff;";
+                        friendBtn.onclick = function() { vrAcceptFriendRequest(fid, uid, name, friendBtn); };
+                    }
+                }
+            });
+        }
+
+        // لوحة المالك
+        if (ownerPanel) {
+            var showOwner = isOwner && !isSelf && _pmInRoom;
+            ownerPanel.style.display = showOwner ? "flex" : "none";
+            if (showOwner) {
+                var seatBtn = document.getElementById("pmOwnSeatBtn");
+                var kickBtn = document.getElementById("pmOwnKickBtn");
+                var banBtn  = document.getElementById("pmOwnBanBtn");
+                if (seatBtn) {
+                    if (typeof _pmSeat === "number") {
+                        seatBtn.textContent = "إزالة من المقعد"; seatBtn.style.background = "#fff3e0"; seatBtn.style.color = "#e65100";
+                        seatBtn.onclick = function() { vrCfmShow("إزالة من المقعد", "هل تريد إزالة " + (name||"المستخدم") + " من المقعد؟", function() { db.ref("rooms/" + roomId + "/seats/" + _pmSeat).remove(); vrSnack("تمت الإزالة"); closeAllModals(); }); };
+                    } else {
+                        seatBtn.textContent = "دعوة للمقعد"; seatBtn.style.background = "#e8f5e9"; seatBtn.style.color = "#1b5e20";
+                        seatBtn.onclick = function() { closeAllModals(); vrOpenSeatPicker(-1); };
+                    }
+                }
+                if (kickBtn) kickBtn.onclick = (function(u,n){ return function(){ closeAllModals(); vrKickUser(u,n); }; })(uid, name);
+                if (banBtn)  banBtn.onclick  = (function(u,n){ return function(){ closeAllModals(); vrBanUser(u,n); }; })(uid, name);
+            }
+        }
+
+        openOverlay();
+        document.getElementById("profile-modal").classList.add("show");
+    }
+
+    function vrToggleFollow() {
+        if (!_pmUid || !me) return;
+        var btn = document.getElementById("pmFollowBtn");
+        // نفس بنية profile.html: /followers/{myUid}_{targetUid}
+        var followId = me.uid + "_" + _pmUid;
+        var ref = db.ref("followers/" + followId);
+        ref.once("value", function(snap) {
+            if (snap.exists()) {
+                ref.remove();
+                btn.classList.remove("following"); btn.textContent = "+ متابعة";
+            } else {
+                ref.set({ userId: me.uid, targetId: _pmUid, name: me.name, avatar: me.avatar||"", ts: Date.now() });
+                btn.classList.add("following"); btn.innerHTML = "تمت المتابعة <i class='fas fa-check'></i>";
+            }
+        });
+    }
+
+    function vrSendFriendRequest(uid, name, avatar, btn) {
+        if (!me) return;
+        var fid = [me.uid, uid].sort().join("_");
+        // نفس بنية profile.html: user1=المُرسِل, user2=المُستقبِل
+        db.ref("friends/" + fid).set({
+            user1: me.uid,
+            user2: uid,
+            status: "pending",
+            createdAt: Date.now()
+        });
+        // إشعار للطرف الآخر (نفس بنية profile.html)
+        db.ref("notifications").push({
+            type: "friend",
+            fromUserId: me.uid,
+            fromName: me.name,
+            fromAvatar: me.avatar || "",
+            toUserId: uid,
+            createdAt: Date.now(),
+            isRead: false
+        });
+        if (btn) { btn.textContent = "⏳ طلب مُرسَل"; btn.style.cssText = "background:#fff3cd;color:#7a5b00;"; btn.onclick = null; }
+        vrSnack("تم إرسال طلب الصداقة إلى " + name);
+    }
+
+    function vrAcceptFriendRequest(fid, uid, name, btn) {
+        if (!me) return;
+        // نفس بنية notifications.html acceptFriend
+        db.ref("friends/" + fid).update({ status: "accepted", acceptedAt: Date.now() });
+        db.ref("notifications").push({
+            type: "friend_accepted",
+            fromUserId: me.uid,
+            fromName: me.name,
+            fromAvatar: me.avatar || "",
+            toUserId: uid,
+            createdAt: Date.now(),
+            isRead: false
+        });
+        if (btn) { btn.textContent = "✔ أصدقاء"; btn.style.cssText = "background:#e8f5e9;color:#2e7d32;"; btn.onclick = null; }
+        vrSnack("تمت الموافقة على طلب صداقة " + name);
+    }
+
+    /* ════ نافذة DM (رسائل خاصة داخل الغرفة) ════ */
+    var _dmUid = "", _dmName = "", _dmListener = null, _dmChatId = null;
+
+    function vrOpenDM(uid, name, avatar) {
+        _dmUid = uid; _dmName = name;
+        var chatId  = [me.uid, uid].sort().join("_"); // نفس مسار messages.html
+        var titleEl = document.getElementById("dmTitle");
+        var avImg   = document.getElementById("dmAvatar");
+        var box     = document.getElementById("dmMessages");
+        if (titleEl) titleEl.textContent = name || "رسالة";
+        if (avImg)   { avImg.src = ""; setTimeout(function(){ avImg.src = avatar||""; }, 10); }
+        if (box)     box.innerHTML = "<div class='dm-loading'><div class='dm-load-dot'></div><div class='dm-load-dot'></div><div class='dm-load-dot'></div></div>";
+        document.getElementById("dmInput").value = "";
+        document.getElementById("dmWrap").classList.add("open");
+
+        // إلغاء المستمع القديم
+        if (_dmListener && _dmChatId) {
+            try { db.ref("chats/" + _dmChatId + "/messages").off("child_added", _dmListener); } catch(ex) {}
+            _dmListener = null;
+        }
+        _dmChatId = chatId;
+
+        // تهيئة محادثة في /chats/ (نفس startChat في messages.html)
+        var updates = {};
+        updates["participants/" + me.uid] = true;
+        updates["participants/" + uid]    = true;
+        updates["participantDetails/" + me.uid + "/name"]   = me.name;
+        updates["participantDetails/" + me.uid + "/avatar"] = me.avatar||"";
+        updates["participantDetails/" + uid + "/name"]      = name;
+        updates["participantDetails/" + uid + "/avatar"]    = avatar||"";
+        db.ref("chats/" + chatId).once("value", function(snap) {
+            if (!snap.exists()) {
+                updates["lastMessage"]     = "";
+                updates["lastMessageTime"] = Date.now();
+                updates["unread/" + me.uid] = 0;
+                updates["unread/" + uid]    = 0;
+            }
+            db.ref("chats/" + chatId).update(updates);
+        });
+
+        // استمع للرسائل من /chats/{chatId}/messages
+        var msgRef   = db.ref("chats/" + chatId + "/messages");
+        var rendered = {};
+        var gotAny   = false;
+
+        _dmListener = function(snap) {
+            var m = snap.val(); if (!m) return;
+            if (rendered[snap.key]) return;
+            rendered[snap.key] = true;
+            if (!gotAny) { box.innerHTML = ""; gotAny = true; }
+            var isMine = m.senderId === me.uid || m.uid === me.uid || m.from === me.uid;
+            var div = document.createElement("div");
+            div.className = "dm-msg " + (isMine ? "dm-out" : "dm-in");
+            div.textContent = m.text || m.message || "";
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        };
+        msgRef.limitToLast(60).on("child_added", _dmListener);
+
+        // إذا لم تكن هناك رسائل
+        setTimeout(function() {
+            if (!gotAny) {
+                box.innerHTML = "<div style='text-align:center;padding:30px;color:#bbb;font-size:13px;'>ابدأ المحادثة الآن ✉️</div>";
+            }
+        }, 2000);
+    }
+
+    window.vrSendDM = function() {
+        var inp = document.getElementById("dmInput");
+        var txt = (inp.value || "").trim(); if (!txt || !_dmUid || !_dmChatId) return;
+        var msg = {
+            senderId: me.uid,
+            senderName: me.name,
+            senderAvatar: me.avatar||"",
+            text: txt,
+            timestamp: Date.now(),
+            // حقول إضافية للتوافق
+            from: me.uid,
+            uid: me.uid,
+            name: me.name,
+            avatar: me.avatar||""
+        };
+        db.ref("chats/" + _dmChatId + "/messages").push(msg);
+        // تحديث آخر رسالة
+        db.ref("chats/" + _dmChatId).update({
+            lastMessage: txt,
+            lastMessageTime: Date.now(),
+            ["unread/" + _dmUid]: (firebase.database.ServerValue.increment ? firebase.database.ServerValue.increment(1) : 1)
+        });
+        inp.value = "";
+        // إشعار للمستلم
+        db.ref("notifications").push({
+            type: "message",
+            fromUserId: me.uid, toUserId: _dmUid,
+            fromName: me.name, fromAvatar: me.avatar||"",
+            text: txt.length > 40 ? txt.slice(0,40) + "..." : txt,
+            createdAt: Date.now(), isRead: false
+        });
+    };
+
+    window.vrHandleDMEnter = function(e) { if (e.key === "Enter") window.vrSendDM(); };
+
+    window.vrCloseDM = function() {
+        document.getElementById("dmWrap").classList.remove("open");
+        if (_dmListener && _dmChatId) {
+            try { db.ref("chats/" + _dmChatId + "/messages").off("child_added", _dmListener); } catch(ex) {}
+            _dmListener = null;
+        }
+    };
+
+    /* ════ نافذة المنظمين ════ */
+    function vrOpenViewers() {
+        var body = document.getElementById("vrViewersBody"); body.innerHTML = "";
+        var hasAny = false;
+        for (var i = 0; i < SEATS; i++) {
+            var s = __vrSeatsSnap[i]; if (!s || !s.userId) continue;
+            hasAny = true;
+            var isMe = me && s.userId === me.uid;
+            var item = document.createElement("div"); item.className = "vm-item";
+            var avW  = document.createElement("div"); avW.className = "vm-av-wrap";
+            var avSh = document.createElement("div"); avSh.className = "vm-av-sh"; avW.appendChild(avSh);
+            var im   = document.createElement("img"); im.alt = "";
+            im.onload  = function(){ this.parentNode.classList.add("loaded"); };
+            im.onerror = function(){ this.parentNode.classList.add("loaded"); };
+            im.src = s.avatar||""; avW.appendChild(im);
+            avW.onclick = (function(sn,sa,su,si){ return function(){ vrCloseViewers(); vrOpenProfile(sn,sa,su,si,true); }; })(s.name||"مستخدم", s.avatar||"", s.userId, i);
+            var info = document.createElement("div"); info.className = "vm-info";
+            var nmD  = document.createElement("div"); nmD.className = "vm-name"; nmD.textContent = s.name||"مستخدم";
+            var sbD  = document.createElement("div"); sbD.className = "vm-sub";  sbD.textContent = isMe ? "أنت" : "مقعد "+(i+1);
+            info.appendChild(nmD); info.appendChild(sbD);
+            var acts = document.createElement("div"); acts.className = "vm-actions";
+            if (isOwner && !isMe) {
+                var kb = document.createElement("button"); kb.className = "vm-btn vm-btn-kick"; kb.textContent = "طرد";
+                kb.onclick = (function(su,sn){ return function(){ vrCloseViewers(); vrKickUser(su,sn); }; })(s.userId, s.name||"مستخدم");
+                var bb = document.createElement("button"); bb.className = "vm-btn vm-btn-ban"; bb.textContent = "حظر";
+                bb.onclick = (function(su,sn){ return function(){ vrCloseViewers(); vrBanUser(su,sn); }; })(s.userId, s.name||"مستخدم");
+                acts.appendChild(kb); acts.appendChild(bb);
+            }
+            item.appendChild(avW); item.appendChild(info); item.appendChild(acts);
+            body.appendChild(item);
+        }
+        if (!hasAny) body.innerHTML = "<div style='text-align:center;padding:30px;color:#aaa;font-size:13px;'>لا يوجد أحد في المقاعد حالياً</div>";
+        document.getElementById("vrViewersWrap").classList.add("open");
+    }
+
+    function vrCloseViewers() { document.getElementById("vrViewersWrap").classList.remove("open"); }
+
+    /* ════ قائمة الأصدقاء ════ */
+    function vrOpenFriends() {
+        closeAllModals();
+        var body = document.getElementById("vrFmBody");
+        body.innerHTML = "<div style='text-align:center;padding:24px;color:#aaa;'><i class='fas fa-spinner fa-spin'></i> جاري التحميل...</div>";
+        document.getElementById("vrFmWrap").classList.add("open");
+        if (!me) return;
+
+        // نفس بنية messages.html: user1 و user2 مع index
+        var fList = [];
+        var done1 = false, done2 = false;
+
+        function renderList() {
+            if (!done1 || !done2) return;
+            if (!fList.length) {
+                body.innerHTML = "<div style='text-align:center;padding:40px 20px;color:#aaa;font-size:13px;'><i class='fas fa-user-friends' style='font-size:40px;display:block;margin-bottom:12px;opacity:.4;'></i>لا يوجد أصدقاء بعد</div>";
+                return;
+            }
+            body.innerHTML = "";
+            fList.forEach(function(fUid) {
+                db.ref("users/" + fUid).once("value", function(us) {
+                    var u    = us.val() || {};
+                    var fName= u.yourname || u.name || "مستخدم";
+                    var fAv  = u.avatar || "";
+                    var nid  = u.numericId || "";
+
+                    var item = document.createElement("div"); item.className = "fm-item";
+
+                    // صورة + shimmer
+                    var avW  = document.createElement("div"); avW.className = "fm-av-w";
+                    var avSh = document.createElement("div"); avSh.className = "fm-av-sh"; avW.appendChild(avSh);
+                    var im   = document.createElement("img"); im.alt = "";
+                    im.onload  = function(){ avW.classList.add("loaded"); };
+                    im.onerror = function(){ avW.classList.add("loaded"); };
+                    im.src = fAv; avW.appendChild(im);
+                    avW.style.cursor = "pointer";
+                    avW.onclick = (function(n,a,u){ return function(){ vrCloseFriends(); vrOpenProfile(n,a,u,null,false); }; })(fName,fAv,fUid);
+
+                    var info = document.createElement("div"); info.className = "fm-info";
+                    var fnm  = document.createElement("div"); fnm.className = "fm-name"; fnm.textContent = fName;
+                    var fsub = document.createElement("div"); fsub.className = "fm-id";
+                    fsub.textContent = nid ? ("ID: " + nid) : "صديق";
+                    info.appendChild(fnm); info.appendChild(fsub);
+
+                    var msgB = document.createElement("button"); msgB.className = "fm-msg-btn";
+                    msgB.innerHTML = "<i class='far fa-comment-dots'></i> رسالة";
+                    msgB.onclick = (function(fu,fn,fa){ return function(){ vrCloseFriends(); vrOpenDM(fu,fn,fa); }; })(fUid,fName,fAv);
+
+                    item.appendChild(avW); item.appendChild(info); item.appendChild(msgB);
+                    body.appendChild(item);
+                });
+            });
+        }
+
+        // user1 = من أرسل الطلب
+        db.ref("friends").orderByChild("user1").equalTo(me.uid).once("value", function(snap) {
+            snap.forEach(function(s) {
+                var f = s.val();
+                if (f && f.status === "accepted" && f.user2 && fList.indexOf(f.user2) === -1) fList.push(f.user2);
+            });
+            done1 = true; renderList();
+        });
+
+        // user2 = من استقبل الطلب
+        db.ref("friends").orderByChild("user2").equalTo(me.uid).once("value", function(snap) {
+            snap.forEach(function(s) {
+                var f = s.val();
+                if (f && f.status === "accepted" && f.user1 && fList.indexOf(f.user1) === -1) fList.push(f.user1);
+            });
+            done2 = true; renderList();
+        });
+    }
+
+    function vrCloseFriends() { document.getElementById("vrFmWrap").classList.remove("open"); }
+
+    /* ════ نافذة تأكيد (cm) ════ */
+    function vrCfmShow(title, bodyTxt, onYes) {
+        var cm = document.getElementById("cm"); if (!cm) return;
+        document.getElementById("cmt").textContent = title||""; document.getElementById("cmb").textContent = bodyTxt||"";
+        var yes = document.getElementById("cmYes"), no = document.getElementById("cmNo");
+        yes.onclick = null; no.onclick = null;
+        no.onclick  = function() { vrCfmClose(); };
+        yes.onclick = function() { vrCfmClose(); if (typeof onYes === "function") onYes(); };
+        cm.classList.add("open"); openOverlay();
+    }
+
+    function vrCfmClose() {
+        var cm = document.getElementById("cm"); if(cm) cm.classList.remove("open");
+        var ov = document.getElementById("modal-overlay");
+        if(ov){ ov.style.opacity="0"; setTimeout(function(){ ov.style.display="none"; },300); }
+    }
+
+    /* ════ Emoji Picker ════ */
+    function vrOpenEmojiPicker() {
+        if (mySeatIdx === null) { vrSnack("يجب أن تكون في مقعد لاستخدام الإيموجيات"); return; }
+        document.getElementById("vrEmojiBackdrop").classList.add("show");
+        document.getElementById("vrEmojiPicker").classList.add("open");
+        // تحميل الإيموجيات من Firebase
+        var grid = document.getElementById("vrEmojiGrid");
+        if (!grid) return;
+        grid.innerHTML = '<div style="text-align:center;color:#aaa;font-size:12px;padding:10px;">جاري التحميل...</div>';
+        db.ref('settings/emojis').once('value', function(snap) {
+            grid.innerHTML = '';
+            var count = 0;
+            snap.forEach(function(s) {
+                var e = s.val(); if (!e || !e.imgUrl) return;
+                count++;
+                var btn = document.createElement('button');
+                btn.className = 'vep-btn'; btn.title = e.name || '';
+                var img = document.createElement('img'); img.src = e.imgUrl;
+                img.style.cssText = 'width:30px;height:30px;object-fit:contain;';
+                img.onerror = function(){ this.style.display='none'; };
+                btn.appendChild(img);
+                btn.onclick = (function(key, imgUrl){ return function(){ vrSendEmojiImg(key, imgUrl); }; })(s.key, e.imgUrl);
+                grid.appendChild(btn);
+            });
+            if (!count) grid.innerHTML = '<div style="text-align:center;color:#aaa;font-size:12px;padding:10px;">لا توجد إيموجيات</div>';
+        });
+    }
+
+    function vrCloseEmojiPicker() {
+        document.getElementById("vrEmojiBackdrop").classList.remove("show");
+        document.getElementById("vrEmojiPicker").classList.remove("open");
+    }
+
+    function vrSendEmoji(id) {
+        vrCloseEmojiPicker(); if (!me || mySeatIdx === null) return;
+        var key = "send_" + mySeatIdx;
+        if (__emoTimers[key]) clearTimeout(__emoTimers[key]);
+        db.ref("rooms/" + roomId + "/seats/" + mySeatIdx + "/emoji").set({ id:id, ts:Date.now() });
+        __emoTimers[key] = setTimeout(function(){ db.ref("rooms/" + roomId + "/seats/" + mySeatIdx + "/emoji").remove(); }, 8000);
+    }
+
+    function vrSendEmojiImg(id, imgUrl) {
+        vrCloseEmojiPicker(); if (!me || mySeatIdx === null) return;
+        var key = "send_" + mySeatIdx;
+        if (__emoTimers[key]) clearTimeout(__emoTimers[key]);
+        db.ref("rooms/" + roomId + "/seats/" + mySeatIdx + "/emoji").set({ id: id, imgUrl: imgUrl, ts: Date.now() });
+        __emoTimers[key] = setTimeout(function(){ db.ref("rooms/" + roomId + "/seats/" + mySeatIdx + "/emoji").remove(); }, 8000);
+    }
+
+    /* ════ Snack Bar ════ */
+    var __snackTO = null;
+    function vrSnack(msg) {
+        var s = document.getElementById("vr-snack"); if(!s) return;
+        s.textContent = msg; s.classList.add("show");
+        if (__snackTO) clearTimeout(__snackTO);
+        __snackTO = setTimeout(function(){ s.classList.remove("show"); }, 3000);
+    }
+
+    var _vrEntryTimeout = null;
+    function vrShowEntryEffect(name, avatar, entryImgUrl) {
+        var c = document.getElementById("vrEntryEffect");
+        if (!c) return;
+        // إخفاء الدخولية السابقة فوراً
+        c.innerHTML = '';
+        if (_vrEntryTimeout) { clearTimeout(_vrEntryTimeout); _vrEntryTimeout = null; }
+        var card = document.createElement('div');
+        card.className = 'vr-entry-card';
+        var avHtml = avatar ? '<img src="' + avatar + '" class="vr-entry-av" onerror="this.style.background=\'#555\'">' : '';
+        var icoHtml = entryImgUrl ? '<img src="' + entryImgUrl + '" class="vr-entry-ico" onerror="this.style.display=\'none\'">' : '<span style="font-size:28px;">✨</span>';
+        card.innerHTML = avHtml + '<div class="vr-entry-txt"><strong>' + name + '</strong><br>دخل الغرفة</div>' + icoHtml;
+        c.appendChild(card);
+        c.style.display = 'flex';
+        _vrEntryTimeout = setTimeout(function() {
+            c.style.display = 'none';
+            c.innerHTML = '';
+        }, 6500);
+    }
+
+    /* ════ نافذة خطأ الغرفة ════ */
+    function vrShowRoomError(msg) {
+        var wrap = document.getElementById("roomErrWrap"); if (!wrap) { alert(msg); return; }
+        var titleEl = document.getElementById("reTitle");
+        if (titleEl) titleEl.textContent = msg || "حدث خطأ";
+        wrap.classList.add("show");
+        wrap.style.display = "flex";
+        var btn = document.getElementById("reBtn");
+        if (btn) btn.onclick = function() {
+            wrap.classList.remove("show"); wrap.style.display = "none";
+            location.href = "roomhom.html";
+        };
+        if (!window.__errRedirectTO) {
+            window.__errRedirectTO = setTimeout(function() { location.href = "roomhom.html"; }, 4000);
+        }
+    }
+
+    /* ════ الميكروفون ════ */
+    function toggleMic() {
+        micOn = !micOn;
+
+        // 1. تعطيل/تفعيل مسارات الصوت المحلية
+        if (localStream) {
+            localStream.getAudioTracks().forEach(function(t) {
+                t.enabled = micOn;
+            });
+        }
+
+        // 2. تحديث واجهة المستخدم
+        var ico = document.getElementById("micIco");
+        if (ico) {
+            ico.className = micOn ? "fas fa-microphone" : "fas fa-microphone-slash";
+            ico.style.color = micOn ? "#0084ff" : "#ff4757";
+        }
+        var mb = document.getElementById("myMicBadge");
+        if (mb) {
+            mb.className = "mic-badge " + (micOn ? "on" : "off");
+            mb.innerHTML = "";
+            var mi = document.createElement("i");
+            mi.className = micOn ? "fas fa-microphone" : "fas fa-microphone-slash";
+            mi.style.fontSize = "8px";
+            mb.appendChild(mi);
+        }
+
+        // 3. تحديث Firebase
+        if (mySeatIdx !== null) {
+            db.ref("rooms/" + roomId + "/seats/" + mySeatIdx + "/micOn").set(micOn);
+        }
+        if (studentRef) studentRef.update({ mic: micOn });
+
+        // 4. تحديث جميع peer connections (المالك → المنظمون)
+        if (isOwner) {
+            Object.keys(teacherPeerConns).forEach(function(key) {
+                var conn = teacherPeerConns[key];
+                if (conn && conn.pc) {
+                    conn.pc.getSenders().forEach(function(sender) {
+                        if (sender.track && sender.track.kind === "audio") {
+                            sender.track.enabled = micOn;
+                        }
+                    });
+                }
+            });
+        } else if (studentPC) {
+            // المنظم → المالك
+            studentPC.getSenders().forEach(function(sender) {
+                if (sender.track && sender.track.kind === "audio") {
+                    sender.track.enabled = micOn;
+                }
+            });
+        }
+
+        vrSnack(micOn ? "🎤 الميكروفون مفعّل" : "🔇 الميكروفون مكتوم");
+    }
+
+    function toggleSpeaker() {
+        speakerOn = !speakerOn;
+        var ico = document.getElementById("speakerIco");
+        if (ico) {
+            ico.className = speakerOn ? "fas fa-volume-up" : "fas fa-volume-mute";
+            ico.style.color = speakerOn ? "#636e72" : "#ff4757";
+        }
+        // كتم/فك كتم جميع عناصر الصوت الخارجية
+        document.querySelectorAll("audio").forEach(function(el) {
+            el.muted = !speakerOn;
+            if (!el.muted && el.paused) { el.play().catch(function(){}); }
+        });
+        // تحديث Teacher peer connections audio elements
+        Object.keys(teacherPeerConns).forEach(function(key) {
+            var conn = teacherPeerConns[key];
+            if (conn && conn.audioEl) {
+                conn.audioEl.muted = !speakerOn;
+                if (!conn.audioEl.muted && conn.audioEl.paused) {
+                    conn.audioEl.play().catch(function(){});
+                }
+            }
+        });
+        vrSnack(speakerOn ? "🔊 الصوت مفعّل" : "🔈 الصوت مكتوم");
+    }
+
+    /* ════ النقاط ════ */
+    function listenPoints() {
+        db.ref("rooms/" + roomId + "/points").on("value", function(snap) {
+            document.getElementById("roomPointsEl").textContent = fmtNum(snap.val() || 0);
+        });
+    }
+
+    /* ════ الداعمون ════ */
+    function listenDonors() {
+        db.ref("rooms/" + roomId + "/donors").on("value", function(snap) {
+            var donors = [];
+            snap.forEach(function(s){ var d=s.val(); if(d) donors.push(d); });
+            donors.sort(function(a,b){ return (b.totalAmount||0)-(a.totalAmount||0); });
+            var el = document.getElementById("topDonorsEl"); if (!el) return;
+            el.innerHTML = "";
+            for (var i = 0; i < 3; i++) {
+                if (donors[i]) {
+                    var img = document.createElement("img"); img.className = "supporter-dot";
+                    img.title = donors[i].name||""; img.alt = "";
+                    img.onerror = function(){ this.outerHTML = "<div class='supporter-dot supporter-empty'><svg viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'><circle cx='18' cy='18' r='18' fill='#dde3ea'/><circle cx='18' cy='14' r='6' fill='#bac4d0'/><ellipse cx='18' cy='28' rx='10' ry='7' fill='#bac4d0'/></svg></div>"; };
+                    img.src = donors[i].avatar||"";
+                    el.appendChild(img);
+                } else {
+                    var ph = document.createElement("div"); ph.className = "supporter-dot supporter-empty";
+                    ph.innerHTML = "<svg viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'><circle cx='18' cy='18' r='18' fill='#dde3ea'/><circle cx='18' cy='14' r='6' fill='#bac4d0'/><ellipse cx='18' cy='28' rx='10' ry='7' fill='#bac4d0'/></svg>";
+                    el.appendChild(ph);
+                }
+            }
+        });
+    }
+
+    /* ════ الدردشة ════ */
+    function listenChat() {
+        db.ref("rooms/" + roomId + "/chat").limitToLast(60).on("child_added", function(snap) {
+            if (!me) return;
+            var m = snap.val(); if (m) appendChatMsg(m);
+        });
+    }
+
+    function appendChatMsg(m) {
+        var cv = document.getElementById("chat-view");
+
+        // ══ رسالة هدية مُلوَّنة (للجميع) ══
+        if (m.type === "gift") {
+            var total = (m.giftPrice||0) * (m.giftQty||1);
+            var bg = "background:rgba(241,196,15,0.15);border:1px solid rgba(241,196,15,0.4);";
+            var nc = "#f1c40f";
+            var bh = "";
+            if (total >= 10000) { bg = "background:linear-gradient(45deg,rgba(255,71,87,0.15),rgba(241,196,15,0.15));border:1px solid #ff4757;"; nc = "#ff4757"; bh = "<span style='background:#ff4757;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:800;'>أسطوري</span>"; }
+            else if (total >= 2000) { bg = "background:rgba(156,136,255,0.15);border:1px solid rgba(156,136,255,0.4);"; nc = "#9c88ff"; bh = "<span style='background:#9c88ff;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:800;'>ضخم</span>"; }
+            var gd = document.createElement("div"); gd.className = "msg-line"; gd.setAttribute("style", bg + "border-radius:10px;margin:2px 0;");
+            var gav = document.createElement("img"); gav.className = "chat-avatar"; gav.src = m.avatar||""; gav.onerror = function(){ this.style.display="none"; };
+            var gmc = document.createElement("div"); gmc.className = "msg-content";
+            var isUrlGiftChat = m.giftIcon && (m.giftIcon.startsWith('http') || m.giftIcon.startsWith('/'));
+            var giftIcoHtml = isUrlGiftChat ? '<img src="' + m.giftIcon + '" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;display:inline-block;" onerror="this.style.display=\'none\'">' : (m.giftIcon || '🎁');
+            gmc.innerHTML = "<div class='msg-header'><span class='chat-name' style='color:" + nc + ";'><i class='fas fa-gift'></i> " + esc(m.name||"مستخدم") + "</span>" + bh + "</div><span class='chat-text'>أرسل <strong>" + (m.giftQty||1) + "x " + esc(m.giftName||"") + " " + giftIcoHtml + "</strong> لـ <strong>" + esc(m.rName||"") + "</strong></span>";
+            gd.appendChild(gav); gd.appendChild(gmc);
+            cv.appendChild(gd); cv.scrollTop = cv.scrollHeight;
+            if (cv.children.length > 60) cv.removeChild(cv.firstChild);
+            return;
+        }
+
+        var d  = document.createElement("div"); d.className = "msg-line";
+        // avatar مع shimmer
+        var avWr = document.createElement("div"); avWr.style.cssText = "position:relative;width:34px;height:34px;flex-shrink:0;border-radius:50%;overflow:hidden;background:#eee;";
+        var avSh = document.createElement("div"); avSh.style.cssText = "position:absolute;inset:0;border-radius:50%;background:linear-gradient(90deg,#e8edf2 25%,#f5f7fa 50%,#e8edf2 75%);background-size:400% 100%;animation:fbShimmer 1.4s ease-in-out infinite;";
+        avWr.appendChild(avSh);
+        var av = document.createElement("img"); av.className = "chat-avatar";
+        av.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0;transition:.2s;";
+        av.onload  = function(){ av.style.opacity="1"; avSh.style.display="none"; };
+        av.onerror = function(){ avSh.style.display="none"; av.style.opacity="0"; };
+        av.src = m.avatar||""; avWr.appendChild(av);
+
+        var mc = document.createElement("div"); mc.className = "msg-content";
+        var mh = document.createElement("div"); mh.className = "msg-header";
+        var nm = document.createElement("span"); nm.className = "chat-name"; nm.textContent = (m.name||"مستخدم") + ":";
+        mh.appendChild(nm);
+        var tx = document.createElement("span"); tx.className = "chat-text"; tx.textContent = m.text||"";
+        mc.appendChild(mh); mc.appendChild(tx);
+        d.appendChild(avWr); d.appendChild(mc);
+        cv.appendChild(d); cv.scrollTop = cv.scrollHeight;
+        if (cv.children.length > 60) cv.removeChild(cv.firstChild);
+    }
+
+    window.sendChatMessage = function() {
+        var inp = document.getElementById("chat-input");
+        var txt = inp.value.trim(); if (!txt) return;
+        db.ref("rooms/" + roomId + "/chat").push({ uid:me.uid, name:me.name, avatar:me.avatar, text:txt, ts:Date.now() });
+        inp.value = ""; inp.focus(); updateNavFocusState();
+    };
+
+    window.handleEnter = function(e) { if (e.key === "Enter") window.sendChatMessage(); };
+
+    /* ════ الهدايا ════ */
+    function renderGifts() {
+        var container = document.getElementById("gifts-grids-container"); container.innerHTML = "";
+        tabsKeys.forEach(function(tabKey, index) {
+            var grid = document.createElement("div"); grid.className = "gifts-grid " + (index===0?"active":""); grid.id = "grid-" + index;
+            giftsData[tabKey].forEach(function(gift, idx) {
+                var div = document.createElement("div"); div.className = "gift-item"; div.style.animationDelay = idx * 0.04 + "s";
+                if (gift.badge) { var bdg = document.createElement("div"); bdg.className = "gift-badge"; bdg.textContent = gift.badge; div.appendChild(bdg); }
+                var ico = document.createElement("div"); ico.className = "gift-icon";
+                var isUrlVR = gift.icon && (gift.icon.startsWith('http') || gift.icon.startsWith('/'));
+                if (isUrlVR) { var icoImg = document.createElement("img"); icoImg.src = gift.icon; icoImg.style.cssText = "width:44px;height:44px;object-fit:contain;"; icoImg.onerror = function(){ this.style.display='none'; }; ico.appendChild(icoImg); } else { ico.textContent = gift.icon; }
+                div.appendChild(ico);
+                var nm  = document.createElement("div"); nm.className  = "gift-name";  nm.textContent  = gift.name;  div.appendChild(nm);
+                var pr  = document.createElement("div"); pr.className  = "gift-price"; pr.textContent  = gift.price + " "; var ci=document.createElement("i"); ci.className="fas fa-coins"; pr.appendChild(ci); div.appendChild(pr);
+                div.onclick = (function(g, tk){ return function(){ selectGift(this,g.name,g.price,g.desc,g.icon,g.soundUrl||'',tk,g._wbKey||null); }; })(gift, tabKey);
+                grid.appendChild(div);
+            });
+            container.appendChild(grid);
+        });
+    }
+
+    window.switchTab = function(index) {
+        if (index < 0 || index >= tabsKeys.length) return;
+        currentTabIndex = index;
+        document.querySelectorAll(".tab-item").forEach(function(el,i){ el.classList.toggle("active",i===index); if(i===index) el.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"}); });
+        document.querySelectorAll(".dot").forEach(function(el,i){ el.classList.toggle("active",i===index); });
+        document.querySelectorAll(".gifts-grid").forEach(function(g,i){ g.classList.toggle("active",i===index); });
+        document.getElementById("gifts-grids-container").scrollTop = 0;
+    };
+
+    var selectedGiftSoundUrl = "";
+    var selectedGiftRecCoins = 0;
+    var selectedGiftTabKey = "";
+    var selectedGift_wbKey = null; // مفتاح wardrobeBag إذا كانت هدية حقيبة شخصية
+    window.selectGift = function(el, name, price, desc, icon, soundUrl, tabKey, wbKey) {
+        document.querySelectorAll(".gift-item").forEach(function(e){ e.classList.remove("active"); });
+        el.classList.add("active");
+        selectedGift = name; selectedPrice = price; selectedGiftIcon = icon;
+        selectedGiftSoundUrl = soundUrl || "";
+        selectedGiftRecCoins = _vrGiftRecCoinsMap[name] || _vrGiftRecCoinsMap['wbag_'+name] || 0;
+        selectedGiftTabKey = tabKey || "";
+        selectedGift_wbKey = wbKey || null;
+        const vrGd = _vrAllGiftsData[name] || _vrAllGiftsData['wbag_'+name] || null;
+        const vrHasRew = vrGd && (vrGd.senderPoints||vrGd.senderFrameUrl||vrGd.senderTitle||vrGd.receiverFrameUrl||vrGd.isBag);
+        var vrDescEl = document.getElementById("gift-desc-text");
+        var vrDesc = "<strong>" + esc(name) + "</strong>: " + price + " 💰";
+        if (vrHasRew) { vrDesc += ' <span style="color:#f1c40f;cursor:pointer;" onclick="openGiftPreview(\'' + name + '\',' + price + ',\'' + icon + '\')">🎁 اضغط للتفاصيل</span>'; }
+        vrDescEl.innerHTML = vrDesc;
+    };
+
+    function populateRecipients() {
+        var c = document.getElementById("recipients-container"); c.innerHTML = "";
+        var isFirst = true;
+        // إضافة المستخدم نفسه (لهدايا المحفظة فقط)
+        if (me && mySeatIdx !== null) {
+            var selfBtn = document.createElement("div"); selfBtn.className = "recipient-avatar-btn" + (isFirst ? " active" : "");
+            selfBtn.dataset.uid = me.uid; selfBtn.dataset.name = me.name||"أنا";
+            var selfImg = document.createElement("img"); selfImg.src = me.avatar||"";
+            var selfSp = document.createElement("span"); selfSp.textContent = (me.name||"أنا").slice(0,8) + " (أنا)";
+            selfBtn.appendChild(selfImg); selfBtn.appendChild(selfSp);
+            selfBtn.onclick = function(){ document.querySelectorAll(".recipient-avatar-btn").forEach(function(b){ b.classList.remove("active"); }); this.classList.add("active"); };
+            c.appendChild(selfBtn); isFirst = false;
+        }
+        for (var i = 0; i < SEATS; i++) {
+            var s = __vrSeatsSnap[i];
+            if (!s || !s.userId || s.userId === me.uid) continue;
+            var btn = document.createElement("div"); btn.className = "recipient-avatar-btn" + (isFirst ? " active" : "");
+            btn.dataset.uid  = s.userId; btn.dataset.name = s.name||"مستخدم";
+            var img = document.createElement("img"); img.src = s.avatar||"";
+            var sp  = document.createElement("span"); sp.textContent = (s.name||"مستخدم").slice(0,8);
+            btn.appendChild(img); btn.appendChild(sp);
+            btn.onclick = function(){ document.querySelectorAll(".recipient-avatar-btn").forEach(function(b){ b.classList.remove("active"); }); this.classList.add("active"); };
+            c.appendChild(btn); isFirst = false;
+        }
+    }
+
+    window.sendGift = function() {
+        if (!selectedGift) { vrSnack("اختر هدية أولاً"); return; }
+        var rec = document.querySelector(".recipient-avatar-btn.active");
+        if (!rec) { vrSnack("اختر المستلم أولاً"); return; }
+        var isSelfVR = rec.dataset.uid === me.uid;
+        var isBagVR = selectedGiftTabKey === "tab1";
+        if (isSelfVR && !isBagVR) {
+            var selfToastVR = document.createElement("div");
+            selfToastVR.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.88);color:#fff;padding:14px 20px;border-radius:14px;font-size:13px;font-weight:800;z-index:9999;text-align:center;max-width:280px;pointer-events:none;";
+            selfToastVR.textContent = "⚠️ لا يمكنك إرسال هذه الهدية لنفسك\nفقط هدايا المحفظة مسموحة";
+            document.body.appendChild(selfToastVR);
+            setTimeout(function(){ if(selfToastVR.parentNode) selfToastVR.parentNode.removeChild(selfToastVR); }, 3000);
+            return;
+        }
+        var qty   = parseInt(document.getElementById("gift-qty").value) || 1;
+        var rName = rec.dataset.name||"مستخدم";
+        var rImg  = rec.querySelector("img").src;
+        var total = selectedPrice * qty;
+
+        // ── فحص رصيد الكوينزات ──
+        db.ref("users/" + me.uid + "/coins").once("value", function(snap) {
+            var currentCoins = snap.val() || 0;
+            if (currentCoins < total) {
+                vrSnack("رصيدك غير كافٍ 💰 (تحتاج " + total + " كوينز)");
+                return;
+            }
+            // ── المتابعة بعد التحقق من الرصيد ──
+            _doSendGift(rec, rName, rImg, qty, total);
+        });
+    };
+
+    function _doSendGift(rec, rName, rImg, qty, total) {
+        closeAllModals();
+        // حذف من wardrobeBag إذا كانت هدية حقيبة شخصية
+        if (selectedGift_wbKey && me && me.uid) { db.ref('users/'+me.uid+'/wardrobeBag/'+selectedGift_wbKey).remove(); }
+        triggerGiftNotification(me.name, me.avatar, rName, rImg, selectedGift, selectedGiftIcon, qty, selectedGiftSoundUrl);
+        // الرسالة الملونة تُعرض للجميع عبر Firebase
+        db.ref("rooms/" + roomId + "/chat").push({
+            uid:me.uid, name:me.name, avatar:me.avatar,
+            type:"gift",
+            giftName:selectedGift, giftIcon:selectedGiftIcon, giftQty:qty, giftPrice:selectedPrice,
+            rName:rName,
+            ts:Date.now()
+        });
+        // تحديث نقاط الغرفة
+        db.ref("rooms/" + roomId).transaction(function(d){ if(d) d.points=(d.points||0)+total; return d; });
+        // تحديث الداعمين في الغرفة
+        db.ref("rooms/" + roomId + "/donors/" + me.uid).transaction(function(d) {
+            if (!d) return { uid:me.uid, name:me.name, avatar:me.avatar, totalAmount:total, ts:Date.now() };
+            d.totalAmount=(d.totalAmount||0)+total; d.name=me.name; d.avatar=me.avatar; d.ts=Date.now(); return d;
+        });
+        // خصم الكوينزات من المرسل
+        db.ref("users/" + me.uid + "/coins").transaction(function(cur) {
+            var newVal = Math.max(0, (cur||0) - total);
+            // تحديث العرض فوراً
+            me.coins = newVal;
+            document.getElementById("user-balance").textContent = newVal;
+            return newVal;
+        });
+        // ── إضافة كوينزات المستلم (receiverCoins من إعدادات الهدية) ──
+        var recUid = rec.dataset.uid;
+        var recCoins = selectedGiftRecCoins > 0 ? (selectedGiftRecCoins * qty) : total;
+        var vrFullGd = _vrAllGiftsData[selectedGift] || null;
+        if (recUid) {
+            db.ref("users/" + recUid + "/coins").transaction(function(cur) { return (cur || 0) + recCoins; });
+            db.ref("users/" + recUid + "/coinsHistory").push({
+                source:'gift', senderUid:me.uid, senderName:me.name,
+                giftName:selectedGift, coins:recCoins, ts:Date.now()
+            });
+            // إضافة الهدية لهدايا الملف الشخصي للمستلم
+            db.ref("users/" + recUid + "/receivedGifts").push({
+                senderUid:me.uid, senderName:me.name, senderAvatar:me.avatar,
+                giftName:selectedGift, giftIcon:selectedGiftIcon,
+                qty:qty, total:recCoins, source:'voice-room', roomId:roomId, ts:Date.now()
+            });
+            // مكافآت المستلم من إعدادات الهدية
+            if (vrFullGd) {
+                var rcRewards = [];
+                if (recCoins > 0) rcRewards.push('+'+recCoins+' 💰');
+                if (vrFullGd.receiverFrameUrl) {
+                    db.ref("users/"+recUid+"/ownedFrames/"+selectedGift.replace(/\s/g,'_')+"_r").set({name:selectedGift,imgUrl:vrFullGd.receiverFrameUrl,ts:Date.now()});
+                    rcRewards.push('🖼 إطار: '+selectedGift);
+                }
+                if (vrFullGd.receiverEntryUrl) { db.ref("users/"+recUid+"/ownedEntryEffects/"+selectedGift.replace(/\s/g,'_')+"_r").set({imgUrl:vrFullGd.receiverEntryUrl,ts:Date.now()}); rcRewards.push('✨ تأثير دخول'); }
+                if (vrFullGd.receiverBagImg && vrFullGd.isBag) { db.ref("users/"+recUid+"/wardrobeBag/"+selectedGift.replace(/\s/g,'_')).set({name:selectedGift,imgUrl:vrFullGd.receiverBagImg,ts:Date.now(),coins:vrFullGd.bagReceiverCoins||0}); rcRewards.push('👜 هدية الحقيبة'+(vrFullGd.bagReceiverCoins?' (+'+vrFullGd.bagReceiverCoins+' 💰)':'')); }
+                if (rcRewards.length) { firebase.database().ref('notifications').push({type:'wardrobe',fromUserId:me.uid,fromName:me.name,fromAvatar:me.avatar,toUserId:recUid,text:'حصلت على: '+rcRewards.join('، '),createdAt:firebase.database.ServerValue.TIMESTAMP,isRead:false}); }
+            }
+        }
+        // مكافآت المرسل من إعدادات الهدية
+        if (vrFullGd) {
+            var sRewards = [];
+            if (vrFullGd.senderPoints) { db.ref("users/"+me.uid+"/points").transaction(function(v){ return (v||0)+(vrFullGd.senderPoints*qty); }); sRewards.push('+'+vrFullGd.senderPoints*qty+' نقطة تصنيف'); }
+            if (vrFullGd.senderFrameUrl) {
+                db.ref("users/"+me.uid+"/ownedFrames/"+selectedGift.replace(/\s/g,'_')+"_s").set({name:selectedGift,imgUrl:vrFullGd.senderFrameUrl,ts:Date.now()});
+                sRewards.push('🖼 إطار: '+selectedGift);
+            }
+            if (vrFullGd.senderEntryUrl) { db.ref("users/"+me.uid+"/ownedEntryEffects/"+selectedGift.replace(/\s/g,'_')+"_s").set({imgUrl:vrFullGd.senderEntryUrl,ts:Date.now()}); sRewards.push('✨ تأثير دخول'); }
+            if (vrFullGd.senderTitle) { db.ref("users/"+me.uid+"/ownedTitles/"+selectedGift.replace(/\s/g,'_')+"_s").set({title:vrFullGd.senderTitle,ts:Date.now()}); sRewards.push('🏷 لقب: '+vrFullGd.senderTitle); }
+            if (vrFullGd.senderBagImg) { db.ref("users/"+me.uid+"/wardrobeBag/"+selectedGift.replace(/\s/g,'_')+"_s").set({name:selectedGift,imgUrl:vrFullGd.senderBagImg,ts:Date.now(),coins:vrFullGd.bagSenderCoins||0}); sRewards.push('👜 هدية الحقيبة'+(vrFullGd.bagSenderCoins?' (+'+vrFullGd.bagSenderCoins+' 💰)':'')); }
+            if (sRewards.length) { firebase.database().ref('notifications').push({type:'wardrobe',fromUserId:'system',fromName:'YADWOR',fromAvatar:'',toUserId:me.uid,text:'حصلت على: '+sRewards.join('، '),createdAt:firebase.database.ServerValue.TIMESTAMP,isRead:false}); }
+        }
+        // ── تحديث إجمالي الهدايا المرسلة (تصنيف الداعمين) ──
+        db.ref("users/" + me.uid + "/totalGiftsSent").transaction(function(cur) { return (cur || 0) + qty; });
+        // ── تحديث نقاط التصنيف: نقطة لكل هدية + senderPoints من إعداد الهدية ──
+        var vrSenderPts = _vrGiftSenderPtsMap[selectedGift] || 0;
+        var vrLeaderAdd = (1 + vrSenderPts) * qty;
+        db.ref("users/" + me.uid + "/giftLeaderPoints").transaction(function(cur) { return (cur || 0) + vrLeaderAdd; });
+        // ── تحديث نقاط الداعمين (المبلغ الكلي المُرسَل - للتصنيف) ──
+        db.ref("users/" + me.uid + "/supportersScore").transaction(function(cur) { return (cur || 0) + total; });
+        // ── تحديث تقدم مهام الدعم ──
+        db.ref('tasks').once('value').then(function(ts) {
+            var tasks = ts.val() || {};
+            Object.keys(tasks).forEach(function(tid) {
+                var t = tasks[tid];
+                if (t.type === 'supporters' && t.active) {
+                    // فقط المهام التي نُشرت قبل إرسال الهدية، ولا تُحتسب إذا أرسل لنفسه
+                    if (isSelfVR) return;
+                    var taskCreatedAt = t.createdAt || 0;
+                    if (taskCreatedAt > Date.now()) return;
+                    db.ref('tasks/' + tid + '/currentProgress').transaction(function(v) { return (v || 0) + qty; });
+                    // ── تحديث التقدم الشخصي ──
+                    db.ref('userTaskProgress/' + me.uid + '/' + tid).transaction(function(v) {
+                        var cur = v || 0;
+                        var goal = t.target || 1;
+                        if (cur < goal) return cur + qty;
+                        return cur;
+                    });
+                }
+            });
+        });
+    }
+
+    function triggerGiftNotification(sNm, sImg, rNm, rImg, gNm, gIco, qty, sndUrl) {
+        var c = document.getElementById("gift-notification-container");
+        var n = document.createElement("div"); n.className = "gift-alert";
+        var avDiv = document.createElement("div"); avDiv.className = "gift-alert-avatars";
+        var si = document.createElement("img"); si.src = sImg; si.className = "sender";
+        var ri = document.createElement("img"); ri.src = rImg; ri.className = "recipient";
+        avDiv.appendChild(si); avDiv.appendChild(ri);
+        var txt  = document.createElement("div"); txt.className = "gift-alert-text";
+        var nms  = document.createElement("div"); nms.className = "names"; nms.innerHTML = "<strong>" + esc(sNm) + "</strong> أرسل إلى <strong>" + esc(rNm) + "</strong>";
+        var act  = document.createElement("div"); act.className = "action"; act.textContent = "أرسل " + gNm + " x" + qty;
+        txt.appendChild(nms); txt.appendChild(act);
+        var icoDiv = document.createElement("div"); icoDiv.className = "gift-alert-icon";
+        var isUrlAlert = gIco && (gIco.startsWith('http') || gIco.startsWith('/'));
+        if (isUrlAlert) { var aImg = document.createElement("img"); aImg.src = gIco; aImg.style.cssText = "width:38px;height:38px;object-fit:contain;"; aImg.onerror = function(){ this.style.display='none'; }; icoDiv.appendChild(aImg); } else { icoDiv.textContent = gIco; }
+        n.appendChild(avDiv); n.appendChild(txt); n.appendChild(icoDiv); c.appendChild(n);
+        // تشغيل صوت الهدية مع تلاشي تدريجي عند اختفاء الإشعار
+        var vrGiftAu = null;
+        if (sndUrl) { try { vrGiftAu = new Audio(sndUrl); vrGiftAu.volume = 1; vrGiftAu.play().catch(function(){}); } catch(e){} }
+        setTimeout(function(){
+            n.style.transition = 'opacity 0.5s'; n.style.opacity = '0';
+            if (vrGiftAu) { var vfi=setInterval(function(){ if(vrGiftAu.volume>0.05){vrGiftAu.volume=Math.max(0,vrGiftAu.volume-0.1);}else{vrGiftAu.pause();clearInterval(vfi);} },50); }
+            setTimeout(function(){ if(n.parentNode) n.parentNode.removeChild(n); }, 500);
+        }, 3600);
+    }
+
+    function addGiftMsgToChat(sImg, sNm, rNm, gNm, gIco, qty, pp) {
+        var cv = document.getElementById("chat-view");
+        var total = pp * qty;
+        var bg = "background:rgba(241,196,15,0.15);border:1px solid rgba(241,196,15,0.4);";
+        var nc = "var(--accent-gold)";
+        var bh = "";
+        if (total >= 10000) { bg = "background:linear-gradient(45deg,rgba(255,71,87,0.15),rgba(241,196,15,0.15));border:1px solid var(--accent-red);"; nc = "var(--accent-red)"; bh = "<span class='badge' style='background:#ff4757;'>أسطوري</span>"; }
+        else if (total >= 2000) { bg = "background:rgba(156,136,255,0.15);border:1px solid rgba(156,136,255,0.4);"; nc = "#9c88ff"; bh = "<span class='badge' style='background:#9c88ff;'>ضخم</span>"; }
+        var d = document.createElement("div"); d.className = "msg-line"; d.setAttribute("style", bg);
+        var av = document.createElement("img"); av.className = "chat-avatar"; av.src = sImg;
+        var mc = document.createElement("div"); mc.className = "msg-content";
+        var mh = document.createElement("div"); mh.className = "msg-header";
+        mh.innerHTML = "<span class='chat-name' style='color:" + nc + ";'><i class='fas fa-gift'></i> " + esc(sNm) + "</span>" + bh;
+        var tx = document.createElement("span"); tx.className = "chat-text";
+        var isUrlChat = gIco && (gIco.startsWith('http') || gIco.startsWith('/'));
+        var icoHtmlChat = isUrlChat ? '<img src="' + gIco + '" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.style.display=\'none\'">' : gIco;
+        tx.innerHTML = "أرسل <strong>" + qty + "x " + esc(gNm) + " " + icoHtmlChat + "</strong> لـ <strong>" + esc(rNm) + "</strong>";
+        mc.appendChild(mh); mc.appendChild(tx); d.appendChild(av); d.appendChild(mc);
+        cv.appendChild(d); cv.scrollTop = cv.scrollHeight;
+    }
+
+    /* ════ الداعمون (نافذة) ════ */
+    window.openSupportersModal = function() {
+        var lc = document.getElementById("supporters-list-container");
+        lc.innerHTML = "<div style='text-align:center;padding:20px;color:#aaa;'>جاري التحميل...</div>";
+        openOverlay(); document.getElementById("supporters-modal").classList.add("show");
+        db.ref("rooms/" + roomId + "/donors").once("value", function(snap) {
+            var donors = [];
+            snap.forEach(function(s){ var d=s.val(); if(d) donors.push(d); });
+            donors.sort(function(a,b){ return (b.totalAmount||0)-(a.totalAmount||0); });
+            if (!donors.length) { lc.innerHTML = "<div style='text-align:center;padding:30px;color:#aaa;font-size:14px;'>لا يوجد داعمون حتى الآن</div>"; return; }
+            lc.innerHTML = "";
+            var medals = ["🥇","🥈","🥉"];
+            donors.forEach(function(s, idx) {
+                var fa = (s.totalAmount||0) >= 1000 ? ((s.totalAmount||0)/1000).toFixed(1) + "K" : (s.totalAmount||0);
+                var item = document.createElement("div"); item.className = "supporter-item";
+                var infoGroup = document.createElement("div"); infoGroup.className = "supporter-info-group";
+                var medalDiv = document.createElement("div"); medalDiv.style.cssText = "width:22px;text-align:center;font-size:16px;flex-shrink:0;";
+                if (idx < 3) medalDiv.textContent = medals[idx]; else medalDiv.innerHTML = "<span style='font-size:12px;font-weight:900;color:#888;'>#" + (idx+1) + "</span>";
+                var avImg = document.createElement("img"); avImg.src = s.avatar||""; avImg.style.cssText = "width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #e1e8ed;flex-shrink:0;";
+                avImg.onerror = function(){ avImg.src = ""; };
+                var details = document.createElement("div"); details.className = "supporter-details";
+                var nameRow = document.createElement("div"); nameRow.className = "supporter-name-row";
+                var nmSpan  = document.createElement("span"); nmSpan.className = "supporter-name"; nmSpan.textContent = s.name||"مستخدم";
+                var amSpan  = document.createElement("span"); amSpan.className = "supporter-amount"; amSpan.innerHTML = fa + " <i class='fas fa-gem'></i>";
+                nameRow.appendChild(nmSpan); nameRow.appendChild(amSpan);
+                var idSpan = document.createElement("span"); idSpan.className = "supporter-id"; 
+                var giftTime = s.ts ? (function(ts){ var d=new Date(ts); return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); })(s.ts) : "";
+                idSpan.textContent = giftTime ? "آخر دعم: " + giftTime : "";
+                details.appendChild(nameRow); details.appendChild(idSpan);
+                infoGroup.appendChild(medalDiv); infoGroup.appendChild(avImg); infoGroup.appendChild(details);
+                var actDiv = document.createElement("div"); actDiv.className = "supporter-actions";
+                var viewBtn = document.createElement("button"); viewBtn.className = "btn-action btn-follow"; viewBtn.style.cssText = "padding:5px 10px;font-size:12px;flex-shrink:0;"; viewBtn.textContent = "ملف";
+                viewBtn.onclick = (function(sn,sa,su){ return function(){ vrOpenProfile(sn,sa,su,null,false); }; })(s.name||"", s.avatar||"", s.uid);
+                actDiv.appendChild(viewBtn); item.appendChild(infoGroup); item.appendChild(actDiv); lc.appendChild(item);
+            });
+        });
+    };
+
+    /* ════ المودالات ════ */
+    function openOverlay() {
+        var ov = document.getElementById("modal-overlay"); ov.style.display = "block"; setTimeout(function(){ ov.style.opacity="1"; }, 10);
+    }
+
+    window.closeAllModals = function() {
+        document.getElementById("gift-modal").style.bottom = "-100%";
+        document.getElementById("profile-modal").classList.remove("show");
+        document.getElementById("supporters-modal").classList.remove("show");
+        document.getElementById("tasks-modal").style.bottom = "-100%";
+        var ov = document.getElementById("modal-overlay"); ov.style.opacity = "0"; setTimeout(function(){ ov.style.display="none"; }, 300);
+    };
+
+    document.getElementById("modal-overlay").addEventListener("click", window.closeAllModals);
+    document.getElementById("open-gift-btn").addEventListener("click", function() {
+        // تحميل هدايا الحقيبة ثم فتح النافذة
+        if (me && me.uid) {
+            giftsData['tab1'] = (giftsData['tab1']||[]).filter(function(g){ return !g._wbKey; });
+            db.ref('users/'+me.uid+'/wardrobeBag').once('value', function(bagSnap) {
+                bagSnap.forEach(function(bs) {
+                    var bg = bs.val(); if (!bg) return;
+                    var isUrl2 = bg.imgUrl && (bg.imgUrl.startsWith('http')||bg.imgUrl.startsWith('/'));
+                    giftsData['tab1'].unshift({ id:'wbag_'+bs.key, name:bg.name||'هدية', price:0, icon:isUrl2?bg.imgUrl:'🎁', desc:bg.name||'هدية', badge:'👜 حقيبة', soundUrl:'', receiverCoins:bg.coins||0, _wbKey:bs.key });
+                    _vrAllGiftsData['wbag_'+bg.name] = {name:bg.name,imgUrl:bg.imgUrl,isBag:true,bagReceiverCoins:bg.coins||0,price:0,_wardrobeKey:bs.key};
+                    _vrGiftRecCoinsMap['wbag_'+bg.name] = bg.coins||0;
+                });
+                renderGifts();
+                populateRecipients(); openOverlay(); document.getElementById("gift-modal").style.bottom = "0";
+            });
+        } else {
+            populateRecipients(); openOverlay(); document.getElementById("gift-modal").style.bottom = "0";
+        }
+    });
+
+    // swipe هدايا
+    var touchArea = document.getElementById("gifts-grids-container"), touchStartX = 0;
+    touchArea.addEventListener("touchstart", function(e){ touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+    touchArea.addEventListener("touchend",   function(e){ var d = touchStartX - e.changedTouches[0].screenX; if(Math.abs(d)>50) window.switchTab(d>0?currentTabIndex-1:currentTabIndex+1); }, {passive:true});
+
+    // focus chat
+    var chatInputElem = document.getElementById("chat-input"), bottomNavElem = document.getElementById("bottom-nav");
+    function updateNavFocusState() { if(document.activeElement===chatInputElem) bottomNavElem.classList.add("typing-mode"); else bottomNavElem.classList.remove("typing-mode"); }
+    chatInputElem.addEventListener("focus", updateNavFocusState);
+    chatInputElem.addEventListener("blur",  function(){ setTimeout(updateNavFocusState, 150); });
+
+    /* ════ الخروج ════ */
+    function showLeave() {
+        var ov = document.getElementById("leave-overlay"), m = document.getElementById("leave-modal");
+        ov.style.display = "block"; setTimeout(function(){ ov.style.opacity="1"; m.classList.add("show"); }, 10);
+    }
+
+    function hideLeave() {
+        document.getElementById("leave-modal").classList.remove("show");
+        var ov = document.getElementById("leave-overlay"); ov.style.opacity = "0"; setTimeout(function(){ ov.style.display="none"; }, 300);
+    }
+
+        function saveRoomTime() {
+        if (!me || !me.uid || !roomJoinTime) return;
+        var joinTime = roomJoinTime;
+        roomJoinTime = null;
+        var totalSecs = Math.floor((Date.now() - joinTime) / 1000);
+        var totalMins = Math.floor(totalSecs / 60);
+        // نقاط الغرفة — نقطة لكل دقيقتين
+        if (totalMins >= 2) {
+            db.ref("users/" + me.uid + "/audioRoomTime").transaction(function(v) { return (v || 0) + totalMins; });
+            db.ref("users/" + me.uid + "/roomPoints").transaction(function(v) { return (v || 0) + Math.floor(totalMins / 2); });
+        }
+        // ── تحديث تقدم مهام غرفة الصوت (من المهام المحملة مسبقاً) ──
+        if (totalSecs < 60) return;
+        var tasks = _cachedRoomTasks || {};
+        Object.keys(tasks).forEach(function(tid) {
+            var t = tasks[tid];
+            if (t.type !== 'audio-room') return;
+            if (!t.active) return;
+            var taskCreatedAt = t.createdAt || 0;
+            if (taskCreatedAt > joinTime) return;
+            var action = t.roomAction || 'any';
+            if (action === 'create' && !isOwner) return;
+            if (action === 'join' && isOwner) return;
+            var required = t.roomMinutes || 1;
+            if (totalMins >= required) {
+                db.ref('userTaskProgress/' + me.uid + '/' + tid).transaction(function(v) {
+                    var cur = v || 0;
+                    var goal = t.target || 1;
+                    if (cur < goal) return cur + 1;
+                    return cur;
+                });
+            }
+        });
+    }
+
+    function doLeave() {
+        saveRoomTime(); // ✅ حفظ وقت الغرفة
+        if (isOwner) {
+            // إغلاق الغرفة وحذفها نهائياً فوراً
+            db.ref("rooms/" + roomId + "/teacherOnline").set(false);
+            db.ref("rooms/" + roomId).update({
+                closed: true,
+                closedReason: "تم إغلاق الغرفة بواسطة صاحبها",
+                closedAt: Date.now()
+            });
+            // حذف نهائي بعد ثانية لإعطاء وقت للـ listeners
+            setTimeout(function() {
+                db.ref("rooms/" + roomId).remove().catch(function(){});
+            }, 1500);
+        }
+        cleanup();
+        location.href = "roomhom.html";
+    }
+
+    function cleanup() {
+        if (window.__roomPointsInt) { clearInterval(window.__roomPointsInt); window.__roomPointsInt = null; }
+        if (mySeatIdx !== null) db.ref("rooms/" + roomId + "/seats/" + mySeatIdx).remove();
+        db.ref("rooms/" + roomId + "/viewers/" + me.uid).remove();
+        db.ref("rooms/" + roomId).off();
+        if (studentRef) studentRef.remove();
+        if (studentPC) { try { studentPC.close(); } catch(e) {} studentPC = null; }
+        Object.keys(teacherPeerConns).forEach(function(key) {
+            var c = teacherPeerConns[key]; if(c.pc) c.pc.close(); if(c.audioEl) c.audioEl.remove(); delete teacherPeerConns[key];
+        });
+        if (localStream) localStream.getTracks().forEach(function(t){ t.stop(); });
+        stopOwnerHiddenCountdown();
+    }
+
+    window.addEventListener("beforeunload", function() {
+        saveRoomTime();
+        if (isOwner) db.ref("rooms/" + roomId + "/teacherOnline").set(false);
+        cleanup();
+    });
+
+    document.getElementById("leave-overlay").addEventListener("click", hideLeave);
+
+    /* ════ مساعدات ════ */
+    function fmtNum(n) { return n>=1000000?(n/1000000).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"K":String(n||0); }
+    function esc(t) { return String(t).replace(/[&<>"']/g, function(c){ var m={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}; return m[c]; }); }
+
+</script>
+
+<!-- ===== نافذة الرسائل الخاصة (DM) ===== -->
+<div class="dm-wrap" id="dmWrap">
+    <div class="dm-box">
+        <div class="dm-hdr">
+            <img src="" id="dmAvatar" class="dm-hdr-av" alt="">
+            <div class="dm-hdr-name" id="dmTitle">رسالة</div>
+            <button class="dm-close" onclick="vrCloseDM()">×</button>
+        </div>
+        <div class="dm-messages" id="dmMessages">
+            <div class="dm-empty">لا توجد رسائل بعد. ابدأ المحادثة!</div>
+        </div>
+        <div class="dm-footer">
+            <button class="dm-send" onclick="vrSendDM()">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+            <input type="text" class="dm-input" id="dmInput" placeholder="اكتب رسالتك..." onkeypress="vrHandleDMEnter(event)">
+        </div>
+    </div>
+</div>
+
+
+<!-- ===== تأثير الدخولية ===== -->
+<div id="vrEntryEffect"></div>
+
+<!-- ===== نافذة المنظمين (من المقاعد) ===== -->
+<div class="viewers-wrap" id="vrViewersWrap" onclick="if(event.target===this)vrCloseViewers()">
+    <div class="viewers-modal-box">
+        <div class="vm-hdr">
+            <span class="vm-hdr-title">في الغرفة</span>
+            <button class="vm-x" onclick="vrCloseViewers()">×</button>
+        </div>
+        <div class="vm-body" id="vrViewersBody"></div>
+    </div>
+</div>
+
+<!-- ===== نافذة تأكيد ===== -->
+<div class="cfm-wrap" id="vrCfmWrap">
+    <div class="cfm-box">
+        <div class="cfm-title" id="vrCfmTitle">تأكيد</div>
+        <div class="cfm-body"  id="vrCfmBody"></div>
+        <div class="cfm-btns">
+            <button class="cfm-yes" id="vrCfmYes">نعم</button>
+            <button class="cfm-no"  onclick="vrCfmClose()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== قائمة الأصدقاء ===== -->
+<div class="fm-wrap" id="vrFmWrap" onclick="if(event.target===this)vrCloseFriends()">
+    <div class="fm-box">
+        <div class="fm-hdr">
+            <span>قائمة الأصدقاء</span>
+            <button class="vm-x" onclick="vrCloseFriends()">×</button>
+        </div>
+        <div class="fm-body" id="vrFmBody"></div>
+    </div>
+</div>
+
+<!-- ===== Emoji Picker ===== -->
+<div id="vrEmojiBackdrop" onclick="vrCloseEmojiPicker()"></div>
+<div id="vrEmojiPicker">
+    <div class="vep-hdr">
+        <span class="vep-title">اختر إيموجي</span>
+        <button class="vep-x" onclick="vrCloseEmojiPicker()"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;color:#555"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.9 4.89a1 1 0 1 0 1.41 1.42L12 13.41l4.89 4.9a1 1 0 0 0 1.42-1.41L13.41 12l4.9-4.89a1 1 0 0 0-.01-1.4z"/></svg></button>
+    </div>
+    <div class="vep-grid" id="vrEmojiGrid">
+        <div style="text-align:center;color:#aaa;font-size:12px;padding:10px;grid-column:1/-1;">جاري التحميل...</div>
+    </div>
+</div>
+
+<!-- ===== نافذة خطأ الغرفة ===== -->
+<div id="roomErrWrap">
+    <div id="roomErrBox">
+        <div class="re-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="re-title" id="reTitle">حدث خطأ</div>
+        <button class="re-btn" id="reBtn" style="margin-top:4px;">حسناً</button>
+    </div>
+</div>
+
+<!-- Snack Bar -->
+<div id="vr-snack"></div>
+
+<!-- ===== نافذة دعوة للمقعد ===== -->
+<div class="seat-picker-ov" id="spm">
+    <div class="seat-picker-box">
+        <div class="seat-picker-hdr">
+            <h3 id="spmt">اختر شخصاً للمقعد</h3>
+            <button class="seat-picker-close" onclick="vrCloseSeatPicker()">×</button>
+        </div>
+        <div class="seat-picker-body">
+            <div id="spl"></div>
+        </div>
+        <div class="seat-picker-footer">
+            <button class="cmbtn" onclick="vrCloseSeatPicker()">إلغاء</button>
+            <button class="cmbtn cmbtn2" id="spInvite">دعوة للمقعد</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== نافذة تأكيد (مطابقة roomvideo) ===== -->
+<div class="cm" id="cm">
+  <div class="cmc">
+    <div class="cmt" id="cmt"></div>
+    <div class="cmb" id="cmb"></div>
+    <div class="cmr" style="display:flex;gap:10px;margin-top:16px;">
+      <button class="cmbtn" id="cmNo">إلغاء</button>
+      <button class="cmbtn cmbtn2" id="cmYes">تأكيد</button>
+    </div>
+  </div>
+</div>
+<!-- نافذة معاينة الهدية -->
+<div class="gp-ov" id="gpOv" onclick="if(event.target===this)closeGiftPreview()">
+  <div class="gp-box">
+    <button class="gp-close" onclick="closeGiftPreview()">✕</button>
+    <img class="gp-gift-img" id="gpGiftImg" src="" onerror="this.style.display='none'">
+    <div class="gp-name" id="gpName"></div>
+    <div class="gp-price" id="gpPrice"></div>
+    <div id="gpBody"></div>
+  </div>
+</div>
+<script>
+function openGiftPreview(name, price, ico) {
+    var gd = _vrAllGiftsData[name] || null; if (!gd) return;
+    var isImg = ico && (ico.startsWith('http')||ico.startsWith('/'));
+    var gpImg = document.getElementById('gpGiftImg');
+    if (isImg) { gpImg.src=ico; gpImg.style.display='block'; } else { gpImg.style.display='none'; }
+    document.getElementById('gpName').textContent = name;
+    document.getElementById('gpPrice').textContent = price + ' 💰';
+    var html = '';
+    if (gd.senderPoints) html += '<div class="gp-pts">+'+gd.senderPoints+' نقطة تصنيف للمرسل 🏆</div>';
+    var sRows = '';
+    if (gd.senderFrameUrl) sRows += '<div class="gp-reward-row"><img class="gp-reward-img" src="'+gd.senderFrameUrl+'" onerror="this.style.background=\'#333\'"><div class="gp-reward-txt">🖼 إطار للمرسل</div></div>';
+    if (gd.senderEntryUrl) sRows += '<div class="gp-reward-row"><img class="gp-reward-img" src="'+gd.senderEntryUrl+'" onerror="this.style.background=\'#333\'"><div class="gp-reward-txt">✨ تأثير دخول للمرسل</div></div>';
+    if (gd.senderBagImg) sRows += '<div class="gp-reward-row"><img class="gp-reward-img" src="'+gd.senderBagImg+'" onerror="this.style.background=\'#333\'"><div class="gp-reward-txt">👜 هدية الحقيبة للمرسل'+(gd.bagSenderCoins?' (+'+gd.bagSenderCoins+' 💰)':'')+'</div></div>';
+    if (gd.senderTitle) sRows += '<div class="gp-reward-row"><div class="gp-reward-img" style="display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#f1c40f;text-align:center;">'+gd.senderTitle+'</div><div class="gp-reward-txt">🏷 لقب للمرسل</div></div>';
+    if (sRows) html += '<div class="gp-section"><div class="gp-section-title">مكافآت المرسل</div>'+sRows+'</div>';
+    var rRows = '';
+    if (gd.receiverFrameUrl) rRows += '<div class="gp-reward-row"><img class="gp-reward-img" src="'+gd.receiverFrameUrl+'" onerror="this.style.background=\'#333\'"><div class="gp-reward-txt">🖼 إطار للمستلم</div></div>';
+    if (gd.receiverEntryUrl) rRows += '<div class="gp-reward-row"><img class="gp-reward-img" src="'+gd.receiverEntryUrl+'" onerror="this.style.background=\'#333\'"><div class="gp-reward-txt">✨ تأثير دخول للمستلم</div></div>';
+    if (gd.isBag && gd.receiverBagImg) rRows += '<div class="gp-reward-row"><img class="gp-reward-img" src="'+gd.receiverBagImg+'" onerror="this.style.background=\'#333\'"><div class="gp-reward-txt">👜 هدية الحقيبة للمستلم'+(gd.bagReceiverCoins?' (+'+gd.bagReceiverCoins+' 💰)':'')+'</div></div>';
+    if (rRows) html += '<div class="gp-section"><div class="gp-section-title">مكافآت المستلم</div>'+rRows+'</div>';
+    document.getElementById('gpBody').innerHTML = html;
+    document.getElementById('gpOv').classList.add('open');
+}
+function closeGiftPreview() { document.getElementById('gpOv').classList.remove('open'); }
+</script>
+</body>
+</html>

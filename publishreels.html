@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="pubHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>نشر فيديو - YADWOR</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; -webkit-tap-highlight-color:transparent; }
+
+        button { border: none; outline: none; -webkit-appearance: none; cursor: pointer; }
+        select { border: none; outline: none; -webkit-appearance: none; appearance: none; cursor: pointer; }
+        input { outline: none; }
+        textarea { outline: none; }
+
+        body {
+            background: #0a0a14;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ===== Facebook Shimmer Loading ===== */
+        .shimmer-page {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .shimmer-topbar {
+            height: 58px;
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        .shimmer-box {
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0.05) 25%,
+                rgba(255,255,255,0.13) 50%,
+                rgba(255,255,255,0.05) 75%
+            );
+            background-size: 400% 100%;
+            animation: shimmerMove 1.4s ease-in-out infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmerMove {
+            0%   { background-position: 100% 50%; }
+            100% { background-position: -100% 50%; }
+        }
+        .shimmer-circle { border-radius: 50% !important; }
+        .shimmer-body { padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+        .shimmer-upload-area {
+            height: 180px;
+            border-radius: 20px;
+        }
+        .shimmer-label { height: 14px; width: 80px; border-radius: 6px; }
+        .shimmer-input { height: 48px; border-radius: 14px; }
+        .shimmer-textarea { height: 90px; border-radius: 14px; }
+        .shimmer-social { height: 68px; border-radius: 16px; }
+        .shimmer-btn { height: 54px; border-radius: 16px; margin-top: 4px; }
+        .shimmer-field { display: flex; flex-direction: column; gap: 8px; }
+
+        /* ===== الصفحة الحقيقية ===== */
+        .real-page { display: none; flex-direction: column; min-height: 100vh; }
+        .real-page.show { display: flex; }
+
+        /* ===== الشريط العلوي ===== */
+        .pub-topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,10,20,0.96);
+            backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            height: 58px;
+            flex-shrink: 0;
+        }
+        .pub-back-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: none; outline: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .2s;
+            flex-shrink: 0;
+        }
+        .pub-back-btn:hover { background: rgba(255,255,255,0.15); }
+        .pub-back-btn svg { width: 20px; height: 20px; }
+        .pub-title { font-size: 16px; font-weight: 700; color: #fff; }
+        .pub-spacer { width: 38px; }
+
+        /* ===== المحتوى ===== */
+        .pub-content {
+            padding: 18px 16px 60px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ===== منطقة رفع الفيديو ===== */
+        .video-upload-zone {
+            border-radius: 20px;
+            box-shadow: inset 0 0 0 1.5px rgba(37,244,238,0.22);
+            background: rgba(37,244,238,0.03);
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .video-upload-zone:hover,
+        .video-upload-zone.drag-over { box-shadow: inset 0 0 0 2px #25f4ee; background: rgba(37,244,238,0.07); }
+        .video-upload-zone input[type="file"] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2;
+        }
+        .vuz-icon-wrap {
+            width: 62px; height: 62px;
+            background: rgba(37,244,238,0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .vuz-icon-wrap svg { width: 30px; height: 30px; fill: #25f4ee; }
+        .vuz-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+        .vuz-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+        .vuz-btn-label {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(37,244,238,0.12);
+            border: none; outline: none;
+            border-radius: 22px; padding: 9px 22px;
+            color: #25f4ee; font-size: 13px; font-weight: 700;
+            pointer-events: none; position: relative; z-index: 0;
+        }
+        .vuz-btn-label svg { width: 15px; height: 15px; fill: #25f4ee; }
+
+        /* ملف محدد */
+        .file-selected {
+            display: none;
+            align-items: center; gap: 12px;
+            padding: 12px 14px;
+            background: rgba(37,244,238,0.06);
+            
+            border-radius: 14px;
+        }
+        .file-selected.show { display: flex; }
+        .file-thumb {
+            width: 44px; height: 44px;
+            background: rgba(37,244,238,0.1);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .file-thumb svg { width: 22px; height: 22px; fill: #25f4ee; }
+        .file-info { flex: 1; min-width: 0; }
+        .file-name { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-size { font-size: 11px; color: rgba(255,255,255,0.38); margin-top: 2px; }
+        .file-change-btn {
+            background: rgba(255,255,255,0.07);
+            border: none; outline: none;
+            border-radius: 9px; padding: 5px 11px;
+            color: rgba(255,255,255,0.55); font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* ===== حقل نموذج ===== */
+        .field-wrap { display: flex; flex-direction: column; gap: 6px; }
+        .field-label {
+            font-size: 12px; font-weight: 700;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: .3px;
+        }
+        .field-input, .field-textarea {
+            background: rgba(255,255,255,0.05);
+            
+            border-radius: 13px;
+            padding: 12px 14px;
+            color: #fff; font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
+            transition: border-color .2s, background .2s;
+        }
+        .field-input:focus, .field-textarea:focus {
+            border-color: rgba(37,244,238,0.5);
+            background: rgba(37,244,238,0.04);
+        }
+        .field-input::placeholder, .field-textarea::placeholder { color: rgba(255,255,255,0.2); }
+        .field-textarea { min-height: 85px; resize: vertical; line-height: 1.6; }
+
+        /* ===== قسم البروفايلات الاجتماعية ===== */
+        .social-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .social-hdr {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .social-hdr-title {
+            font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.75);
+        }
+        .add-link-btn {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(37,244,238,0.12);
+            border: none; outline: none;
+            border-radius: 20px; padding: 7px 14px;
+            color: #25f4ee; font-size: 12px; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+            transition: background .2s, transform .15s;
+            outline: none;
+        }
+        .add-link-btn:active { transform: scale(.94); }
+        .add-link-btn svg { width: 13px; height: 13px; fill: none; stroke: #25f4ee; stroke-width: 2.5; stroke-linecap: round; }
+        .profiles-list { display: flex; flex-direction: column; gap: 8px; }
+        .profile-card {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 11px;
+            border-radius: 12px;
+            animation: cardIn .22s ease;
+        }
+        @keyframes cardIn { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+        .profile-card img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .profile-card-info { flex: 1; min-width: 0; }
+        .profile-card-name { color: #fff; font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-card-plat { color: rgba(255,255,255,0.5); font-size: 11px; margin-top: 1px; }
+        .remove-card-btn {
+            background: rgba(254,44,85,0.15); border: none; border-radius: 50%;
+            width: 28px; height: 28px; color: #fe2c55; font-size: 17px; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background .2s;
+        }
+        .remove-card-btn:hover { background: rgba(254,44,85,0.3); }
+        .social-empty { color: rgba(255,255,255,0.22); font-size: 12px; text-align: center; padding: 8px 0 2px; }
+
+        /* ===== شريط تقدم الرفع ===== */
+        .upload-progress {
+            display: none;
+            flex-direction: column; gap: 10px;
+            padding: 15px;
+            background: rgba(37,244,238,0.05);
+            
+            border-radius: 15px;
+        }
+        .upload-progress.active { display: flex; }
+        .uprog-hdr { display: flex; justify-content: space-between; align-items: center; }
+        .uprog-label {
+            font-size: 13px; font-weight: 600; color: #fff;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .uprog-spinner {
+            width: 14px; height: 14px; border: 2px solid transparent;
+            border-top-color: #25f4ee; border-right-color: rgba(37,244,238,0.4); border-radius: 50%;
+            animation: spin .8s linear infinite; display: inline-block;
+        }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        .uprog-pct { color: #25f4ee; font-size: 17px; font-weight: 800; }
+        .uprog-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+        .uprog-bar-fill { height: 100%; background: linear-gradient(90deg, #25f4ee, #fe2c55); width: 0%; transition: width .35s ease; border-radius: 10px; }
+        .uprog-sub { color: rgba(255,255,255,0.35); font-size: 11px; text-align: center; }
+
+        /* ===== زر النشر ===== */
+        .pub-submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #25f4ee, #1acaca);
+            border: none; border-radius: 16px;
+            color: #000; font-size: 15px; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            transition: transform .2s, box-shadow .2s;
+            box-shadow: 0 6px 24px rgba(37,244,238,0.2);
+            outline: none;
+        }
+        .pub-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(37,244,238,0.3); }
+        .pub-submit-btn:active { transform: scale(.98); }
+        .pub-submit-btn svg { width: 18px; height: 18px; fill: #000; }
+        .pub-submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        /* ===== نافذة إضافة رابط ===== */
+        .link-modal-ov {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none; align-items: flex-end; justify-content: center;
+        }
+        .link-modal-ov.open { display: flex; }
+        .link-modal-sheet {
+            width: 100%; max-width: 500px;
+            background: #12121f;
+            border-radius: 22px 22px 0 0;
+            
+            padding: 6px 18px 32px;
+            transform: translateY(100%);
+            transition: transform .32s cubic-bezier(.2,.8,.2,1);
+        }
+        .link-modal-ov.open .link-modal-sheet { transform: translateY(0); }
+        .lm-handle { width: 34px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 12px auto 16px; }
+        .lm-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .lm-title { font-size: 16px; font-weight: 800; color: #fff; }
+        .lm-close-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(255,255,255,0.07); border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lm-close-btn svg { width: 15px; height: 15px; fill: #fff; }
+        .lm-input {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            
+            border-radius: 13px; padding: 12px 14px;
+            color: #fff; font-size: 14px; font-family: inherit;
+            outline: none; transition: border-color .2s;
+            margin-bottom: 8px;
+        }
+        .lm-input:focus { border-color: rgba(37,244,238,0.5); }
+        .lm-input::placeholder { color: rgba(255,255,255,0.2); }
+        .lm-error { color: #fe2c55; font-size: 11px; margin-bottom: 8px; display: none; }
+        .lm-error.show { display: block; }
+        .lm-preview {
+            display: none; align-items: center; gap: 11px;
+            padding: 11px 12px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px; margin-bottom: 8px;
+        }
+        .lm-preview.show { display: flex; }
+        .lm-preview img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .lm-preview-info { flex: 1; }
+        .lm-preview-name { color: #fff; font-weight: 700; font-size: 13px; }
+        .lm-preview-plat { color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 1px; }
+        .lm-footer { display: flex; gap: 8px; margin-top: 14px; }
+        .lm-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .18s; outline: none; }
+        .lm-btn-cancel { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
+        .lm-btn-confirm { background: linear-gradient(135deg, #25f4ee, #1acaca); color: #000; }
+        .lm-btn-confirm:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* ===== نافذة النجاح ===== */
+        .success-ov {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(14px);
+            z-index: 9000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .success-ov.show { display: flex; }
+        .success-box {
+            background: linear-gradient(145deg, #101020, #181830);
+            border-radius: 24px; padding: 38px 24px;
+            text-align: center; width: 100%; max-width: 300px;
+            box-shadow: 0 0 40px rgba(37,244,238,0.08);
+            animation: popIn .45s cubic-bezier(.2,.8,.2,1);
+        }
+        @keyframes popIn { from{transform:scale(.75);opacity:0;} to{transform:scale(1);opacity:1;} }
+        .success-emoji { font-size: 60px; display: block; margin-bottom: 14px; animation: bounce .5s .1s cubic-bezier(.2,.8,.2,1) both; }
+        @keyframes bounce { from{transform:scale(0)rotate(-15deg);} to{transform:scale(1)rotate(0);} }
+        .success-title { color: #fff; font-size: 20px; font-weight: 800; margin-bottom: 7px; }
+        .success-sub { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 22px; }
+        .success-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
+        .success-bar-fill { height: 100%; background: linear-gradient(90deg, #25f4ee, #fe2c55); animation: fillW 3s linear forwards; }
+        @keyframes fillW { from{width:0%} to{width:100%} }
+        .success-hint { color: rgba(255,255,255,0.25); font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Shimmer Loading (يظهر أثناء تحميل Firebase) ===== -->
+    <div class="shimmer-page" id="shimmerPage">
+        <div class="shimmer-topbar">
+            <div class="shimmer-box shimmer-circle" style="width:38px;height:38px;flex-shrink:0;"></div>
+            <div class="shimmer-box" style="width:130px;height:18px;margin:0 auto;"></div>
+            <div style="width:38px;flex-shrink:0;"></div>
+        </div>
+        <div class="shimmer-body">
+            <div class="shimmer-field">
+                <div class="shimmer-box shimmer-upload-area"></div>
+            </div>
+            <div class="shimmer-field">
+                <div class="shimmer-box shimmer-label"></div>
+                <div class="shimmer-box shimmer-textarea"></div>
+            </div>
+            <div class="shimmer-field">
+                <div class="shimmer-box shimmer-label"></div>
+                <div class="shimmer-box shimmer-input"></div>
+            </div>
+            <div class="shimmer-field">
+                <div class="shimmer-box shimmer-social"></div>
+            </div>
+            <div class="shimmer-box shimmer-btn"></div>
+        </div>
+    </div>
+
+    <!-- ===== الصفحة الحقيقية ===== -->
+    <div class="real-page" id="realPage">
+
+        <!-- الشريط العلوي -->
+        <div class="pub-topbar">
+            <button class="pub-back-btn" id="backBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <div class="pub-title" id="pubTitleEl">نشر ريل جديد</div>
+            <div class="pub-spacer"></div>
+        </div>
+
+        <!-- المحتوى -->
+        <div class="pub-content">
+
+            <!-- منطقة رفع الفيديو -->
+            <div class="video-upload-zone" id="uploadZone">
+                <input type="file" id="videoFileInput" accept="video/mp4" required>
+                <div class="vuz-icon-wrap">
+                    <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+                </div>
+                <div class="vuz-title" id="vuzTitleEl">اختر فيديو للنشر</div>
+                <div class="vuz-sub" id="vuzSubEl">صيغة MP4 فقط · اضغط أو اسحب الملف</div>
+                <div class="vuz-btn-label">
+                    <svg viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4-4 4 4M12 16V8"/></svg>
+                    رفع من الجهاز
+                </div>
+            </div>
+
+            <!-- معلومات الملف المختار -->
+            <div class="file-selected" id="fileSelected">
+                <div class="file-thumb">
+                    <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+                </div>
+                <div class="file-info">
+                    <div class="file-name" id="fileName">—</div>
+                    <div class="file-size" id="fileSize">—</div>
+                </div>
+                <button type="button" class="file-change-btn" id="changeFileBtn">تغيير</button>
+            </div>
+
+            <form id="publishForm">
+
+                <!-- وصف الفيديو -->
+                <div class="field-wrap" style="margin-bottom:16px;">
+                    <div class="field-label" id="labelDescEl">وصف الفيديو</div>
+                    <textarea class="field-textarea" id="videoDescInput" placeholder="اكتب وصفاً جذاباً للفيديو..."></textarea>
+                </div>
+
+                <!-- الهاشتاق -->
+                <div class="field-wrap" style="margin-bottom:16px;">
+                    <div class="field-label" id="labelHashEl">الهاشتاق</div>
+                    <input type="text" class="field-input" id="hashtagInput" placeholder="#ريلز #فيديو">
+                </div>
+
+                <!-- الروابط الاجتماعية -->
+                <div class="social-section">
+                    <div class="social-hdr">
+                        <div class="social-hdr-title" id="socialHdrTitleEl">روابط البروفايلات <span id="linkCounterEl" style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;">(0/3)</span></div>
+                        <button type="button" class="add-link-btn" id="addLinkBtn">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <span id="addLinkBtnTxt">إضافة</span>
+                        </button>
+                    </div>
+                    <div class="profiles-list" id="profilesList">
+                        <div class="social-empty" id="socialEmpty">لم تضف أي روابط بعد</div>
+                    </div>
+                </div>
+
+                <!-- شريط تقدم الرفع -->
+                <div class="upload-progress" id="uploadProgress" style="margin-top:16px;">
+                    <div class="uprog-hdr">
+                        <span class="uprog-label">
+                            <span class="uprog-spinner"></span>
+                            <span id="uploadLabelEl">جاري رفع الفيديو</span>
+                        </span>
+                        <span class="uprog-pct" id="uploadPct">0%</span>
+                    </div>
+                    <div class="uprog-bar-bg">
+                        <div class="uprog-bar-fill" id="uploadFill"></div>
+                    </div>
+                    <div class="uprog-sub" id="uploadSub">يرجى الانتظار، لا تغلق الصفحة</div>
+                </div>
+
+                <!-- زر النشر -->
+                <button type="submit" class="pub-submit-btn" id="submitBtn" style="margin-top:16px;">
+                    <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    <span id="submitBtnTxt">نشر الفيديو</span>
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة رابط -->
+    <div class="link-modal-ov" id="linkModalOv">
+        <div class="link-modal-sheet">
+            <div class="lm-handle"></div>
+            <div class="lm-hdr">
+                <div class="lm-title" id="lmTitleEl">إضافة رابط بروفايل</div>
+                <button class="lm-close-btn" id="lmCloseBtn">
+                    <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <input type="url" class="lm-input" id="lmInput" placeholder="الصق رابط بروفايلك (فيسبوك، إنستقرام، يوتيوب...)">
+            <div class="lm-error" id="lmError"></div>
+            <div class="lm-preview" id="lmPreview">
+                <img src="" alt="" id="lmPreviewImg">
+                <div class="lm-preview-info">
+                    <div class="lm-preview-name" id="lmPreviewName">—</div>
+                    <div class="lm-preview-plat" id="lmPreviewPlat">—</div>
+                </div>
+            </div>
+            <div class="lm-footer">
+                <button class="lm-btn lm-btn-cancel" id="lmCancelBtn">إلغاء</button>
+                <button class="lm-btn lm-btn-confirm" id="lmConfirmBtn" disabled>إضافة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة النجاح -->
+    <div class="success-ov" id="successOv">
+        <div class="success-box">
+            <span class="success-emoji"></span>
+            <div class="success-title" id="successTitleEl">تم النشر بنجاح!</div>
+            <div class="success-sub" id="successSubEl">فيديوك الآن متاح للجميع على الريلز</div>
+            <div class="success-bar-bg"><div class="success-bar-fill"></div></div>
+            <div class="success-hint" id="successHintEl">سيتم توجيهك تلقائياً...</div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+    <script>
+    // ===== Firebase =====
+    const firebaseConfig = {
+        apiKey:"AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",
+        authDomain:"a-comment-5a3e5.firebaseapp.com",
+        databaseURL:"https://a-comment-5a3e5-default-rtdb.firebaseio.com",
+        projectId:"a-comment-5a3e5",
+        storageBucket:"a-comment-5a3e5.appspot.com",
+        messagingSenderId:"557343451166",
+        appId:"1:557343451166:web:d181f098cdeccf7691260f"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db   = firebase.database();
+    const auth = firebase.auth();
+
+    // ═══════════════════════════════════════════════
+    // نظام الترجمة ar / en
+    // ═══════════════════════════════════════════════
+    var _pubLang = 'ar';
+    var _PUB_TR = {
+        ar: {
+            pageTitle:      'نشر ريل جديد',
+            docTitle:       'نشر فيديو - YADWOR',
+            vuzTitle:       'اختر فيديو للنشر',
+            vuzSub:         'صيغة MP4 فقط · اضغط أو اسحب الملف',
+            vuzBtn:         'رفع من الجهاز',
+            changeFile:     'تغيير',
+            labelDesc:      'وصف الفيديو',
+            descPh:         'اكتب وصفاً جذاباً للفيديو...',
+            labelHash:      'الهاشتاق',
+            hashPh:         '#ريلز #فيديو',
+            socialTitle:    'روابط البروفايلات',
+            addLink:        'إضافة',
+            noLinks:        'لم تضف أي روابط بعد',
+            uploading:      'جاري رفع الفيديو',
+            uploadWait:     'يرجى الانتظار، لا تغلق الصفحة',
+            uploadHalf:     'أكثر من النصف...',
+            uploadAlmost:   'اقتربنا من الانتهاء!',
+            uploadDone:     'اكتمل الرفع، جاري النشر...',
+            uploadStart:    'جاري الرفع...',
+            submitBtn:      'نشر الفيديو',
+            lmTitle:        'إضافة رابط بروفايل',
+            lmPh:           'الصق رابط بروفايلك (فيسبوك، إنستقرام، يوتيوب...)',
+            lmCancel:       'إلغاء',
+            lmAdd:          'إضافة',
+            lmErrUnsupported: 'رابط غير مدعوم. المسموح: فيسبوك / إنستقرام / يوتيوب / X / تيك توك / واتساب / سناب شات',
+            lmErrDup:       'تمت إضافة هذه المنصة مسبقاً',
+            lmErrMax:       'الحد الأقصى 3 روابط فقط',
+            linkCounter:    'الروابط ({n}/3)',
+            successTitle:   'تم النشر بنجاح!',
+            successSub:     'فيديوك الآن متاح للجميع على الريلز',
+            successHint:    'سيتم توجيهك تلقائياً...',
+            errLogin:       'يرجى تسجيل الدخول أولاً',
+            errNoFile:      'الرجاء اختيار فيديو MP4',
+            errNotMp4:      'الرجاء رفع فيديو بصيغة MP4 فقط',
+            errPublish:     'حدث خطأ أثناء النشر: ',
+            user:           'مستخدم',
+            platforms: {
+                facebook: 'فيسبوك', instagram: 'إنستقرام', youtube: 'يوتيوب',
+                tiktok: 'تيك توك', twitter: 'X', whatsapp: 'واتساب', snapchat: 'سناب شات'
+            }
+        },
+        en: {
+            pageTitle:      'Publish New Reel',
+            docTitle:       'Publish Video - YADWOR',
+            vuzTitle:       'Choose a video to publish',
+            vuzSub:         'MP4 only · Tap or drag file',
+            vuzBtn:         'Upload from device',
+            changeFile:     'Change',
+            labelDesc:      'Video description',
+            descPh:         'Write an engaging description...',
+            labelHash:      'Hashtag',
+            hashPh:         '#reels #video',
+            socialTitle:    'Profile Links',
+            addLink:        'Add',
+            noLinks:        'No links added yet',
+            uploading:      'Uploading video',
+            uploadWait:     'Please wait, do not close the page',
+            uploadHalf:     'More than halfway...',
+            uploadAlmost:   'Almost done!',
+            uploadDone:     'Upload complete, publishing...',
+            uploadStart:    'Uploading...',
+            submitBtn:      'Publish Video',
+            lmTitle:        'Add Profile Link',
+            lmPh:           'Paste your profile link (Facebook, Instagram, YouTube...)',
+            lmCancel:       'Cancel',
+            lmAdd:          'Add',
+            lmErrUnsupported: 'Unsupported link. Allowed: Facebook / Instagram / YouTube / X / TikTok / WhatsApp / Snapchat',
+            lmErrDup:       'This platform has already been added',
+            lmErrMax:       'Maximum 3 links only',
+            linkCounter:    'Links ({n}/3)',
+            successTitle:   'Published successfully!',
+            successSub:     'Your video is now available to everyone on Reels',
+            successHint:    'You will be redirected automatically...',
+            errLogin:       'Please log in first',
+            errNoFile:      'Please choose an MP4 video',
+            errNotMp4:      'Please upload a video in MP4 format only',
+            errPublish:     'An error occurred while publishing: ',
+            user:           'User',
+            platforms: {
+                facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube',
+                tiktok: 'TikTok', twitter: 'X', whatsapp: 'WhatsApp', snapchat: 'Snapchat'
+            }
+        }
+    };
+
+    function PT(k) {
+        var t = _PUB_TR[_pubLang];
+        return (t && t[k] !== undefined) ? t[k] : (_PUB_TR['ar'][k] || k);
+    }
+
+    function applyPubLang(lang) {
+        _pubLang = lang;
+        var isRtl = (lang === 'ar');
+        var root = document.getElementById('pubHtmlRoot');
+        if (root) { root.setAttribute('lang', lang); root.setAttribute('dir', isRtl ? 'rtl' : 'ltr'); }
+        document.title = PT('docTitle');
+        var el;
+        el = document.getElementById('pubTitleEl');       if(el) el.textContent = PT('pageTitle');
+        el = document.getElementById('vuzTitleEl');       if(el) el.textContent = PT('vuzTitle');
+        el = document.getElementById('vuzSubEl');         if(el) el.textContent = PT('vuzSub');
+        el = document.getElementById('changeFileBtn');    if(el) el.textContent = PT('changeFile');
+        el = document.getElementById('labelDescEl');      if(el) el.textContent = PT('labelDesc');
+        el = document.getElementById('videoDescInput');   if(el) el.placeholder  = PT('descPh');
+        el = document.getElementById('labelHashEl');      if(el) el.textContent = PT('labelHash');
+        el = document.getElementById('hashtagInput');     if(el) el.placeholder  = PT('hashPh');
+        el = document.getElementById('socialHdrTitleEl'); if(el) el.textContent = PT('socialTitle');
+        el = document.getElementById('addLinkBtnTxt');    if(el) el.textContent = PT('addLink');
+        el = document.getElementById('socialEmpty');      if(el) el.textContent = PT('noLinks');
+        el = document.getElementById('uploadLabelEl');    if(el) el.textContent = PT('uploading');
+        el = document.getElementById('uploadSub');        if(el && el.textContent.indexOf('%') < 0) el.textContent = PT('uploadWait');
+        el = document.getElementById('submitBtnTxt');     if(el) el.textContent = PT('submitBtn');
+        el = document.getElementById('lmTitleEl');        if(el) el.textContent = PT('lmTitle');
+        el = document.getElementById('lmInput');          if(el) el.placeholder = PT('lmPh');
+        el = document.getElementById('lmCancelBtn');      if(el) el.textContent = PT('lmCancel');
+        el = document.getElementById('lmConfirmBtn');     if(el) el.textContent = PT('lmAdd');
+        el = document.getElementById('successTitleEl');   if(el) el.textContent = PT('successTitle');
+        el = document.getElementById('successSubEl');     if(el) el.textContent = PT('successSub');
+        el = document.getElementById('successHintEl');    if(el) el.textContent = PT('successHint');
+        // تحديث PLATFORMS
+        var platKeys = ['facebook','instagram','youtube','tiktok','twitter','whatsapp','snapchat'];
+        platKeys.forEach(function(k) { if(PLATFORMS[k]) PLATFORMS[k].name = PT('platforms')[k] || PLATFORMS[k].name; });
+    }
+
+    let me = null;
+
+    // ===== الشيمر والصفحة الحقيقية =====
+    const shimmerPage = document.getElementById('shimmerPage');
+    const realPage    = document.getElementById('realPage');
+
+    auth.onAuthStateChanged(user => {
+        if (!user) { location.href = 'roomlogin.html'; return; }
+        db.ref('users/' + user.uid).once('value').then(snap => {
+            const u = snap.val() || {};
+            // قراءة اللغة من Firebase
+            var userLang = (u.preferences && u.preferences.lang) || u.lang || 'ar';
+            _pubLang = userLang;
+            applyPubLang(userLang);
+            const name   = u.yourname || u.name || user.displayName || PT('user');
+            const avatar = u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+            me = { uid: user.uid, name, avatar };
+            // إخفاء الشيمر وإظهار الصفحة
+            shimmerPage.style.display = 'none';
+            realPage.classList.add('show');
+        });
+    });
+
+    // ===== زر الرجوع: يوجه دائماً إلى reels.html =====
+    document.getElementById('backBtn').addEventListener('click', () => {
+        location.href = 'reels.html';
+    });
+
+    // ===== رفع الفيديو - اختيار الملف =====
+    const videoFileInput = document.getElementById('videoFileInput');
+    const uploadZone     = document.getElementById('uploadZone');
+    const fileSelected   = document.getElementById('fileSelected');
+
+    videoFileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        showFileInfo(file);
+    });
+
+    document.getElementById('changeFileBtn').addEventListener('click', () => {
+        videoFileInput.click();
+    });
+
+    function showFileInfo(file) {
+        document.getElementById('fileName').textContent = file.name;
+        const mb = (file.size / 1024 / 1024).toFixed(1);
+        document.getElementById('fileSize').textContent = mb + ' MB';
+        uploadZone.style.display = 'none';
+        fileSelected.classList.add('show');
+    }
+
+    // Drag & Drop
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && (file.type === 'video/mp4' || file.name.toLowerCase().endsWith('.mp4'))) {
+            // نعيّن الملف على الـ input
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            videoFileInput.files = dt.files;
+            showFileInfo(file);
+        }
+    });
+
+    // ===== المنصات =====
+    var PLATFORMS = {
+        facebook:  { name: 'فيسبوك',   bg: 'rgba(24,119,242,0.5)'  },
+        instagram: { name: 'إنستقرام', bg: 'linear-gradient(135deg,rgba(225,48,108,0.5),rgba(193,53,132,0.5))' },
+        youtube:   { name: 'يوتيوب',   bg: 'rgba(255,0,0,0.42)'    },
+        tiktok:    { name: 'تيك توك',  bg: 'rgba(20,20,20,0.85)'   },
+        twitter:   { name: 'X',         bg: 'rgba(20,20,20,0.85)'   },
+        whatsapp:  { name: 'واتساب',   bg: 'rgba(37,211,102,0.45)' },
+        snapchat:  { name: 'سناب شات', bg: 'rgba(255,220,0,0.55)'  }
+    };
+
+    function detectPlatform(raw) {
+        if (!raw) return null;
+        raw = raw.trim();
+        if (/^[\d\s\+\-\(\)]{6,}$/.test(raw)) {
+            const d = raw.replace(/\D/g,'');
+            return { platform:'whatsapp', url:`https://wa.me/${d}` };
+        }
+        const withProto = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw;
+        let u; try { u = new URL(withProto); } catch(e) { return null; }
+        const host = (u.hostname || '').replace(/^www\./,'').toLowerCase();
+        let p = null;
+        if (host.endsWith('facebook.com') || host === 'fb.com') p = 'facebook';
+        else if (host.endsWith('instagram.com'))  p = 'instagram';
+        else if (host.endsWith('youtube.com') || host === 'youtu.be') p = 'youtube';
+        else if (host.endsWith('tiktok.com'))  p = 'tiktok';
+        else if (host.endsWith('x.com') || host.endsWith('twitter.com')) p = 'twitter';
+        else if (host.endsWith('wa.me') || host.endsWith('whatsapp.com')) p = 'whatsapp';
+        else if (host.endsWith('snapchat.com') || host.endsWith('snap.com')) p = 'snapchat';
+        if (!p) return null;
+        return { platform: p, url: u.toString() };
+    }
+
+    // ===== نافذة إضافة رابط =====
+    const linkModalOv  = document.getElementById('linkModalOv');
+    const lmInput      = document.getElementById('lmInput');
+    const lmError      = document.getElementById('lmError');
+    const lmPreview    = document.getElementById('lmPreview');
+    const lmPreviewImg = document.getElementById('lmPreviewImg');
+    const lmPreviewName= document.getElementById('lmPreviewName');
+    const lmPreviewPlat= document.getElementById('lmPreviewPlat');
+    const lmConfirmBtn = document.getElementById('lmConfirmBtn');
+    const profilesList = document.getElementById('profilesList');
+    const socialEmpty  = document.getElementById('socialEmpty');
+
+    let currentLinkData = null;
+
+    function openLinkModal() {
+        // فحص الحد الأقصى قبل فتح النافذة
+        var existingCount = profilesList.querySelectorAll('.profile-card').length;
+        if (existingCount >= 3) {
+            var addBtn = document.getElementById('addLinkBtn');
+            if (addBtn) { addBtn.style.opacity = '0.4'; addBtn.style.pointerEvents = 'none'; }
+            return;
+        }
+        lmInput.value = '';
+        lmError.className = 'lm-error';
+        lmPreview.className = 'lm-preview';
+        lmConfirmBtn.disabled = true;
+        currentLinkData = null;
+        linkModalOv.classList.add('open');
+        setTimeout(() => lmInput.focus(), 350);
+    }
+
+    function closeLinkModal() {
+        linkModalOv.classList.remove('open');
+    }
+
+    document.getElementById('addLinkBtn').addEventListener('click', openLinkModal);
+    document.getElementById('lmCloseBtn').addEventListener('click', closeLinkModal);
+    document.getElementById('lmCancelBtn').addEventListener('click', closeLinkModal);
+    linkModalOv.addEventListener('click', e => { if (e.target === linkModalOv) closeLinkModal(); });
+
+    lmInput.addEventListener('input', function() {
+        const val = this.value.trim();
+        if (!val) {
+            lmError.className = 'lm-error';
+            lmPreview.className = 'lm-preview';
+            lmConfirmBtn.disabled = true;
+            currentLinkData = null;
+            return;
+        }
+        const link = detectPlatform(val);
+        if (!link) {
+            lmError.textContent = PT('lmErrUnsupported');
+            lmError.className = 'lm-error show';
+            lmPreview.className = 'lm-preview';
+            lmConfirmBtn.disabled = true;
+            currentLinkData = null;
+            return;
+        }
+        lmError.className = 'lm-error';
+        currentLinkData = link;
+        const name   = me?.name   || 'مستخدم';
+        const avatar = me?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
+        lmPreviewImg.src = avatar;
+        lmPreviewImg.onerror = function(){ this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`; };
+        lmPreviewName.textContent = name;
+        lmPreviewPlat.textContent = PLATFORMS[link.platform]?.name || link.platform;
+        lmPreview.className = 'lm-preview show';
+        lmConfirmBtn.disabled = false;
+    });
+
+    lmConfirmBtn.addEventListener('click', function() {
+        if (!currentLinkData) return;
+        // فحص الحد الأقصى: 3 روابط فقط
+        var existingCount = profilesList.querySelectorAll('.profile-card').length;
+        if (existingCount >= 3) {
+            lmError.textContent = PT('lmErrMax');
+            lmError.className = 'lm-error show';
+            return;
+        }
+        // التحقق من عدم التكرار
+        if (profilesList.querySelector('.profile-card[data-platform="' + currentLinkData.platform + '"]')) {
+            lmError.textContent = PT('lmErrDup');
+            lmError.className = 'lm-error show';
+            return;
+        }
+        const p    = PLATFORMS[currentLinkData.platform];
+        const name = me?.name   || PT('user');
+        const av   = me?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name);
+
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.dataset.platform = currentLinkData.platform;
+        card.dataset.url       = currentLinkData.url;
+        card.style.background  = p?.bg || 'rgba(255,255,255,0.07)';
+        var fallbackAv = 'https://ui-avatars.com/api/?name=U';
+        card.innerHTML = '<img src="' + av + '" alt="' + name + '" onerror="this.src=&quot;' + fallbackAv + '&quot;">' +
+            '<div class="profile-card-info">' +
+                '<div class="profile-card-name">' + name + '</div>' +
+                '<div class="profile-card-plat">' + ((p && p.name) || currentLinkData.platform) + '</div>' +
+            '</div>' +
+            '<button type="button" class="remove-card-btn" onclick="removeCard(this)">×</button>';
+        if (socialEmpty) socialEmpty.style.display = 'none';
+        profilesList.appendChild(card);
+        updateLinkCounter();
+        // إخفاء زر الإضافة إذا وصلنا للحد
+        if (profilesList.querySelectorAll('.profile-card').length >= 3) {
+            document.getElementById('addLinkBtn').style.opacity = '0.4';
+            document.getElementById('addLinkBtn').style.pointerEvents = 'none';
+        }
+        closeLinkModal();
+    });
+
+    function removeCard(btn) {
+        btn.parentElement.remove();
+        var remaining = profilesList.querySelectorAll('.profile-card').length;
+        if (!remaining && socialEmpty) {
+            socialEmpty.style.display = 'block';
+        }
+        updateLinkCounter();
+        // إعادة تفعيل زر الإضافة
+        var addBtn = document.getElementById('addLinkBtn');
+        if (addBtn) { addBtn.style.opacity = '1'; addBtn.style.pointerEvents = ''; }
+    }
+
+    function updateLinkCounter() {
+        var count = profilesList.querySelectorAll('.profile-card').length;
+        var el = document.getElementById('linkCounterEl');
+        if (el) el.textContent = PT('linkCounter').replace('{n}', count);
+    }
+
+    // ===== نشر الفيديو =====
+    document.getElementById('publishForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (!me) { alert(PT('errLogin')); return; }
+
+        const file = videoFileInput?.files?.[0];
+        if (!file) { alert(PT('errNoFile')); return; }
+
+        const isMp4 = file.type === 'video/mp4' || file.name.toLowerCase().endsWith('.mp4');
+        if (!isMp4) { alert(PT('errNotMp4')); return; }
+
+        const desc    = (document.getElementById('videoDescInput').value || '').trim();
+        const hashtag = (document.getElementById('hashtagInput').value   || '').trim();
+
+        const socialLinks = {};
+        profilesList.querySelectorAll('.profile-card').forEach(c => {
+            if (c.dataset.platform && c.dataset.url)
+                socialLinks[c.dataset.platform] = { platform: c.dataset.platform, url: c.dataset.url };
+        });
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.style.display = 'none';
+
+        const prog = document.getElementById('uploadProgress');
+        prog.classList.add('active');
+
+        try {
+            const reelKey = db.ref('reels').push().key;
+            const videoUrl = await uploadToCloudinary(file, function(pct) {
+                document.getElementById('uploadPct').textContent  = pct + '%';
+                document.getElementById('uploadFill').style.width = pct + '%';
+                const sub = pct < 30 ? PT('uploadStart')
+                          : pct < 70 ? PT('uploadHalf')
+                          : pct < 100 ? PT('uploadAlmost')
+                          : PT('uploadDone');
+                document.getElementById('uploadSub').textContent = sub;
+            });
+
+            await db.ref('reels/' + reelKey).set({
+                authorUid:    me.uid,
+                authorName:   me.name,
+                authorAvatar: me.avatar,
+                videoUrl,
+                description:  desc,
+                hashtag,
+                socialLinks,
+                likesCount:   0,
+                commentsCount:0,
+                viewsCount:   0,
+                giftsCount:   0,
+                editCount:    0,
+                createdAt:    firebase.database.ServerValue.TIMESTAMP
+            });
+
+            // ── تتبع مهام المشاهدات ──
+            db.ref('tasks').once('value').then(function(snap) {
+                var tasks = snap.val() || {};
+                Object.keys(tasks).forEach(function(tid) {
+                    var t = tasks[tid];
+                    if (t.type === 'views' && t.active) {
+                        db.ref('reels/' + reelKey + '/viewsCount').on('value', function(vs) {
+                            var vc = vs.val() || 0;
+                            db.ref('tasks/' + tid + '/currentProgress').set(vc);
+                        });
+                    }
+                });
+            });
+            prog.classList.remove('active');
+            document.getElementById('successOv').classList.add('show');
+            setTimeout(() => { location.href = 'reels.html'; }, 3000);
+
+        } catch(err) {
+            console.error(err);
+            prog.classList.remove('active');
+            alert(PT('errPublish') + err.message);
+            submitBtn.disabled = false;
+            submitBtn.style.display = '';
+        }
+    });
+    
+/* ── Cloudinary Upload Helper ── */
+async function uploadToCloudinary(file, onProgress) {
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        var fd  = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', 'my_app_upload');
+        var resType = (file.type && (file.type.startsWith('video/') || file.type.startsWith('audio/'))) ? 'video' : 'image';
+        if (xhr.upload && onProgress) {
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) onProgress(Math.round(e.loaded / e.total * 100));
+            });
+        }
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                var d = JSON.parse(xhr.responseText);
+                d.secure_url ? resolve(d.secure_url) : reject(new Error(d.error ? d.error.message : 'Upload failed'));
+            } else { reject(new Error('HTTP ' + xhr.status)); }
+        });
+        xhr.addEventListener('error', function() { reject(new Error('Network error')); });
+        xhr.open('POST', 'https://api.cloudinary.com/v1_1/dlujoziwz/' + resType + '/upload');
+        xhr.send(fd);
+    });
+}
+
+/* ── Cloudinary Upload Helper ── */
+async function uploadToCloudinary(file, onProgress) {
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        var fd  = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', 'my_app_upload');
+        var resType = (file.type && (file.type.startsWith('video/') || file.type.startsWith('audio/'))) ? 'video' : 'image';
+        if (xhr.upload && onProgress) {
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) onProgress(Math.round(e.loaded / e.total * 100));
+            });
+        }
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                var d = JSON.parse(xhr.responseText);
+                d.secure_url ? resolve(d.secure_url) : reject(new Error(d.error ? d.error.message : 'Upload failed'));
+            } else { reject(new Error('HTTP ' + xhr.status)); }
+        });
+        xhr.addEventListener('error', function() { reject(new Error('Network error')); });
+        xhr.open('POST', 'https://api.cloudinary.com/v1_1/dlujoziwz/' + resType + '/upload');
+        xhr.send(fd);
+    });
+}
+</script>
+</body>
+</html>

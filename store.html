@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المتجر - YADWOR</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1877f2;--bg:#f0f2f5;--card:#fff;--txt:#050505;--sub:#65676b;--border:#eee;--gold:#f1c40f;--green:#42b72a;--purple:#9c27b0;--red:#e41e3f;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--txt);padding-top:60px;padding-bottom:72px;}
+
+/* ─── Facebook Shimmer Loader ─── */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;padding:70px 12px 0;overflow:hidden;}
+.shimmer-wrap{display:flex;flex-direction:column;gap:14px;}
+.sk{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:sk 1.5s infinite;border-radius:10px;}
+@keyframes sk{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.sk-tabs{height:44px;border-radius:22px;}
+.sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sk-card{height:160px;border-radius:14px;}
+
+.top-navbar{position:fixed;top:0;left:0;right:0;height:60px;background:var(--card);display:flex;align-items:center;padding:0 15px;z-index:1000;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.nav-btn{background:none;border:none;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--txt);}
+.nav-btn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-title{flex:1;text-align:center;font-size:18px;font-weight:800;}
+.coins-badge{background:linear-gradient(135deg,#f1c40f,#e67e22);color:white;font-size:13px;font-weight:800;padding:7px 14px;border-radius:20px;display:flex;align-items:center;gap:5px;}
+
+/* ─── Wallet Strip ─── */
+.wallet-strip{background:linear-gradient(135deg,#1877f2,#9c27b0);color:white;border-radius:16px;padding:16px;margin:12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 16px rgba(24,119,242,0.25);}
+.wallet-info span{font-size:12px;opacity:.85;}
+.wallet-info strong{font-size:22px;display:block;margin-top:2px;}
+.wallet-topup{background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:white;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;}
+
+/* ─── Notice banner: COINS ONLY ─── */
+.store-notice{background:linear-gradient(135deg,#fff8e1,#fff3e0);border:1.5px solid #ffe082;border-radius:12px;margin:0 12px 12px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.store-notice span{font-size:13px;color:#795548;font-weight:600;line-height:1.5;}
+
+/* ─── Category tabs ─── */
+.cat-tabs{display:flex;overflow-x:auto;scrollbar-width:none;gap:8px;padding:4px 12px 12px;background:var(--card);border-bottom:1px solid var(--border);}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tab{flex-shrink:0;padding:9px 18px;border-radius:22px;border:2px solid var(--border);background:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;color:var(--sub);transition:.2s;white-space:nowrap;}
+.cat-tab.active{background:var(--primary);border-color:var(--primary);color:white;}
+
+/* ─── Content ─── */
+.sec-content{display:none;padding:12px;animation:fadeIn .2s;}
+.sec-content.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ─── Store Grid ─── */
+.store-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.store-card{background:var(--card);border-radius:16px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);border:2px solid var(--border);transition:.2s;position:relative;cursor:pointer;}
+.store-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);}
+.store-card.owned{border-color:var(--green);}
+.store-card.owned::after{content:'✓ مملوك';position:absolute;top:8px;left:8px;background:var(--green);color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;}
+.store-card.equipped{border-color:var(--gold);background:linear-gradient(135deg,#fffde7,#fff8e1);}
+.store-card.equipped::after{content:'✦ مُفعَّل';position:absolute;top:8px;left:8px;background:var(--gold);color:#333;font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;}
+
+/* ─── Discount badge ─── */
+.discount-badge{position:absolute;top:8px;right:8px;background:var(--red);color:white;font-size:10px;font-weight:800;padding:3px 7px;border-radius:8px;}
+
+.card-preview{width:84px;height:84px;margin:0 auto 10px;position:relative;display:flex;align-items:center;justify-content:center;}
+.card-preview img.base-av{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid #eee;}
+.card-preview img.frame-ov{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:145%;height:145%;object-fit:contain;pointer-events:none;}
+.card-preview img.cover-thumb{width:100%;height:60px;object-fit:cover;border-radius:10px;}
+.card-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.card-desc{font-size:11px;color:var(--sub);margin-bottom:6px;line-height:1.4;}
+.card-price-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
+.card-price{font-size:13px;color:var(--gold);font-weight:800;}
+.card-price-old{font-size:11px;color:#aaa;text-decoration:line-through;}
+.card-buy-btn{background:var(--primary);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;width:100%;transition:.2s;}
+.card-buy-btn:active{opacity:.8;}
+.card-buy-btn.equip{background:var(--gold);color:#333;}
+.card-buy-btn.free{background:var(--green);}
+.card-buy-btn:disabled{background:#ccc;cursor:not-allowed;}
+
+/* ─── Title/Badge cards (not for sale, for info only) ─── */
+.title-info-card{background:var(--card);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);border:1px solid var(--border);margin-bottom:10px;}
+.title-icon-wrap{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.title-card-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.title-card-desc{font-size:12px;color:var(--sub);}
+.title-card-price-row{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.title-card-price{font-size:13px;font-weight:800;color:var(--gold);}
+.title-card-price-old{font-size:11px;color:#aaa;text-decoration:line-through;}
+.buy-title-btn{background:var(--primary);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;margin-top:8px;}
+
+/* ─── Section heading ─── */
+.sec-head{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* ─── Empty ─── */
+.empty-hint{text-align:center;padding:40px 20px;color:#ccc;grid-column:1/-1;}
+.empty-hint svg{width:50px;height:50px;stroke:#ddd;fill:none;margin-bottom:10px;}
+
+/* ─── Bottom nav ─── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--card);display:flex;justify-content:space-around;align-items:center;border-top:1px solid var(--border);z-index:1000;}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#90949c;font-size:10px;gap:3px;flex:1;height:100%;cursor:pointer;border:none;background:none;font-family:'Tajawal',sans-serif;position:relative;}
+.nav-item svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item.active{color:var(--primary);}
+.nav-item.active svg{stroke:var(--primary);}
+.nav-dot{position:absolute;top:8px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--card);}
+
+/* ─── Toast ─── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:white;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:600;z-index:5000;opacity:0;transition:.3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- Shimmer Loader -->
+<div id="loader">
+  <div class="shimmer-wrap">
+    <div class="sk" style="height:50px;border-radius:25px;width:80%;margin:0 auto;"></div>
+    <div class="sk sk-tabs"></div>
+    <div class="sk-grid">
+      <div class="sk sk-card"></div>
+      <div class="sk sk-card"></div>
+      <div class="sk sk-card"></div>
+      <div class="sk sk-card"></div>
+    </div>
+  </div>
+</div>
+
+<header class="top-navbar">
+  <button class="nav-btn" onclick="history.back()">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="nav-title">🛍️ المتجر</span>
+  <div class="coins-badge">💰 <span id="myCoins">0</span></div>
+</header>
+
+<!-- Wallet strip -->
+<div class="wallet-strip">
+  <div class="wallet-info">
+    <span>رصيدك من الكوينز</span>
+    <strong>💰 <span id="walletCoins">0</span> كوين</strong>
+  </div>
+  <button class="wallet-topup" onclick="location.href='wallet.html'">💳 شحن الرصيد</button>
+</div>
+
+<!-- Notice -->
+<div class="store-notice">
+  <span style="font-size:20px;">💡</span>
+  <span>يمكنك الحصول على الكوينز من خلال الهدايا التي تستقبلها في منشوراتك أو في الغرف. كل منتج هنا يُشترى بالكوينز فقط.</span>
+</div>
+
+<!-- Category tabs -->
+<div class="cat-tabs">
+  <button class="cat-tab active" id="cat_frames" onclick="switchCat('frames')">🖼️ إطارات</button>
+  <button class="cat-tab" id="cat_covers" onclick="switchCat('covers')">🎨 خلفيات الملف</button>
+  <button class="cat-tab" id="cat_support_titles" onclick="switchCat('support_titles')">💜 لقب الدعم</button>
+  <button class="cat-tab" id="cat_room_titles" onclick="switchCat('room_titles')">🎧 لقب الغرف</button>
+  <button class="cat-tab" id="cat_entries" onclick="switchCat('entries')">✨ دخوليات الغرف</button>
+</div>
+
+<!-- Frames -->
+<div class="sec-content active" id="sec_frames">
+  <div class="sec-head">🖼️ إطارات الصورة الشخصية</div>
+  <div class="store-grid" id="framesGrid">
+    <div class="empty-hint" style="grid-column:1/-1;"><div style="font-size:40px;">🖼️</div><p>جاري التحميل...</p></div>
+  </div>
+</div>
+
+<!-- Covers -->
+<div class="sec-content" id="sec_covers">
+  <div class="sec-head">🎨 خلفيات / غلاف الملف الشخصي</div>
+  <div class="store-grid" id="coversGrid">
+    <div class="empty-hint" style="grid-column:1/-1;"><div style="font-size:40px;">🎨</div><p>جاري التحميل...</p></div>
+  </div>
+</div>
+
+<!-- Support Titles -->
+<div class="sec-content" id="sec_support_titles">
+  <div class="sec-head">💜 ألقاب الدعم</div>
+  <div id="supportTitlesGrid">
+    <div class="empty-hint"><div style="font-size:40px;">💜</div><p>جاري التحميل...</p></div>
+  </div>
+</div>
+
+<!-- Room Titles -->
+<div class="sec-content" id="sec_room_titles">
+  <div class="sec-head">🎧 ألقاب الغرف</div>
+  <div id="roomTitlesGrid">
+    <div class="empty-hint"><div style="font-size:40px;">🎧</div><p>جاري التحميل...</p></div>
+  </div>
+</div>
+
+<!-- Room Entry Effects -->
+<div class="sec-content" id="sec_entries">
+  <div class="sec-head">✨ صور تأثير الدخوليات</div>
+  <div class="store-grid" id="entriesGrid">
+    <div class="empty-hint" style="grid-column:1/-1;"><div style="font-size:40px;">✨</div><p>جاري التحميل...</p></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="location.href='home.html'">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>الرئيسية</span>
+  </button>
+  <button class="nav-item" onclick="location.href='search.html'">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>بحث</span>
+  </button>
+  <button class="nav-item" onclick="location.href='roomhom.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    <span>غرف</span>
+  </button>
+  <button class="nav-item" id="eventsNavBtn" onclick="location.href='events.html'" style="position:relative;">
+    <span id="eventsNavDot" style="display:none;position:absolute;top:6px;right:50%;transform:translateX(10px);width:8px;height:8px;background:#e41e3f;border-radius:50%;border:2px solid white;"></span>
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>أحداث</span>
+  </button>
+  <button class="nav-item" id="msgsNavBtn" onclick="location.href='messages.html'" style="position:relative;">
+    <span id="msgsNavDot" style="display:none;position:absolute;top:6px;right:50%;transform:translateX(10px);width:8px;height:8px;background:#e41e3f;border-radius:50%;border:2px solid white;"></span>
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>دردشة</span>
+  </button>
+  <button class="nav-item" onclick="location.href='profile.html'">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>ملفي</span>
+  </button>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",
+  authDomain:"a-comment-5a3e5.firebaseapp.com",
+  databaseURL:"https://a-comment-5a3e5-default-rtdb.firebaseio.com",
+  projectId:"a-comment-5a3e5",
+  storageBucket:"a-comment-5a3e5.appspot.com",
+  messagingSenderId:"557343451166",
+  appId:"1:557343451166:web:d181f098cdeccf7691260f"
+});
+const db = firebase.database(), auth = firebase.auth();
+let myUid=null, myData={};
+const loadedCats = new Set();
+
+auth.onAuthStateChanged(user=>{
+  if(!user){location.href='roomlogin.html';return;}
+    initNavDots(user.uid);
+  myUid=user.uid;
+  db.ref('users/'+myUid).once('value',snap=>{
+    myData=snap.val()||{};
+    /* ─── حساب الكوينز من الهدايا (حقيقية) ─── */
+    const coins = myData.coins || 0;
+    document.getElementById('myCoins').textContent = coins;
+    document.getElementById('walletCoins').textContent = coins;
+    document.getElementById('loader').style.display='none';
+    loadFrames();
+    checkNavBadges();
+  });
+});
+
+/* ─── Check nav badges (new events / messages) ─── */
+function checkNavBadges(){
+  // New events
+  db.ref('settings/storeItems').orderByChild('isNew').equalTo(true).limitToFirst(1).once('value',snap=>{
+    if(snap.numChildren()>0) addNavDot('eventsNavBtn');
+  });
+  // Unread messages
+  db.ref('chats').orderByChild('participants/'+myUid).equalTo(true).once('value',snap=>{
+    let unread=0;
+    snap.forEach(s=>{const d=s.val();if(d&&d.unread&&d.unread[myUid])unread+=d.unread[myUid];});
+    if(unread>0){
+      const btn=document.getElementById('msgsNavBtn');
+      const dot=document.createElement('span');
+      dot.style.cssText='position:absolute;top:8px;right:calc(50% - 16px);min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--card);';
+      dot.textContent=unread>9?'9+':unread;
+      btn.appendChild(dot);
+    }
+  });
+}
+function addNavDot(btnId){
+  const btn=document.getElementById(btnId);
+  if(!btn||btn.querySelector('.nav-dot'))return;
+  const d=document.createElement('span');d.className='nav-dot';btn.appendChild(d);
+}
+
+/* ─── Switch Category ─── */
+function switchCat(cat){
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sec-content').forEach(s=>s.classList.remove('active'));
+  document.getElementById('cat_'+cat).classList.add('active');
+  document.getElementById('sec_'+cat).classList.add('active');
+  if(!loadedCats.has(cat)){
+    loadedCats.add(cat);
+    if(cat==='frames') loadFrames();
+    else if(cat==='covers') loadCovers();
+    else if(cat==='support_titles') loadTitles('support');
+    else if(cat==='room_titles') loadTitles('room');
+    else if(cat==='entries') loadEntries();
+  }
+}
+
+/* ─── Frames ─── */
+function loadFrames(){
+  loadedCats.add('frames');
+  db.ref('settings/frames').once('value',snap=>{
+    const frames=[];snap.forEach(s=>frames.push({key:s.key,...s.val()}));
+    const g=document.getElementById('framesGrid');
+    if(!frames.length){g.innerHTML='<div class="empty-hint" style="grid-column:1/-1;"><div style="font-size:40px;">🖼️</div><p>لا توجد إطارات بعد</p></div>';return;}
+    const ownedFrames=myData.ownedFrames||{};
+    const activeFrame=myData.activeFrame||'';
+    g.innerHTML=frames.map(f=>{
+      const isOwned=!!ownedFrames[f.key];
+      const isEquipped=activeFrame===f.key;
+      const cls=isEquipped?'store-card equipped':isOwned?'store-card owned':'store-card';
+      const discountHtml=f.discount?`<div class="discount-badge">-${f.discount}%</div>`:'';
+      const oldPrice=f.discount?Math.round(f.price/(1-f.discount/100)):0;
+      const priceHtml=f.discount?`<div class="card-price-row"><span class="card-price">💰 ${f.price}</span><span class="card-price-old">${oldPrice}</span></div>`
+        :`<div class="card-price-row"><span class="card-price">💰 ${f.price||0} كوين</span></div>`;
+      return `<div class="${cls}">${discountHtml}
+        <div class="card-preview">
+          <img src="${esc(myData.avatar||'')}" class="base-av" onerror="this.src='https://ui-avatars.com/api/?name=U'">
+          ${f.imgUrl?`<img src="${esc(f.imgUrl)}" class="frame-ov">`:''}
+        </div>
+        <div class="card-name">${esc(f.name)}</div>
+        ${f.desc?`<div class="card-desc">${esc(f.desc)}</div>`:''}
+        ${priceHtml}
+        ${isEquipped?`<button class="card-buy-btn equip" disabled>✦ مفعّل</button>`
+          :isOwned?`<button class="card-buy-btn equip" onclick="equipFrame('${f.key}','${esc(f.imgUrl||'')}')">تفعيل</button>`
+          :(f.price===0||f.locked===false)?`<button class="card-buy-btn free" onclick="buyItem('frame','${f.key}',0,'${esc(f.name)}')">احصل عليه مجاناً</button>`
+          :`<button class="card-buy-btn" onclick="buyItem('frame','${f.key}',${f.price||0},'${esc(f.name)}')">شراء</button>`}
+      </div>`;
+    }).join('');
+  });
+}
+
+/* ─── Covers ─── */
+function loadCovers(){
+  db.ref('settings/profileCovers').once('value',snap=>{
+    const covers=[];snap.forEach(s=>covers.push({key:s.key,...s.val()}));
+    const g=document.getElementById('coversGrid');
+    if(!covers.length){g.innerHTML='<div class="empty-hint" style="grid-column:1/-1;"><div style="font-size:40px;">🎨</div><p>لا توجد خلفيات بعد</p></div>';return;}
+    const ownedCovers=myData.ownedCovers||{};
+    const activeCover=myData.activeCover||'';
+    g.innerHTML=covers.map(cv=>{
+      const isOwned=!!ownedCovers[cv.key];
+      const isEquipped=activeCover===cv.key;
+      const cls=isEquipped?'store-card equipped':isOwned?'store-card owned':'store-card';
+      const discountHtml=cv.discount?`<div class="discount-badge">-${cv.discount}%</div>`:'';
+      const oldPrice=cv.discount?Math.round(cv.price/(1-cv.discount/100)):0;
+      const priceHtml=cv.discount?`<div class="card-price-row"><span class="card-price">💰 ${cv.price}</span><span class="card-price-old">${oldPrice}</span></div>`
+        :`<div class="card-price-row"><span class="card-price">💰 ${cv.price||0} كوين</span></div>`;
+      return `<div class="${cls}">${discountHtml}
+        <div class="card-preview"><img src="${esc(cv.imgUrl||'')}" class="cover-thumb" onerror="this.style.background='#eee'"></div>
+        <div class="card-name">${esc(cv.name)}</div>
+        ${cv.desc?`<div class="card-desc">${esc(cv.desc)}</div>`:''}
+        ${priceHtml}
+        ${isEquipped?`<button class="card-buy-btn equip" disabled>✦ مفعّل</button>`
+          :isOwned?`<button class="card-buy-btn equip" onclick="equipCover('${cv.key}','${esc(cv.imgUrl||'')}')">تفعيل</button>`
+          :(cv.price===0||cv.locked===false)?`<button class="card-buy-btn free" onclick="buyItem('cover','${cv.key}',0,'${esc(cv.name)}')">احصل عليه مجاناً</button>`
+          :`<button class="card-buy-btn" onclick="buyItem('cover','${cv.key}',${cv.price||0},'${esc(cv.name)}')">شراء</button>`}
+      </div>`;
+    }).join('');
+  });
+}
+
+/* ─── Titles (Support / Room) ─── */
+function loadTitles(type){
+  const containerSuffix = type==='support'?'supportTitlesGrid':'roomTitlesGrid';
+  const g=document.getElementById(containerSuffix);
+  db.ref('settings/storeTitles').orderByChild('titleType').equalTo(type).once('value',snap=>{
+    const items=[];snap.forEach(s=>items.push({key:s.key,...s.val()}));
+    if(!items.length){
+      // Fallback: load from settings/titles with storePrice
+      db.ref('settings/titles').once('value',s2=>{
+        const all=[];s2.forEach(ss=>{const v=ss.val();if(v&&v.storePrice&&v.titleCategory===type)all.push({key:ss.key,...v});});
+        if(!all.length){g.innerHTML=`<div class="empty-hint"><div style="font-size:40px;">${type==='support'?'💜':'🎧'}</div><p>لا توجد ألقاب بعد</p></div>`;return;}
+        g.innerHTML=all.map(t=>buildTitleCard(t,type)).join('');
+      });
+      return;
+    }
+    g.innerHTML=items.map(t=>buildTitleCard(t,type)).join('');
+  });
+}
+
+function buildTitleCard(t,type){
+  const color=t.color||'#1877f2';
+  const owned=myData.ownedTitles||{};
+  const isOwned=!!owned[t.key];
+  const activeTitle=myData.activeTitle||'';
+  const isEquipped=activeTitle===t.key;
+  const discountHtml=t.discount?`<span style="background:var(--red);color:white;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;">-${t.discount}%</span>`:'';
+  const oldPrice=t.discount?Math.round((t.storePrice||t.price||0)/(1-t.discount/100)):0;
+  return `<div class="title-info-card" style="border-right:4px solid ${color};">
+    <div class="title-icon-wrap" style="background:${color}20;">${t.icon||'🏅'}</div>
+    <div style="flex:1;">
+      <div class="title-card-name">${esc(t.name||'لقب')}</div>
+      <div class="title-card-desc">${esc(t.desc||'')}</div>
+      <div class="title-card-price-row">
+        <span class="title-card-price">💰 ${t.storePrice||t.price||0} كوين</span>
+        ${t.discount?`<span class="title-card-price-old">${oldPrice}</span>`:''}
+        ${discountHtml}
+      </div>
+      ${isEquipped?`<button class="buy-title-btn" style="background:var(--gold);color:#333;" disabled>✦ مفعّل</button>`
+        :isOwned?`<button class="buy-title-btn" style="background:var(--gold);color:#333;" onclick="equipTitle('${t.key}','${esc(t.name)}')">تفعيل</button>`
+        :`<button class="buy-title-btn" onclick="buyTitle('${t.key}',${t.storePrice||t.price||0},'${esc(t.name)}')">شراء</button>`}
+    </div>
+  </div>`;
+}
+
+/* ─── Room Entry Effects ─── */
+function loadEntries(){
+  db.ref('settings/roomEntries').once('value',snap=>{
+    const items=[];snap.forEach(s=>items.push({key:s.key,...s.val()}));
+    const g=document.getElementById('entriesGrid');
+    if(!items.length){g.innerHTML='<div class="empty-hint" style="grid-column:1/-1;"><div style="font-size:40px;">✨</div><p>لا توجد دخوليات بعد</p></div>';return;}
+    const owned=myData.ownedEntries||{};
+    const active=myData.activeEntry||'';
+    g.innerHTML=items.map(e=>{
+      const isOwned=!!owned[e.key];
+      const isEquipped=active===e.key;
+      const cls=isEquipped?'store-card equipped':isOwned?'store-card owned':'store-card';
+      return `<div class="${cls}">
+        ${e.discount?`<div class="discount-badge">-${e.discount}%</div>`:''}
+        <div class="card-preview" style="height:70px;">
+          ${e.imgUrl?`<img src="${esc(e.imgUrl)}" style="width:100%;height:70px;object-fit:cover;border-radius:10px;" onerror="this.style.background='#eee'">`:
+          `<div style="font-size:36px;">${e.icon||'✨'}</div>`}
+        </div>
+        <div class="card-name">${esc(e.name)}</div>
+        ${e.desc?`<div class="card-desc">${esc(e.desc)}</div>`:''}
+        <div class="card-price-row"><span class="card-price">💰 ${e.price||0} كوين</span></div>
+        ${isEquipped?`<button class="card-buy-btn equip" disabled>✦ مفعّل</button>`
+          :isOwned?`<button class="card-buy-btn equip" onclick="equipEntry('${e.key}','${esc(e.imgUrl||'')}')">تفعيل</button>`
+          :`<button class="card-buy-btn" onclick="buyItem('entry','${e.key}',${e.price||0},'${esc(e.name)}')">شراء</button>`}
+      </div>`;
+    }).join('');
+  });
+}
+
+/* ─── Buy Item ─── */
+async function buyItem(type,key,price,name){
+  const coins=myData.coins||0;
+  if(price>0&&coins<price){showToast('💰 رصيدك غير كافٍ! تحتاج '+price+' كوين');return;}
+  if(price>0&&!confirm(`شراء "${name}" مقابل ${price} كوين؟`))return;
+  const updates={};
+  if(price>0) updates['users/'+myUid+'/coins']=coins-price;
+  if(type==='frame'){
+    updates['users/'+myUid+'/ownedFrames/'+key]=true;
+    updates['users/'+myUid+'/wardrobe/frames/'+key]={name,addedAt:firebase.database.ServerValue.TIMESTAMP};
+  } else if(type==='cover'){
+    updates['users/'+myUid+'/ownedCovers/'+key]=true;
+    updates['users/'+myUid+'/wardrobe/covers/'+key]={name,addedAt:firebase.database.ServerValue.TIMESTAMP};
+  } else if(type==='entry'){
+    updates['users/'+myUid+'/ownedEntries/'+key]=true;
+  }
+  await db.ref().update(updates);
+  myData.coins=coins-price;
+  document.getElementById('myCoins').textContent=myData.coins;
+  document.getElementById('walletCoins').textContent=myData.coins;
+  sendPurchaseNotif(type,name);
+  showToast('✅ تم الشراء: '+name);
+  if(type==='frame'){myData.ownedFrames=myData.ownedFrames||{};myData.ownedFrames[key]=true;loadedCats.delete('frames');loadFrames();}
+  else if(type==='cover'){myData.ownedCovers=myData.ownedCovers||{};myData.ownedCovers[key]=true;loadedCats.delete('covers');loadCovers();}
+  else if(type==='entry'){myData.ownedEntries=myData.ownedEntries||{};myData.ownedEntries[key]=true;loadedCats.delete('entries');loadEntries();}
+}
+
+async function buyTitle(key,price,name){
+  const coins=myData.coins||0;
+  if(price>0&&coins<price){showToast('💰 رصيدك غير كافٍ! تحتاج '+price+' كوين');return;}
+  if(price>0&&!confirm(`شراء لقب "${name}" مقابل ${price} كوين؟`))return;
+  const updates={};
+  if(price>0) updates['users/'+myUid+'/coins']=coins-price;
+  updates['users/'+myUid+'/ownedTitles/'+key]=true;
+  await db.ref().update(updates);
+  myData.coins=coins-price;
+  document.getElementById('myCoins').textContent=myData.coins;
+  document.getElementById('walletCoins').textContent=myData.coins;
+  sendPurchaseNotif('title',name);
+  showToast('✅ تم شراء لقب: '+name);
+  myData.ownedTitles=myData.ownedTitles||{};myData.ownedTitles[key]=true;
+  loadedCats.delete('support_titles');loadedCats.delete('room_titles');
+}
+
+function sendPurchaseNotif(type,name){
+  const icons={frame:'🖼️',cover:'🎨',title:'🏅',entry:'✨'};
+  db.ref('notifications').push({
+    type:'purchase',toUserId:myUid,fromUserId:myUid,
+    fromName:'المتجر',fromAvatar:'',
+    text:(icons[type]||'🛍️')+' اشتريت: '+name,
+    isRead:false,createdAt:firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+async function equipFrame(key,imgUrl){
+  if(!imgUrl){const s=await db.ref('settings/frames/'+key).once('value');imgUrl=s.val()?.imgUrl||'';}
+  await db.ref('users/'+myUid).update({activeFrame:key,activeFrameUrl:imgUrl});
+  myData.activeFrame=key;showToast('✦ تم تفعيل الإطار!');
+  loadedCats.delete('frames');loadFrames();
+}
+async function equipCover(key,imgUrl){
+  await db.ref('users/'+myUid).update({activeCover:key,coverUrl:imgUrl});
+  myData.activeCover=key;showToast('✦ تم تفعيل الخلفية!');
+  loadedCats.delete('covers');loadCovers();
+}
+async function equipTitle(key,name){
+  await db.ref('users/'+myUid).update({activeTitle:key,activeRoomTitle:name});
+  myData.activeTitle=key;showToast('✦ تم تفعيل اللقب: '+name);
+  loadedCats.delete('support_titles');loadedCats.delete('room_titles');
+}
+async function equipEntry(key,imgUrl){
+  if(!imgUrl){const s=await db.ref('settings/roomEntries/'+key).once('value');imgUrl=s.val()?.imgUrl||'';}
+  await db.ref('users/'+myUid).update({activeEntry:key,activeEntryUrl:imgUrl});
+  myData.activeEntry=key;showToast('✦ تم تفعيل الدخولية!');
+  loadedCats.delete('entries');loadEntries();
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── نقاط الإشعار في الشريط السفلي ──
+function initNavDots(uid) {
+    const db2 = firebase.database();
+    // رسائل غير مقروءة
+    db2.ref('chats').orderByChild('participants/'+uid).equalTo(true).on('value', s => {
+        let unread = 0;
+        s.forEach(c => { unread += (c.val().unread && c.val().unread[uid]) || 0; });
+        const dot = document.getElementById('msgsNavDot');
+        if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
+    });
+    // أحداث جديدة
+    const lastSeen = parseInt(localStorage.getItem('lastSeenEvents') || '0');
+    db2.ref('settings/events').orderByChild('ts').startAt(lastSeen + 1).on('value', s => {
+        const dot = document.getElementById('eventsNavDot');
+        if (dot) dot.style.display = s.numChildren() > 0 ? 'block' : 'none';
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>YADWOR - الأحداث والأخبار</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Tajawal',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;}
+
+/* ── الشريط العلوي الثابت ── */
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(135deg,#0d47a1,#1565c0);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.top-bar-title{color:white;font-size:16px;font-weight:800;}
+.back-btn{background:rgba(255,255,255,0.15);border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;}
+.back-btn svg{width:20px;height:20px;stroke:white;fill:none;stroke-width:2;}
+
+/* ── شريط الإحصاءات الثابت ── */
+.stats-strip{position:fixed;top:56px;left:0;right:0;z-index:99;background:white;border-bottom:1px solid #e8ecf0;padding:0;height:60px;display:flex;align-items:center;overflow-x:auto;}
+.stats-strip::-webkit-scrollbar{display:none;}
+.stat-chip{display:flex;align-items:center;gap:8px;padding:0 14px;height:60px;flex-shrink:0;border-left:1px solid #f0f2f5;min-width:90px;}
+.stat-chip:last-child{border-left:none;}
+.stat-chip-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat-chip-icon svg{width:18px;height:18px;}
+.stat-chip-val{font-size:14px;font-weight:900;color:#1a1a2e;line-height:1.1;white-space:nowrap;}
+.stat-chip-lbl{font-size:10px;color:#888;white-space:nowrap;line-height:1.2;}
+
+/* ── المحتوى ── */
+.content{padding:128px 12px 80px;max-width:600px;margin:0 auto;}
+
+/* ── بطاقة الحدث ── */
+.event-card{background:white;border-radius:18px;margin-bottom:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+.event-img{width:100%;height:180px;object-fit:cover;display:block;}
+.event-img-placeholder{width:100%;height:180px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);display:flex;align-items:center;justify-content:center;}
+.event-img-placeholder svg{width:48px;height:48px;stroke:#90caf9;fill:none;stroke-width:1.5;}
+.event-body{padding:14px 14px 12px;}
+.event-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.event-title{font-size:15px;font-weight:900;color:#1a1a2e;flex:1;}
+.event-rewards-btn{background:#f0f7ff;border:1.5px solid #bbdefb;border-radius:10px;padding:5px 10px;font-size:11px;font-weight:800;color:#1565c0;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.event-rewards-btn svg{width:13px;height:13px;stroke:#1565c0;fill:none;stroke-width:2;}
+.event-desc{font-size:12px;color:#666;line-height:1.7;margin-bottom:12px;}
+.event-meta{display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:11px;color:#888;}
+.event-meta svg{width:13px;height:13px;stroke:#aaa;fill:none;stroke-width:2;flex-shrink:0;}
+.event-expires{display:flex;align-items:center;gap:4px;font-size:11px;color:#e53935;}
+.event-expires svg{width:12px;height:12px;stroke:#e53935;fill:none;stroke-width:2;}
+
+/* ── شريط التقدم ── */
+.progress-section{background:#f8faff;border-radius:12px;padding:12px;margin-bottom:12px;border:1px solid #e3f2fd;}
+.progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.progress-label{font-size:12px;color:#444;font-weight:700;display:flex;align-items:center;gap:5px;}
+.progress-label svg{width:14px;height:14px;stroke:#1565c0;fill:none;stroke-width:2;}
+.progress-nums{font-size:12px;font-weight:800;}
+.progress-nums .cur{color:#1565c0;}
+.progress-nums .tar{color:#aaa;}
+.progress-bar-bg{height:8px;background:#e3f2fd;border-radius:99px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#1565c0,#42a5f5);border-radius:99px;transition:width .6s ease;}
+
+/* ── زر الاستلام ── */
+.claim-btn{width:100%;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Tajawal',sans-serif;transition:.2s;}
+.claim-btn.ready{background:linear-gradient(135deg,#1565c0,#1e88e5);color:white;box-shadow:0 4px 16px rgba(21,101,192,0.35);}
+.claim-btn.ready:active{transform:scale(.97);}
+.claim-btn.not-ready{background:#f0f2f5;color:#aaa;cursor:not-allowed;}
+.claim-btn.claimed{background:#e8f5e9;color:#388e3c;cursor:not-allowed;border:1.5px solid #a5d6a7;}
+
+/* ── نافذة المكافآت ── */
+.rewards-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:3000;align-items:flex-end;justify-content:center;}
+.rewards-modal-ov.open{display:flex;}
+.rewards-modal-box{background:white;width:100%;max-width:500px;border-radius:22px 22px 0 0;padding:0;max-height:70vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.rewards-modal-ov.open .rewards-modal-box{transform:translateY(0);}
+.rewards-modal-header{padding:16px 16px 12px;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:1;}
+.rewards-modal-title{font-size:15px;font-weight:800;}
+.rewards-modal-close{background:#f0f2f5;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.rewards-modal-close svg{width:16px;height:16px;stroke:#666;fill:none;stroke-width:2.5;}
+.reward-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f8f8f8;}
+.reward-row img{width:52px;height:52px;border-radius:10px;object-fit:contain;background:#f8f8f8;}
+.reward-row-info{flex:1;}
+.reward-row-name{font-size:13px;font-weight:700;}
+.reward-row-type{font-size:11px;color:#888;}
+.reward-coins-box{background:linear-gradient(135deg,#fff8e1,#fff3e0);border-radius:14px;padding:14px;margin:12px 16px;display:flex;align-items:center;gap:10px;border:1px solid #ffe082;}
+.reward-coins-box svg{width:24px;height:24px;stroke:#f57f17;fill:none;stroke-width:2;flex-shrink:0;}
+.reward-coins-val{font-size:18px;font-weight:900;color:#e65100;}
+
+/* ── حالة فارغة ── */
+.empty-events{text-align:center;padding:60px 20px;}
+.empty-events svg{width:60px;height:60px;stroke:#ccc;fill:none;stroke-width:1.5;margin-bottom:16px;}
+.empty-events p{font-size:14px;color:#aaa;}
+
+/* ── تحميل ── */
+.ev-loading{text-align:center;padding:40px;color:#aaa;font-size:14px;}
+
+/* ── toast ── */
+.ev-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:white;padding:10px 22px;border-radius:22px;font-size:13px;font-weight:700;z-index:5000;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;}
+.ev-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- ── الشريط العلوي ── -->
+<div class="top-bar">
+  <button class="back-btn" onclick="history.back()">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="top-bar-title">الأحداث والأخبار</span>
+  <div style="width:36px;"></div>
+</div>
+
+<!-- ── شريط الإحصاءات ── -->
+<div class="stats-strip" id="statsStrip">
+  <div class="stat-chip">
+    <div class="stat-chip-icon" style="background:#e3f2fd;"><svg viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+    <div><div class="stat-chip-val" id="sc-roomPoints">0</div><div class="stat-chip-lbl">نقاط الغرف</div></div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-chip-icon" style="background:#fff3e0;"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+    <div><div class="stat-chip-val" id="sc-support">0</div><div class="stat-chip-lbl">نقاط الدعم</div></div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-chip-icon" style="background:#fff8e1;"><svg viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M16 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0"/><path d="M2 10h20"/></svg></div>
+    <div><div class="stat-chip-val" id="sc-coins">0</div><div class="stat-chip-lbl">الكوينز</div></div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-chip-icon" style="background:#e8f5e9;"><svg viewBox="0 0 24 24" fill="none" stroke="#43a047" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    <div><div class="stat-chip-val" id="sc-followers">0</div><div class="stat-chip-lbl">المتابعون</div></div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-chip-icon" style="background:#f3e5f5;"><svg viewBox="0 0 24 24" fill="none" stroke="#8e24aa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <div><div class="stat-chip-val" id="sc-friends">0</div><div class="stat-chip-lbl">الأصدقاء</div></div>
+  </div>
+</div>
+
+<!-- ── المحتوى ── -->
+<div class="content" id="eventsList">
+  <div class="ev-loading">جاري التحميل...</div>
+</div>
+
+<!-- ── نافذة المكافآت ── -->
+<div class="rewards-modal-ov" id="rewardsModalOv" onclick="if(event.target===this)closeRewardsModal()">
+  <div class="rewards-modal-box" id="rewardsModalBox">
+    <div class="rewards-modal-header">
+      <span class="rewards-modal-title" id="rewardsModalTitle">مكافآت الحدث</span>
+      <button class="rewards-modal-close" onclick="closeRewardsModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="rewardsModalContent"></div>
+  </div>
+</div>
+
+<div class="ev-toast" id="evToast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+    apiKey:"AIzaSyAP-xRJ5zvHvMmqkkVvXnWdqwfuuj58CcA",
+    authDomain:"a-comment-5a3e5.firebaseapp.com",
+    databaseURL:"https://a-comment-5a3e5-default-rtdb.firebaseio.com",
+    projectId:"a-comment-5a3e5",
+    storageBucket:"a-comment-5a3e5.appspot.com",
+    messagingSenderId:"557343451166",
+    appId:"1:557343451166:web:d181f098cdeccf7691260f"
+});
+const db = firebase.database(), auth = firebase.auth();
+let me = null, myData = {};
+
+const typeLabels = {
+    roomPoints:      'نقاط الغرف',
+    totalGiftsSent:  'نقاط الدعم',
+    followersCount:  'عدد المتابعين',
+    friendsCount:    'عدد الأصدقاء',
+    coins:           'الكوينز'
+};
+const typeIcons = {
+    roomPoints:`<svg viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2" style="width:14px;height:14px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,
+    totalGiftsSent:`<svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2" style="width:14px;height:14px"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/></svg>`,
+    followersCount:`<svg viewBox="0 0 24 24" fill="none" stroke="#43a047" stroke-width="2" style="width:14px;height:14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
+    friendsCount:`<svg viewBox="0 0 24 24" fill="none" stroke="#8e24aa" stroke-width="2" style="width:14px;height:14px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    coins:`<svg viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2" style="width:14px;height:14px"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>`
+};
+
+function fmtNum(v){
+    if(v>=1000000) return (v/1000000).toFixed(1)+'M';
+    if(v>=1000) return (v/1000).toFixed(1)+'K';
+    return v;
+}
+
+function showToast(msg){
+    const t=document.getElementById('evToast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+auth.onAuthStateChanged(async user=>{
+    if(!user){location.href='login.html';return;}
+    me = user;
+    const snap = await db.ref('users/'+me.uid).once('value');
+    myData = snap.val()||{};
+    loadStats();
+    loadEvents();
+});
+
+function loadStats(){
+    const rm = myData.roomPoints||0;
+    const sp = myData.totalGiftsSent||0;
+    const co = myData.coins||myData.balance||0;
+    document.getElementById('sc-roomPoints').textContent = fmtNum(rm);
+    document.getElementById('sc-support').textContent    = fmtNum(sp);
+    document.getElementById('sc-coins').textContent      = fmtNum(co);
+    // جلب عدد المتابعين من Firebase مباشرة
+    db.ref('followers').orderByChild('userId').equalTo(me.uid).once('value', function(snap){
+        document.getElementById('sc-followers').textContent = fmtNum(snap.numChildren());
+        myData.followersCount = snap.numChildren();
+    });
+    // جلب عدد الأصدقاء من Firebase مباشرة
+    db.ref('friends').orderByChild('user1').equalTo(me.uid).once('value', function(snap){
+        var cnt = 0;
+        snap.forEach(function(ch){ if(ch.val().status==='accepted') cnt++; });
+        db.ref('friends').orderByChild('user2').equalTo(me.uid).once('value', function(snap2){
+            snap2.forEach(function(ch){ if(ch.val().status==='accepted') cnt++; });
+            document.getElementById('sc-friends').textContent = fmtNum(cnt);
+            myData.friendsCount = cnt;
+        });
+    });
+}
+
+async function loadEvents(){
+    const list = document.getElementById('eventsList');
+    const now = Date.now();
+    const snap = await db.ref('newsEvents').orderByChild('createdAt').once('value');
+    const data = snap.val()||{};
+    const keys = Object.keys(data).reverse().filter(k=>{
+        const e=data[k];
+        if(!e.active) return false;
+        if(e.expiresAt && e.expiresAt < now) return false;
+        return true;
+    });
+    if(!keys.length){
+        list.innerHTML=`<div class="empty-events"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>لا توجد أحداث نشطة حالياً</p></div>`;
+        return;
+    }
+    // تحميل المطالبات السابقة للمستخدم
+    const claimedSnap = await db.ref('users/'+me.uid+'/claimedEvents').once('value');
+    const claimed = claimedSnap.val()||{};
+
+    list.innerHTML = keys.map(k => renderEvent(k, data[k], claimed)).join('');
+}
+
+function getUserVal(pointType){
+    if(pointType==='roomPoints')     return myData.roomPoints||0;
+    if(pointType==='totalGiftsSent') return myData.totalGiftsSent||0;
+    if(pointType==='followersCount') return myData.followersCount||0;
+    if(pointType==='friendsCount')   return myData.friendsCount||0;
+    if(pointType==='coins')          return myData.coins||myData.balance||0;
+    return 0;
+}
+
+function renderEvent(key, e, claimed){
+    const target  = e.targetNum||0;
+    const curVal  = getUserVal(e.pointType);
+    const pct     = Math.min(100, target>0?Math.round(curVal/target*100):0);
+    const isClaimed = !!claimed[key];
+    const isReady   = curVal >= target && !isClaimed;
+    const typeLabel = typeLabels[e.pointType]||e.pointType||'';
+    const typeIcon  = typeIcons[e.pointType]||'';
+    const expText   = e.expiresAt ? 'ينتهي: '+new Date(e.expiresAt).toLocaleDateString('ar') : '';
+
+    let btnHtml='';
+    if(isClaimed){
+        btnHtml=`<button class="claim-btn claimed" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#388e3c" stroke-width="2.5" style="width:16px;height:16px;vertical-align:middle;margin-left:6px;"><polyline points="20 6 9 17 4 12"/></svg>
+            تم الاستلام
+        </button>`;
+    } else if(isReady){
+        btnHtml=`<button class="claim-btn ready" onclick="claimEvent('${key}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:16px;height:16px;vertical-align:middle;margin-left:6px;"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>
+            استلام المكافأة
+        </button>`;
+    } else {
+        btnHtml=`<button class="claim-btn not-ready" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-left:6px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            لم تصل للهدف بعد (${fmtNum(curVal)} / ${fmtNum(target)})
+        </button>`;
+    }
+
+    return `<div class="event-card" id="evcard-${key}">
+        ${e.imgUrl
+            ? `<img src="${e.imgUrl}" class="event-img" onerror="this.style.display='none'">`
+            : `<div class="event-img-placeholder"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`
+        }
+        <div class="event-body">
+            <div class="event-header">
+                <div class="event-title">${e.title||'حدث'}</div>
+                <button class="event-rewards-btn" onclick="openRewardsModal('${key}')">
+                    <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+                    المكافآت
+                </button>
+            </div>
+            ${e.desc?`<div class="event-desc">${e.desc}</div>`:''}
+            <div class="event-meta">
+                ${typeIcon}
+                <span>${typeLabel}</span>
+                ${expText?`<span style="margin-right:auto;" class="event-expires"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${expText}</span>`:''}
+            </div>
+            <div class="progress-section">
+                <div class="progress-header">
+                    <div class="progress-label">
+                        ${typeIcon} تقدمك نحو الهدف
+                    </div>
+                    <div class="progress-nums">
+                        <span class="cur">${fmtNum(curVal)}</span>
+                        <span class="tar"> / ${fmtNum(target)}</span>
+                    </div>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width:${pct}%"></div>
+                </div>
+                <div style="font-size:10px;color:#aaa;margin-top:4px;text-align:left;">${pct}%</div>
+            </div>
+            ${btnHtml}
+        </div>
+    </div>`;
+}
+
+// ── استلام المكافأة ──
+const _eventsCache = {};
+async function claimEvent(key){
+    const btn = document.querySelector(`#evcard-${key} .claim-btn`);
+    if(btn) {btn.disabled=true; btn.textContent='جاري الاستلام...';}
+
+    // تحميل بيانات الحدث
+    let evData = _eventsCache[key];
+    if(!evData){
+        const s = await db.ref('newsEvents/'+key).once('value');
+        evData = s.val();
+        _eventsCache[key] = evData;
+    }
+    if(!evData){showToast('خطأ: لم يُعثر على الحدث');if(btn){btn.disabled=false;}return;}
+
+    // التحقق مجدداً
+    const curVal = getUserVal(evData.pointType);
+    if(curVal < evData.targetNum){showToast('لم تصل للهدف المطلوب بعد');if(btn){btn.disabled=false;}return;}
+
+    const already = await db.ref('users/'+me.uid+'/claimedEvents/'+key).once('value');
+    if(already.val()){showToast('لقد استلمت هذه المكافأة مسبقاً');return;}
+
+    // منح المكافآت
+    const updates = {};
+    updates['users/'+me.uid+'/claimedEvents/'+key] = {claimedAt: Date.now(), eventTitle: evData.title||''};
+
+    if(evData.reward_bigTitleUrl){
+        updates['users/'+me.uid+'/ownedTitles/event_'+key+'_bt'] = {
+            imgUrl: evData.reward_bigTitleUrl,
+            name:   evData.title||'لقب الحدث',
+            bigTitle: true, source:'event', ts: Date.now()
+        };
+    }
+    if(evData.reward_frameUrl){
+        updates['users/'+me.uid+'/ownedFrames/event_'+key+'_fr'] = {
+            imgUrl: evData.reward_frameUrl, source:'event', ts: Date.now()
+        };
+    }
+    if(evData.reward_nameBadgeUrl){
+        updates['users/'+me.uid+'/ownedNameBadges/event_'+key+'_nb'] = {
+            imgUrl: evData.reward_nameBadgeUrl, source:'event', ts: Date.now()
+        };
+    }
+    if(evData.reward_entryUrl){
+        updates['users/'+me.uid+'/ownedEntryEffects/event_'+key+'_en'] = {
+            imgUrl: evData.reward_entryUrl, source:'event', ts: Date.now()
+        };
+    }
+    if(evData.coins && evData.coins>0){
+        const coinsSnap = await db.ref('users/'+me.uid+'/coins').once('value');
+        updates['users/'+me.uid+'/coins'] = (coinsSnap.val()||0) + evData.coins;
+    }
+    if(evData.dollars && evData.dollars>0){
+        const dolSnap = await db.ref('users/'+me.uid+'/dollars').once('value');
+        updates['users/'+me.uid+'/dollars'] = parseFloat(((dolSnap.val()||0) + evData.dollars).toFixed(2));
+    }
+
+    // إشعار
+    updates['notifications/'+me.uid+'/'+Date.now()] = {
+        type:'event_reward',
+        title:'مكافأة حدث',
+        body:'استلمت مكافأة حدث: '+(evData.title||''),
+        ts: Date.now(), read: false
+    };
+
+    await db.ref().update(updates);
+    showToast('تم استلام المكافأة بنجاح');
+    // إعادة تحميل
+    const claimedSnap = await db.ref('users/'+me.uid+'/claimedEvents').once('value');
+    const claimed = claimedSnap.val()||{};
+    const evSnap = await db.ref('newsEvents/'+key).once('value');
+    const card = document.getElementById('evcard-'+key);
+    if(card && evSnap.val()) card.outerHTML = renderEvent(key, evSnap.val(), claimed);
+}
+
+// ── نافذة المكافآت ──
+async function openRewardsModal(key){
+    let evData = _eventsCache[key];
+    if(!evData){
+        const s = await db.ref('newsEvents/'+key).once('value');
+        evData = s.val();
+        _eventsCache[key] = evData;
+    }
+    document.getElementById('rewardsModalTitle').textContent = 'مكافآت: '+(evData.title||'الحدث');
+    let html='';
+    if(evData.reward_bigTitleUrl){
+        html+=`<div class="reward-row"><img src="${evData.reward_bigTitleUrl}" onerror="this.style.background='#eee'">
+            <div class="reward-row-info"><div class="reward-row-name">لقب أسطوري</div><div class="reward-row-type">يُضاف لحقيبة الأناقة</div></div></div>`;
+    }
+    if(evData.reward_frameUrl){
+        html+=`<div class="reward-row"><img src="${evData.reward_frameUrl}" onerror="this.style.background='#eee'">
+            <div class="reward-row-info"><div class="reward-row-name">إطار</div><div class="reward-row-type">يُضاف لحقيبة الأناقة</div></div></div>`;
+    }
+    if(evData.reward_nameBadgeUrl){
+        html+=`<div class="reward-row"><img src="${evData.reward_nameBadgeUrl}" onerror="this.style.background='#eee'">
+            <div class="reward-row-info"><div class="reward-row-name">شارة الاسم</div><div class="reward-row-type">يُضاف لحقيبة الأناقة</div></div></div>`;
+    }
+    if(evData.reward_entryUrl){
+        html+=`<div class="reward-row"><img src="${evData.reward_entryUrl}" onerror="this.style.background='#eee'">
+            <div class="reward-row-info"><div class="reward-row-name">تأثير الدخول</div><div class="reward-row-type">يُضاف لحقيبة الأناقة</div></div></div>`;
+    }
+    if(evData.coins && evData.coins>0){
+        html+=`<div class="reward-coins-box">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M16 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0"/><path d="M2 10h20"/></svg>
+            <div><div class="reward-coins-val">${evData.coins.toLocaleString()}</div><div style="font-size:11px;color:#888;">كوينز</div></div>
+        </div>`;
+    }
+    if(evData.dollars && evData.dollars>0){
+        html+=`<div class="reward-coins-box" style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-color:#a5d6a7;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" style="width:24px;height:24px;flex-shrink:0;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <div><div class="reward-coins-val" style="color:#2e7d32;">${parseFloat(evData.dollars).toFixed(2)}</div><div style="font-size:11px;color:#888;">دولار 💵</div></div>
+        </div>`;
+    }
+    if(!html) html='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">لا توجد مكافآت محددة</div>';
+    document.getElementById('rewardsModalContent').innerHTML = html;
+    document.getElementById('rewardsModalOv').classList.add('open');
+}
+function closeRewardsModal(){
+    document.getElementById('rewardsModalOv').classList.remove('open');
+}
+</script>
+</body>
+</html>
